@@ -201,8 +201,8 @@ os.makedirs("./data", exist_ok=True)
 
 download_from_gdrive("1AVtktDFEXey1RSTq_lTFE4sgG-S9nIxT", "./data/movies.csv")
 download_from_gdrive("17USu4Dkt0SaoL8XiV3ckm1wX2iP7HgQQ", "./data/ratings.csv")
-download_from_gdrive("1Vl4CFVxUDP6uJP9HjtU6lDiCqxkxXHQK", "./data/genome-tags.csv")
-download_from_gdrive("1y2dkOZ7QOSZJS_PBs9ZbgOTuUYJQjfF2", "./data/genome-scores.csv")
+download_from_gdrive("1wwWoz4RI9ysYVe5mtqNh7BBJ5JwL9IZj", "./data/genome-tags.csv")
+download_from_gdrive("1M0v8mSSbgS7Wz1HoMdCM_YqpXTh0bGd9", "./data/genome-scores.csv")
 
 @st.cache_data
 def load_data():
