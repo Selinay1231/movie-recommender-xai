@@ -12,6 +12,7 @@ import uuid
 import re
 from sklearn.decomposition import PCA
 import gdown
+import random 
 
 
 
@@ -139,8 +140,6 @@ def get_movie_poster(title, api_key):
 
 
 #Textuelle Erklärung
-import random  # falls noch nicht importiert
-
 def generate_text_explanation(movie_row, tags_selected):
     reasons = []
 
@@ -192,10 +191,22 @@ def generate_text_explanation(movie_row, tags_selected):
     else:
         return "Dieser Film wurde empfohlen, weil er in mehreren Aspekten zu deinem Profil passt."
 
+def download_from_gdrive(file_id, dest_path):
+    if not os.path.exists(dest_path):
+        url = f"https://drive.google.com/uc?id={file_id}"
+        gdown.download(url, dest_path, quiet=False)
+
+# Lade Daten bei Bedarf aus Google Drive herunter
+os.makedirs("./data", exist_ok=True)
+
+download_from_gdrive("1AVtktDFEXey1RSTq_lTFE4sgG-S9nIxT", "./data/movies.csv")
+download_from_gdrive("17USu4Dkt0SaoL8XiV3ckm1wX2iP7HgQQ", "./data/ratings.csv")
+download_from_gdrive("1Vl4CFVxUDP6uJP9HjtU6lDiCqxkxXHQK", "./data/genome-tags.csv")
+download_from_gdrive("1y2dkOZ7QOSZJS_PBs9ZbgOTuUYJQjfF2", "./data/genome-scores.csv")
 
 @st.cache_data
 def load_data():
-    base_path = "C:/Users/selin/PycharmProjects/Masterarbeit/Dataset/ml-20m/"
+    base_path = "./data/"
     movies = pd.read_csv(base_path + "movies.csv")
     ratings = pd.read_csv(base_path + "ratings.csv")
     movies["year"] = movies["title"].str.extract(r"\((\d{4})\)").astype(float)
@@ -208,7 +219,7 @@ def load_data():
 
 @st.cache_data
 def load_tag_data():
-    base_path = "C:/Users/selin/PycharmProjects/Masterarbeit/Dataset/ml-20m/"
+    base_path = "./data/"
     genome_tags = pd.read_csv(base_path + "genome-tags.csv")
     genome_scores = pd.read_csv(base_path + "genome-scores.csv")
     return genome_tags, genome_scores
