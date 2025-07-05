@@ -209,6 +209,8 @@ def load_data():
     base_path = "./data/"
     movies = pd.read_csv(base_path + "movies.csv", sep=";")
     ratings = pd.read_csv(base_path + "ratings.csv", sep=",", encoding="utf-8")
+    # Zeige die ersten 10 Zeilen der ratings-Daten an
+    st.write(ratings.head(10))
     movies["year"] = movies["title"].str.extract(r"\((\d{4})\)").astype(float)
     avg_ratings = ratings.groupby("movieId")["rating"].mean()
     count_ratings = ratings.groupby("movieId")["rating"].count()
