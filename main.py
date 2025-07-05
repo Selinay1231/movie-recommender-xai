@@ -335,16 +335,36 @@ if len(selected_titles) == 5:
     understanding = st.radio("Welche Erklärung war für dich verständlicher?", ["Textuelle Erklärung", "SHAP", "Tabelle"])
     transparency = st.radio("Wie wichtig ist dir Transparenz in KI?", ["Unwichtig", "Wichtig", "Sehr wichtig"])
 
-    if st.button("Antworten absenden"):
-        final_data = st.session_state.umfrage_data.copy()
-        final_data.update({
-            "selected_titles": ", ".join(selected_titles),
-            "selected_tags": ", ".join(tags_selected),
-            "recommendation_rating": rating,
-            "understanding_choice": understanding,
-            "transparency_importance": transparency
-        })
-        csv_path = "C:/Users/selin/PycharmProjects/Masterarbeit/feedback.csv"
-        df_final = pd.DataFrame([final_data])
-        df_final.to_csv(csv_path, mode='a', sep=';', encoding='utf-8-sig', header=not os.path.exists(csv_path), index=False)
-        st.success("Vielen Dank für dein Feedback! Die Daten wurden gespeichert.")
+import gdown
+import pandas as pd
+import os
+
+if st.button("Antworten absenden"):
+    # Deine Umfragedaten
+    final_data = st.session_state.umfrage_data.copy()
+    final_data.update({
+        "selected_titles": ", ".join(selected_titles),
+        "selected_tags": ", ".join(tags_selected),
+        "recommendation_rating": rating,
+        "understanding_choice": understanding,
+        "transparency_importance": transparency
+    })
+    
+    # Google Drive Link zu meiner feedback.csv Datei
+    google_drive_link = 'https://drive.google.com/uc?id=1gwLySMTgA_OHXQlW-yqlj8oVsM_bvawe'
+    
+    # Zielpfad für die CSV auf dem Server
+    csv_path = "/mount/src/movie-recommender-xai/data/feedback.csv"
+    
+    # CSV-Datei von Google Drive herunterladen (falls nicht existiert)
+    gdown.download(google_drive_link, csv_path, quiet=False)
+    
+    # Neues DataFrame mit den aktuellen Daten
+    df_final = pd.DataFrame([final_data])
+    
+    # CSV-Datei mit neuen Daten aktualisieren (Hinzufügen der neuen Zeile)
+    df_final.to_csv(csv_path, mode='a', sep=';', encoding='utf-8-sig', header=not os.path.exists(csv_path), index=False)
+    
+    # Bestätigung, dass die Daten gespeichert wurden
+    st.success("Vielen Dank für dein Feedback! Die Daten wurden gespeichert.")
+
