@@ -191,28 +191,38 @@ def generate_text_explanation(movie_row, tags_selected):
     else:
         return "Dieser Film wurde empfohlen, weil er in mehreren Aspekten zu deinem Profil passt."
 
-def download_from_gdrive(file_id, dest_path):
+def download_and_verify_csv(file_id, dest_path):
+    # Direktlink zum Herunterladen
+    url = f"https://drive.google.com/uc?export=download&id={file_id}"
+
     if not os.path.exists(dest_path):
-        url = f"https://drive.google.com/uc?id={file_id}"
         gdown.download(url, dest_path, quiet=False)
 
-# Lade Daten bei Bedarf aus Google Drive herunter
+    # Dateiinhalt kurz prüfen
+    with open(dest_path, "r", encoding="utf-8") as f:
+        first_line = f.readline()
+        if "<html" in first_line.lower():
+            st.error(f"❌ Fehler beim Download: '{dest_path}' enthält HTML statt CSV. Vermutlich wurde ein Redirect oder Google-Warnung geladen.")
+            st.stop()
+
+# Verzeichnis vorbereiten
 os.makedirs("./data", exist_ok=True)
 
-download_from_gdrive("1AVtktDFEXey1RSTq_lTFE4sgG-S9nIxT", "./data/movies.csv")
-download_from_gdrive("17USu4Dkt0SaoL8XiV3ckm1wX2iP7HgQQ", "./data/ratings.csv")
-download_from_gdrive("1wwWoz4RI9ysYVe5mtqNh7BBJ5JwL9IZj", "./data/genome-tags.csv")
-download_from_gdrive("1M0v8mSSbgS7Wz1HoMdCM_YqpXTh0bGd9", "./data/genome-scores.csv")
+# Downloads mit Überprüfung
+download_and_verify_csv("1AVtktDFEXey1RSTq_lTFE4sgG-S9nIxT", "./data/movies.csv")
+download_and_verify_csv("17USu4Dkt0SaoL8XiV3ckm1wX2iP7HgQQ", "./data/ratings.csv")
+download_and_verify_csv("1wwWoz4RI9ysYVe5mtqNh7BBJ5JwL9IZj", "./data/genome-tags.csv")
+download_and_verify_csv("1M0v8mSSbgS7Wz1HoMdCM_YqpXTh0bGd9", "./data/genome-scores.csv")
 
 @st.cache_data
 def load_data():
     base_path = "./data/"
-   
-    movies = pd.read_csv(base_path + "movies.csv", sep=";")
+    movies = pd.read_csv(base_path + "movies.csv", sep=";", encoding="utf-8")
+    ratings = pd.read_csv(base_path + "ratings.csv", sep=";", encoding="utf-8")
+
     st.write("Spalten im movies-DataFrame:", movies.columns.tolist())
 
-    ratings = pd.read_csv(base_path + "ratings.csv", sep=";", encoding="utf-8")
-    # Zeige die ersten 10 Zeilen der ratings-Daten an
+    # Weiterverarbeitung
     movies["year"] = movies["title"].str.extract(r"\((\d{4})\)").astype(float)
     avg_ratings = ratings.groupby("movieId")["rating"].mean()
     count_ratings = ratings.groupby("movieId")["rating"].count()
@@ -224,8 +234,8 @@ def load_data():
 @st.cache_data
 def load_tag_data():
     base_path = "./data/"
-    genome_tags = pd.read_csv(base_path + "genome-tags.csv", sep=";")
-    genome_scores = pd.read_csv(base_path + "genome-scores.csv", sep=";")
+    genome_tags = pd.read_csv(base_path + "genome-tags.csv", sep=";", encoding="utf-8")
+    genome_scores = pd.read_csv(base_path + "genome-scores.csv", sep=";", encoding="utf-8")
     return genome_tags, genome_scores
 
 movies, ratings = load_data()
