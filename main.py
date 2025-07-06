@@ -207,7 +207,9 @@ download_from_gdrive("1M0v8mSSbgS7Wz1HoMdCM_YqpXTh0bGd9", "./data/genome-scores.
 @st.cache_data
 def load_data():
     base_path = "./data/"
-    movies = pd.read_csv(base_path + "movies.csv", sep=";", encoding="utf-8")
+    
+    movies = pd.read_csv(base_path + "movies.csv", sep=";", encoding="utf-8-sig")
+
     st.write("Spalten im movies-DataFrame:", movies.columns.tolist())
 
     ratings = pd.read_csv(base_path + "ratings.csv", sep=";", encoding="utf-8")
