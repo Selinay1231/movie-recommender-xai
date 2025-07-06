@@ -191,6 +191,13 @@ def generate_text_explanation(movie_row, tags_selected):
     else:
         return "Dieser Film wurde empfohlen, weil er in mehreren Aspekten zu deinem Profil passt."
 
+import shutil
+
+# Löscht den gesamten ./data Ordner, wenn er existiert
+if os.path.exists("./data"):
+    shutil.rmtree("./data")
+
+
 def download_and_verify_csv(file_id, dest_path):
     # Direktlink zum Herunterladen
     url = f"https://drive.google.com/uc?export=download&id={file_id}"
