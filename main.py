@@ -353,38 +353,50 @@ if len(selected_titles) == 5:
     rating = st.slider("Wie gut passen die Empfehlungen?", 1, 5, 3)
     understanding = st.radio("Welche Erklärung war für dich verständlicher?", ["Textuelle Erklärung", "SHAP", "Tabelle"])
     transparency = st.radio("Wie wichtig ist dir Transparenz in KI?", ["Unwichtig", "Wichtig", "Sehr wichtig"])
-    
-#feedback.csv mit google sheets
+
+
+# === Feedback Speicherung via Google Sheets ===
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
+import streamlit as st
 
-# Pfad zur Service-Account-JSON
-SERVICE_ACCOUNT_FILE = "credentials.json"
-
-# Verbindung aufbauen
+# Verbindung zu Google Sheets via Streamlit Secrets (kein JSON-File nötig)
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-creds = ServiceAccountCredentials.from_json_keyfile_name(SERVICE_ACCOUNT_FILE, scope)
+creds = ServiceAccountCredentials.from_json_keyfile_dict(st.secrets["google_service_account"], scope)
 client = gspread.authorize(creds)
-sheet = client.open("KI_Umfrage_Responses").sheet1  
-# Beispiel: Umfrage speichern
-umfrage_data = st.session_state.umfrage_data  # wie vorher gespeichert
+sheet = client.open("KI_Umfrage_Responses").sheet1  # Muss existieren!
 
-# Werte extrahieren in derselben Reihenfolge
-row = [
-    umfrage_data["user_id"],
-    umfrage_data["timestamp"],
-    umfrage_data["age_group"],
-    umfrage_data["contact_ki"],
-    umfrage_data["assoziation"],
-    umfrage_data["geschlecht_ki"],
-    umfrage_data["kontrolleinstellung"],
-    umfrage_data["wichtig"],
-    umfrage_data["vertrauen_bereich"],
-    umfrage_data["erklaerung_einfluss"],
-    umfrage_data["beeinflussung_wichtigkeit"]
-]
+# === Button zum Absenden ===
+if st.button("Antworten absenden"):
+    try:
+        umfrage_data = st.session_state.umfrage_data  # Vorher gespeichert
 
-# In nächste freie Zeile einfügen
-sheet.append_row(row)
+        # Werte extrahieren
+        row = [
+            umfrage_data["user_id"],
+            umfrage_data["timestamp"],
+            umfrage_data["age_group"],
+            umfrage_data["contact_ki"],
+            umfrage_data["assoziation"],
+            umfrage_data["geschlecht_ki"],
+            umfrage_data["kontrolleinstellung"],
+            umfrage_data["wichtig"],
+            umfrage_data["vertrauen_bereich"],
+            umfrage_data["erklaerung_einfluss"],
+            umfrage_data["beeinflussung_wichtigkeit"]
+        ]
 
+        # Header setzen (einmalig, wenn leer)
+        if not sheet.get_all_values():  # Leeres Sheet
+            header = [
+                "user_id", "timestamp", "age_group", "contact_ki", "assoziation",
+                "geschlecht_ki", "kontrolleinstellung", "wichtig",
+                "vertrauen_bereich", "erklaerung_einfluss", "beeinflussung_wichtigkeit"
+            ]
+            sheet.append_row(header)
 
+        # In nächste freie Zeile einfügen
+        sheet.append_row(row)
+        st.success("✅ Vielen Dank für deine Teilnahme! Deine Antworten wurden gespeichert.")
+    except Exception as e:
+        st.error(f"❌ Fehler beim Speichern der Antworten: {e}")
