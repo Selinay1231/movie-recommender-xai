@@ -217,7 +217,10 @@ def load_data():
     movies = movies.join(count_ratings.rename("n_ratings"), on="movieId")
     movies = movies[(movies["avg_rating"] >= 3) & (movies["n_ratings"] >= 50)]
     return movies.reset_index(drop=True), ratings
-
+   # Debug-Ausgabe für Prüfung TEST
+    st.write("Spalten in 'movies.csv':", movies.columns.tolist())
+    st.write(movies.head())
+    # Debug-Ausgabe für Prüfung TEST ENDE
 @st.cache_data
 def load_tag_data():
     base_path = "./data/"
