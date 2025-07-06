@@ -335,12 +335,41 @@ if len(selected_titles) == 5:
     understanding = st.radio("Welche Erklärung war für dich verständlicher?", ["Textuelle Erklärung", "SHAP", "Tabelle"])
     transparency = st.radio("Wie wichtig ist dir Transparenz in KI?", ["Unwichtig", "Wichtig", "Sehr wichtig"])
 
-import gdown
-import pandas as pd
-import os
+from google.oauth2 import service_account
+from googleapiclient.discovery import build
+from googleapiclient.http import MediaIoBaseDownload, MediaFileUpload
+import io
 
+# === Google Drive Zugriff vorbereiten ===
+SERVICE_ACCOUNT_JSON = 'google_service_account.json'
+FILE_ID = '1gwLySMTgA_OHXQlW-yqlj8oVsM_bvawe'  # Deine Drive-Datei-ID für feedback.csv
+
+creds = service_account.Credentials.from_service_account_file(
+    SERVICE_ACCOUNT_JSON,
+    scopes=["https://www.googleapis.com/auth/drive"]
+)
+drive_service = build("drive", "v3", credentials=creds)
+
+# === Hilfsfunktionen ===
+def load_feedback_csv(file_id):
+    request = drive_service.files().get_media(fileId=file_id)
+    fh = io.BytesIO()
+    downloader = MediaIoBaseDownload(fh, request)
+    done = False
+    while not done:
+        status, done = downloader.next_chunk()
+    fh.seek(0)
+    return pd.read_csv(fh, sep=';')
+
+def append_and_upload_feedback(new_data: dict, file_id: str):
+    df = load_feedback_csv(file_id)
+    df = pd.concat([df, pd.DataFrame([new_data])], ignore_index=True)
+    df.to_csv("temp_feedback.csv", sep=';', index=False, encoding='utf-8-sig')
+    media = MediaFileUpload("temp_feedback.csv", mimetype="text/csv")
+    drive_service.files().update(fileId=file_id, media_body=media).execute()
+
+# === Streamlit: Antwort absenden ===
 if st.button("Antworten absenden"):
-    # Deine Umfragedaten
     final_data = st.session_state.umfrage_data.copy()
     final_data.update({
         "selected_titles": ", ".join(selected_titles),
@@ -349,22 +378,6 @@ if st.button("Antworten absenden"):
         "understanding_choice": understanding,
         "transparency_importance": transparency
     })
-    
-    # Google Drive Link zu meiner feedback.csv Datei
-    google_drive_link = 'https://drive.google.com/uc?id=1gwLySMTgA_OHXQlW-yqlj8oVsM_bvawe'
-    
-    # Zielpfad für die CSV auf dem Server
-    csv_path = "/mount/src/movie-recommender-xai/data/feedback.csv"
-    
-    # CSV-Datei von Google Drive herunterladen (falls nicht existiert)
-    gdown.download(google_drive_link, csv_path, quiet=False)
-    
-    # Neues DataFrame mit den aktuellen Daten
-    df_final = pd.DataFrame([final_data])
-    
-    # CSV-Datei mit neuen Daten aktualisieren (Hinzufügen der neuen Zeile)
-    df_final.to_csv(csv_path, mode='a', sep=';', encoding='utf-8-sig', header=not os.path.exists(csv_path), index=False)
-    
-    # Bestätigung, dass die Daten gespeichert wurden
-    st.success("Vielen Dank für dein Feedback! Die Daten wurden gespeichert.")
 
+    append_and_upload_feedback(final_data, FILE_ID)
+    st.success("Vielen Dank für dein Feedback! Die Daten wurden erfolgreich gespeichert.")
