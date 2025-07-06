@@ -207,7 +207,7 @@ download_from_gdrive("1M0v8mSSbgS7Wz1HoMdCM_YqpXTh0bGd9", "./data/genome-scores.
 @st.cache_data
 def load_data():
     base_path = "./data/"
-    movies = pd.read_csv(base_path + "movies.csv", sep=";", encoding="utf-8")
+    movies = pd.read_csv(base_path + "movies.csv", sep=",", encoding="utf-8")
     ratings = pd.read_csv(base_path + "ratings.csv", sep=";", encoding="utf-8")
     # Zeige die ersten 10 Zeilen der ratings-Daten an
     movies["year"] = movies["title"].str.extract(r"\((\d{4})\)").astype(float)
