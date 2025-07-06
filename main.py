@@ -227,7 +227,6 @@ def load_data():
     movies = pd.read_csv(base_path + "movies.csv", sep=";", encoding="utf-8")
     ratings = pd.read_csv(base_path + "ratings.csv", sep=";", encoding="utf-8")
 
-    st.write("Spalten im movies-DataFrame:", movies.columns.tolist())
 
     # Weiterverarbeitung
     movies["year"] = movies["title"].str.extract(r"\((\d{4})\)").astype(float)
