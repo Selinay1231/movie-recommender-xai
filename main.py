@@ -204,12 +204,6 @@ download_from_gdrive("17USu4Dkt0SaoL8XiV3ckm1wX2iP7HgQQ", "./data/ratings.csv")
 download_from_gdrive("1wwWoz4RI9ysYVe5mtqNh7BBJ5JwL9IZj", "./data/genome-tags.csv")
 download_from_gdrive("1M0v8mSSbgS7Wz1HoMdCM_YqpXTh0bGd9", "./data/genome-scores.csv")
 
-
-movies = pd.read_csv(base_path + "movies.csv", sep=";")
-st.write("Spalten:", movies.columns.tolist())
-st.write("Erste Zeilen:", movies.head())
-
-
 @st.cache_data
 def load_data():
     base_path = "./data/"
