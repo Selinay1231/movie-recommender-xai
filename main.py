@@ -193,9 +193,9 @@ def generate_text_explanation(movie_row, tags_selected):
 
 import shutil
 
-# Löscht den gesamten ./data Ordner, wenn er existiert
-if os.path.exists("./data"):
-    shutil.rmtree("./data")
+# CACHE Löschen falls es irgendwie nicht mehr geht ..Löscht den gesamten ./data Ordner, wenn er existiert
+#if os.path.exists("./data"):
+    #shutil.rmtree("./data")
 
 
 def download_and_verify_csv(file_id, dest_path):
