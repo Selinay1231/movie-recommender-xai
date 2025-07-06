@@ -204,10 +204,16 @@ download_from_gdrive("17USu4Dkt0SaoL8XiV3ckm1wX2iP7HgQQ", "./data/ratings.csv")
 download_from_gdrive("1wwWoz4RI9ysYVe5mtqNh7BBJ5JwL9IZj", "./data/genome-tags.csv")
 download_from_gdrive("1M0v8mSSbgS7Wz1HoMdCM_YqpXTh0bGd9", "./data/genome-scores.csv")
 
+
+movies = pd.read_csv(base_path + "movies.csv", sep=";")
+st.write("Spalten:", movies.columns.tolist())
+st.write("Erste Zeilen:", movies.head())
+
+
 @st.cache_data
 def load_data():
     base_path = "./data/"
-    movies = pd.read_csv(base_path + "movies.csv", sep=",", encoding="utf-8")
+    movies = pd.read_csv(base_path + "movies.csv", sep=";")
     ratings = pd.read_csv(base_path + "ratings.csv", sep=";", encoding="utf-8")
     # Zeige die ersten 10 Zeilen der ratings-Daten an
     movies["year"] = movies["title"].str.extract(r"\((\d{4})\)").astype(float)
@@ -217,10 +223,7 @@ def load_data():
     movies = movies.join(count_ratings.rename("n_ratings"), on="movieId")
     movies = movies[(movies["avg_rating"] >= 3) & (movies["n_ratings"] >= 50)]
     return movies.reset_index(drop=True), ratings
-   # Debug-Ausgabe für Prüfung TEST
-    st.write("Spalten in 'movies.csv':", movies.columns.tolist())
-    st.write(movies.head())
-    # Debug-Ausgabe für Prüfung TEST ENDE
+
 @st.cache_data
 def load_tag_data():
     base_path = "./data/"
