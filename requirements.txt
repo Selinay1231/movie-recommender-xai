@@ -5,3 +5,5 @@ matplotlib
 shap
 requests
 gdown
+gspread
+oauth2client
