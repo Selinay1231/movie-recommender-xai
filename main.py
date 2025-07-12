@@ -100,31 +100,25 @@ beeinflussung = st.slider("Wie wichtig ist es Ihnen, die Entscheidungen eines KI
 # === Absenden und Daten merken ===
 
 
+
 # === Absenden und Daten merken ===
 if st.button("Umfrage abschließen und starten"):
-    with st.spinner("⏳ Lade dein Empfehlungssystem..."):
-        st.session_state.umfrage_abgeschlossen = True
-        st.session_state.umfrage_data = {
-            "user_id": st.session_state.user_id,
-            "timestamp": datetime.now().isoformat(),
-            "age_group": age_group,
-            "contact_ki": contact_ki,
-            "assoziation": assoziation,
-            "geschlecht_ki": geschlecht_vorstellung,
-            "kontrolleinstellung": kontrolleinstellung,
-            "wichtig": "; ".join(wichtige_aspekte),
-            "vertrauen_bereich": "; ".join(vertrauensbereiche),
-            "erklaerung_einfluss": erklaerung_vertrauen,
-            "beeinflussung_wichtigkeit": beeinflussung
-        }
-        time.sleep(1.5)  # damit der Spinner kurz sichtbar bleibt
-        st.toast("✅ Vielen Dank! Du wirst jetzt weitergeleitet ...")
-        st.experimental_rerun()
-
-if "umfrage_abgeschlossen" not in st.session_state:
-    st.stop()
-
-
+    st.session_state.umfrage_abgeschlossen = True
+    st.session_state.umfrage_data = {
+        "user_id": st.session_state.user_id,
+        "timestamp": datetime.now().isoformat(),
+        "age_group": age_group,
+        "contact_ki": contact_ki,
+        "assoziation": assoziation,
+        "geschlecht_ki": geschlecht_vorstellung,
+        "kontrolleinstellung": kontrolleinstellung,
+        "wichtig": "; ".join(wichtige_aspekte),
+        "vertrauen_bereich": "; ".join(vertrauensbereiche),
+        "erklaerung_einfluss": erklaerung_vertrauen,
+        "beeinflussung_wichtigkeit": beeinflussung
+    }
+    st.success("Vielen Dank! Du kannst jetzt deine personalisierte Empfehlung erhalten.")
+    st.markdown("---")
 
 
 
