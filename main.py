@@ -190,10 +190,26 @@ def generate_text_explanation(movie_row, tags_selected):
             "da er eine gute, aber nicht überragende Bewertung erhalten hat"
         ]))
 
-    if reasons:
-        return "Dieser Film wurde empfohlen, " + " und ".join(reasons) + "."
+    # Vertrauenswert basierend auf Ähnlichkeit
+    trust_score = movie_row.get("similarity", 0)
+    trust_percent = round(trust_score * 100, 1)
+
+    if trust_score >= 0.8:
+        trust_label = "sehr hohes Vertrauen"
+    elif trust_score >= 0.6:
+        trust_label = "hohes Vertrauen"
+    elif trust_score >= 0.4:
+        trust_label = "mittleres Vertrauen"
     else:
-        return "Dieser Film wurde empfohlen, weil er in mehreren Aspekten zu deinem Profil passt."
+        trust_label = "niedriges Vertrauen"
+
+    vertrauen_text = f" Der Vertrauenswert dieser Empfehlung beträgt {trust_percent} %, was einem {trust_label} entspricht."
+
+    if reasons:
+        return "Dieser Film wurde empfohlen, " + " und ".join(reasons) + "." + vertrauen_text
+    else:
+        return "Dieser Film wurde empfohlen, weil er in mehreren Aspekten zu deinem Profil passt." + vertrauen_text
+
 
 import shutil
 
