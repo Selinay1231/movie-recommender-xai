@@ -195,13 +195,13 @@ def generate_text_explanation(movie_row, tags_selected):
     trust_percent = round(trust_score * 100, 1)
 
     if trust_score >= 0.8:
-        trust_label = "sehr hohes Vertrauen"
+        trust_label = "sehr hohen Vertrauen"
     elif trust_score >= 0.6:
-        trust_label = "hohes Vertrauen"
+        trust_label = "hohen Vertrauen"
     elif trust_score >= 0.4:
-        trust_label = "mittleres Vertrauen"
+        trust_label = "mittlerem Vertrauen"
     else:
-        trust_label = "niedriges Vertrauen"
+        trust_label = "niedrigem Vertrauen"
 
     vertrauen_text = f" Der Vertrauenswert dieser Empfehlung beträgt {trust_percent} %, was einem {trust_label} entspricht."
 
