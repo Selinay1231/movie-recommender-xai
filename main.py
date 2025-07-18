@@ -138,7 +138,6 @@ aufgabenvergleich = {
     "Moralisch handeln": st.radio("Moralisch handeln", ["Mensch", "KI"]),
     "Verantwortung übernehmen": st.radio("Verantwortung übernehmen", ["Mensch", "KI"]),
     "Selbst lernen ohne menschliche Hilfe": st.radio("Selbst lernen, ohne menschliche Hilfe", ["Mensch", "KI"]),
-    "Keines dieser Dinge": st.radio("Keines dieser Dinge", ["Mensch", "KI"])
 }
 
 st.subheader("3. Kontrolle & Vertrauen")
@@ -516,7 +515,7 @@ rating = st.slider("Skala: 1 = gar nicht passend, 3 = mittelmäßig, 5 = sehr pa
 # Verständlichstes Erklärformat auswählen
 understanding = st.radio(
     "**Welche Erklärung war für dich am verständlichsten?**",
-    ["Vektorraumerklärung (Tabelle)", "SHAP-Erklärung", "Textuelle Erklärung"]
+    [ "Textuelle Erklärung","SHAP-Erklärung","Vektorraumerklärung"]
 )
 
 st.markdown("**Hat die Erklärung dein Vertrauen in die KI-Empfehlung gestärkt?**")
@@ -575,7 +574,7 @@ if st.button("Antworten absenden"):
             umfrage_data.get("vertrauen_kunst", ""),
             umfrage_data.get("transparenz_vertrauen", ""),
             umfrage_data.get("job_szenario", ""),
-            umfrage_data.get("app_einstellungen", ""),
+             "; ".join(umfrage_data.get("app_einstellungen", [])),
             umfrage_data.get("ki_entscheidung", ""),
             umfrage_data.get("ki_unfaehigkeit", ""),
             st.session_state.get("rating", ""),
