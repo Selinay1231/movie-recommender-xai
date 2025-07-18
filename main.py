@@ -220,10 +220,26 @@ if st.button("Umfrage abschließen und starten"):
         "timestamp": datetime.now().isoformat(),
         "age_group": age_group,
         "contact_ki": contact_ki,
-        "assoziation": assoziation,
-        "geschlecht_ki": geschlecht_vorstellung,
-
-        # Abschnitt 3: Kontrolle & Vertrauen
+        "ki_frequency": ki_frequency if contact_ki != "Nein, noch nie" else "",
+        "most_used_ki": most_used_ki,
+        "treffgenauigkeit": treffgenauigkeit,
+        "transparenz": transparenz,
+        "einfachheit": einfachheit,
+        "zugänglichkeit": zugänglichkeit,
+        "personalisierung": personalisierung,
+        "datenschutz": datenschutz,
+        "ki_aktivitaeten": ki_aktivitaeten,
+        "erklaerung_kind": erklaerung_kind,
+        "ki_name": ki_name,
+        "ki_verstaendnis": ki_verstaendnis,
+        "ki_rollenbild": ki_rollenbild,
+        "aufgaben_emotionen": aufgabenvergleich["Emotionen erkennen"],
+        "aufgaben_imitieren": aufgabenvergleich["Menschen täuschend echt imitieren"],
+        "aufgaben_kreativitaet": aufgabenvergleich["Kreativ sein"],
+        "aufgaben_moral": aufgabenvergleich["Moralisch handeln"],
+        "aufgaben_verantwortung": aufgabenvergleich["Verantwortung übernehmen"],
+        "aufgaben_selbstlernen": aufgabenvergleich["Selbst lernen ohne menschliche Hilfe"],
+        "aufgaben_keines": aufgabenvergleich["Keines dieser Dinge"],
         "navigation_entscheidung": navigation_entscheidung,
         "vertrauen_produkte": vertrauen_produkte,
         "vertrauen_medizin": vertrauen_medizin,
@@ -233,14 +249,13 @@ if st.button("Umfrage abschließen und starten"):
         "vertrauen_kunst": vertrauen_kunst,
         "transparenz_vertrauen": transparenz_vertrauen,
         "job_szenario": job_szenario,
-        "app_einstellungen": "; ".join(app_einstellungen),
-
-        # Abschnitt 4: Verständnis von KI
+        "app_einstellungen": app_einstellungen,
         "ki_entscheidung": ki_entscheidung,
         "ki_unfaehigkeit": ki_unfaehigkeit
     }
     st.success("Vielen Dank! Du kannst jetzt deine personalisierte Empfehlung erhalten.")
     st.markdown("---")
+
 
 
 
@@ -525,32 +540,67 @@ if st.button("Antworten absenden"):
     try:
         umfrage_data = st.session_state.umfrage_data  # Vorher gespeichert
 
-        # Werte extrahieren
+        # Neue Zeile mit allen Umfragefeldern
         row = [
             umfrage_data["user_id"],
             umfrage_data["timestamp"],
             umfrage_data["age_group"],
             umfrage_data["contact_ki"],
-            umfrage_data["assoziation"],
-            umfrage_data["geschlecht_ki"],
-            umfrage_data["kontrolleinstellung"],
-            umfrage_data["wichtig"],
-            umfrage_data["vertrauen_bereich"],
-            umfrage_data["erklaerung_einfluss"],
-            umfrage_data["beeinflussung_wichtigkeit"]
+            umfrage_data.get("ki_frequency", ""),
+            umfrage_data.get("most_used_ki", ""),
+            umfrage_data.get("treffgenauigkeit", ""),
+            umfrage_data.get("transparenz", ""),
+            umfrage_data.get("einfachheit", ""),
+            umfrage_data.get("zugänglichkeit", ""),
+            umfrage_data.get("personalisierung", ""),
+            umfrage_data.get("datenschutz", ""),
+            "; ".join(umfrage_data.get("ki_aktivitaeten", [])),
+            umfrage_data.get("erklaerung_kind", ""),
+            umfrage_data.get("ki_name", ""),
+            umfrage_data.get("ki_verstaendnis", ""),
+            umfrage_data.get("ki_rollenbild", ""),
+            umfrage_data.get("aufgaben_emotionen", ""),
+            umfrage_data.get("aufgaben_imitieren", ""),
+            umfrage_data.get("aufgaben_kreativitaet", ""),
+            umfrage_data.get("aufgaben_moral", ""),
+            umfrage_data.get("aufgaben_verantwortung", ""),
+            umfrage_data.get("aufgaben_selbstlernen", ""),
+            umfrage_data.get("aufgaben_keines", ""),
+            umfrage_data.get("navigation_entscheidung", ""),
+            umfrage_data.get("vertrauen_produkte", ""),
+            umfrage_data.get("vertrauen_medizin", ""),
+            umfrage_data.get("vertrauen_verkehr", ""),
+            umfrage_data.get("vertrauen_finanz", ""),
+            umfrage_data.get("vertrauen_bildung", ""),
+            umfrage_data.get("vertrauen_kunst", ""),
+            umfrage_data.get("transparenz_vertrauen", ""),
+            umfrage_data.get("job_szenario", ""),
+            umfrage_data.get("app_einstellungen", ""),
+            umfrage_data.get("ki_entscheidung", ""),
+            umfrage_data.get("ki_unfaehigkeit", ""),
+            st.session_state.get("rating", ""),
+            st.session_state.get("understanding", ""),
+            st.session_state.get("trust_effect", "")
         ]
 
-        # Header setzen (einmalig, wenn leer)
-        if not sheet.get_all_values():  # Leeres Sheet
+        # Header bei leerem Sheet setzen
+        if not sheet.get_all_values():
             header = [
-                "user_id", "timestamp", "age_group", "contact_ki", "assoziation",
-                "geschlecht_ki", "kontrolleinstellung", "wichtig",
-                "vertrauen_bereich", "erklaerung_einfluss", "beeinflussung_wichtigkeit"
+                "user_id", "timestamp", "age_group", "contact_ki", "ki_frequency", "most_used_ki",
+                "treffgenauigkeit", "transparenz", "einfachheit", "zugänglichkeit", "personalisierung", "datenschutz",
+                "ki_aktivitaeten", "erklaerung_kind", "ki_name", "ki_verstaendnis", "ki_rollenbild",
+                "aufgaben_emotionen", "aufgaben_imitieren", "aufgaben_kreativitaet", "aufgaben_moral",
+                "aufgaben_verantwortung", "aufgaben_selbstlernen", "aufgaben_keines",
+                "navigation_entscheidung", "vertrauen_produkte", "vertrauen_medizin", "vertrauen_verkehr",
+                "vertrauen_finanz", "vertrauen_bildung", "vertrauen_kunst", "transparenz_vertrauen",
+                "job_szenario", "app_einstellungen", "ki_entscheidung", "ki_unfaehigkeit",
+                "bewertung_empfehlung", "verstaendlichkeit_erklaerung", "vertrauenseffekt"
             ]
             sheet.append_row(header)
 
-        # In nächste freie Zeile einfügen
+        # Speichern
         sheet.append_row(row)
         st.success("✅ Vielen Dank für deine Teilnahme! Deine Antworten wurden gespeichert.")
     except Exception as e:
         st.error(f"❌ Fehler beim Speichern der Antworten: {e}")
+
