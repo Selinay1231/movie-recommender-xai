@@ -238,7 +238,6 @@ if st.button("Umfrage abschließen und starten"):
         "aufgaben_moral": aufgabenvergleich["Moralisch handeln"],
         "aufgaben_verantwortung": aufgabenvergleich["Verantwortung übernehmen"],
         "aufgaben_selbstlernen": aufgabenvergleich["Selbst lernen ohne menschliche Hilfe"],
-        "aufgaben_keines": aufgabenvergleich["Keines dieser Dinge"],
         "navigation_entscheidung": navigation_entscheidung,
         "vertrauen_produkte": vertrauen_produkte,
         "vertrauen_medizin": vertrauen_medizin,
