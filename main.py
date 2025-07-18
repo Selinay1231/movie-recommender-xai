@@ -215,9 +215,9 @@ ki_unfaehigkeit = st.radio(
 )
 
 
-# === Absenden und Daten merken ===
-if st.button("Umfrage abschließen und starten"):
-    st.session_state.umfrage_abgeschlossen = True
+# === Vorumfrage abschließen ===
+if st.button("Vorumfrage abschließen und Recommender starten"):
+    st.session_state.umfrage_abgeschlossen = True  # Zeigt Recommender und Nachbefragung erst danach
     st.session_state.umfrage_data = {
         "user_id": st.session_state.user_id,
         "timestamp": datetime.now().isoformat(),
@@ -236,12 +236,12 @@ if st.button("Umfrage abschließen und starten"):
         "ki_name": ki_name,
         "ki_verstaendnis": ki_verstaendnis,
         "ki_rollenbild": ki_rollenbild,
-        "aufgaben_emotionen": aufgabenvergleich["Emotionen erkennen"],
-        "aufgaben_imitieren": aufgabenvergleich["Menschen täuschend echt imitieren"],
-        "aufgaben_kreativitaet": aufgabenvergleich["Kreativ sein"],
-        "aufgaben_moral": aufgabenvergleich["Moralisch handeln"],
-        "aufgaben_verantwortung": aufgabenvergleich["Verantwortung übernehmen"],
-        "aufgaben_selbstlernen": aufgabenvergleich["Selbst lernen ohne menschliche Hilfe"],
+        "aufgaben_emotionen": aufgabenvergleich.get("Emotionen erkennen", ""),
+        "aufgaben_imitieren": aufgabenvergleich.get("Menschen täuschend echt imitieren", ""),
+        "aufgaben_kreativitaet": aufgabenvergleich.get("Kreativ sein", ""),
+        "aufgaben_moral": aufgabenvergleich.get("Moralisch handeln", ""),
+        "aufgaben_verantwortung": aufgabenvergleich.get("Verantwortung übernehmen", ""),
+        "aufgaben_selbstlernen": aufgabenvergleich.get("Selbst lernen ohne menschliche Hilfe", ""),
         "navigation_entscheidung": navigation_entscheidung,
         "vertrauen_produkte": vertrauen_produkte,
         "vertrauen_medizin": vertrauen_medizin,
@@ -255,10 +255,8 @@ if st.button("Umfrage abschließen und starten"):
         "ki_entscheidung": ki_entscheidung,
         "ki_unfaehigkeit": ki_unfaehigkeit
     }
-    st.success("Vielen Dank! Du kannst jetzt deine personalisierte Empfehlung erhalten.")
+    st.success("Vielen Dank für das Ausfüllen der Vorumfrage! Jetzt startet dein persönlicher Recommender.")
     st.markdown("---")
-
-
 
 
 
@@ -406,125 +404,108 @@ def load_tag_data():
 movies, ratings = load_data()
 genome_tags, genome_scores = load_tag_data()
 
-st.title("\U0001F3AC Dein personalisierter Filmempfehler")
-st.markdown("Dieses interaktive Empfehlungssystem schlägt dir Filme vor, die zu deinem Geschmack passen.")
-st.markdown("Wähle dazu bitte 5 Filme aus, die dir besonders gut gefallen. Optional kannst du zusätzlich Tags (z. B. 'spannend', 'visuell beeindruckend') wählen, um die Empfehlungen weiter zu verfeinern.")
 
-st.markdown("Du kannst die Empfehlungen auf Filme ab einem bestimmten Jahr begrenzen (max. 2015):")
-min_year = st.slider("Zeige Filme ab Jahr:", 1950, 2015, 1999)
-movies = movies[movies["year"] >= min_year]
+#############################################
 
-available_movies = movies.sort_values("title")
-selected_titles = st.multiselect("Wähle Filme:", available_movies["title"].tolist(), max_selections=5)
+# === Recommender + Nachbefragung nur anzeigen, wenn Umfrage abgeschlossen ===
+if st.session_state.get("umfrage_abgeschlossen", False):
+    st.title("🎬 Dein personalisierter Filmempfehler")
+    st.markdown("Dieses interaktive Empfehlungssystem schlägt dir Filme vor, die zu deinem Geschmack passen.")
+    st.markdown("Wähle dazu bitte 5 Filme aus, die dir besonders gut gefallen. Optional kannst du zusätzlich Tags (z. B. 'spannend', 'visuell beeindruckend') wählen, um die Empfehlungen weiter zu verfeinern.")
 
-# Tags optional
-tags_selected = []
-with st.expander("\U0001F516 Optional: Wähle Tags, die dich interessieren"):
-    all_tags = genome_tags["tag"].sort_values().unique().tolist()
-    tags_selected = st.multiselect("Wähle bis zu 5 Tags:", all_tags, max_selections=5)
+    st.markdown("Du kannst die Empfehlungen auf Filme ab einem bestimmten Jahr begrenzen (max. 2015):")
+    min_year = st.slider("Zeige Filme ab Jahr:", 1950, 2015, 1999)
+    movies = movies[movies["year"] >= min_year]
 
-if len(selected_titles) == 5:
-    selected_ids = movies[movies["title"].isin(selected_titles)]["movieId"].values
-    movie_features = movies.copy()
-    movie_features = movie_features.join(movies["genres"].str.get_dummies("|"))
-    genre_columns = movies["genres"].str.get_dummies("|").columns
-    user_profile = movie_features[movie_features["movieId"].isin(selected_ids)][genre_columns].mean().values.reshape(1, -1)
-    all_profiles = movie_features[genre_columns].values
-    genre_similarities = cosine_similarity(user_profile, all_profiles)[0]
-    movies["genre_similarity"] = genre_similarities
+    available_movies = movies.sort_values("title")
+    selected_titles = st.multiselect("Wähle Filme:", available_movies["title"].tolist(), max_selections=5)
 
-    tag_matrix = pd.pivot_table(genome_scores, values="relevance", index="movieId", columns="tagId", fill_value=0)
-    selected_tag_ids = genome_tags[genome_tags["tag"].isin(tags_selected)]["tagId"].tolist()
-    user_tag_vector = pd.Series(0, index=tag_matrix.columns, dtype=float)
-    for tag_id in selected_tag_ids:
-        user_tag_vector[tag_id] = 1.0
+    tags_selected = []
+    with st.expander("🔖 Optional: Wähle Tags, die dich interessieren"):
+        all_tags = genome_tags["tag"].sort_values().unique().tolist()
+        tags_selected = st.multiselect("Wähle bis zu 5 Tags:", all_tags, max_selections=5)
 
-    tag_similarities = cosine_similarity([user_tag_vector], tag_matrix.reindex(movies["movieId"].values, fill_value=0).fillna(0).values)[0]
-    movies["tag_similarity"] = tag_similarities
+    if len(selected_titles) == 5:
+        selected_ids = movies[movies["title"].isin(selected_titles)]["movieId"].values
+        movie_features = movies.copy()
+        movie_features = movie_features.join(movies["genres"].str.get_dummies("|"))
+        genre_columns = movies["genres"].str.get_dummies("|").columns
+        user_profile = movie_features[movie_features["movieId"].isin(selected_ids)][genre_columns].mean().values.reshape(1, -1)
+        all_profiles = movie_features[genre_columns].values
+        genre_similarities = cosine_similarity(user_profile, all_profiles)[0]
+        movies["genre_similarity"] = genre_similarities
 
-    #Berechnung
-    movies["similarity"] = 0.5 * movies["genre_similarity"] + 0.5 * movies["tag_similarity"] if tags_selected else movies["genre_similarity"]
-    top_movies = movies[~movies["movieId"].isin(selected_ids)].sort_values("similarity", ascending=False).head(3)
+        tag_matrix = pd.pivot_table(genome_scores, values="relevance", index="movieId", columns="tagId", fill_value=0)
+        selected_tag_ids = genome_tags[genome_tags["tag"].isin(tags_selected)]["tagId"].tolist()
+        user_tag_vector = pd.Series(0, index=tag_matrix.columns, dtype=float)
+        for tag_id in selected_tag_ids:
+            user_tag_vector[tag_id] = 1.0
+
+        tag_similarities = cosine_similarity([user_tag_vector], tag_matrix.reindex(movies["movieId"].values, fill_value=0).fillna(0).values)[0]
+        movies["tag_similarity"] = tag_similarities
+
+        movies["similarity"] = 0.5 * movies["genre_similarity"] + 0.5 * movies["tag_similarity"] if tags_selected else movies["genre_similarity"]
+        top_movies = movies[~movies["movieId"].isin(selected_ids)].sort_values("similarity", ascending=False).head(3)
+
+        # SHAP Erklärung
+        from sklearn.linear_model import LinearRegression
+        X_shap = build_shap_features(movie_features, genre_columns, tag_matrix, selected_tag_ids, movies)
+        model = LinearRegression()
+        model.fit(X_shap, movies["similarity"])
+        explainer = shap.Explainer(model, X_shap)
+        shap_values = explainer(X_shap)
+
+        st.subheader("🎯 Deine Filmempfehlungen")
+        api_key = st.secrets["TMDB_API_KEY"]
+
+        for i, (_, row) in enumerate(top_movies.iterrows()):
+            col1, col2 = st.columns([1, 3])
+            with col1:
+                poster_url = get_movie_poster(clean_title(row["title"]), api_key)
+                st.image(poster_url if poster_url else "https://via.placeholder.com/120x180.png?text=No+Image", width=300)
+
+            with col2:
+                st.markdown(f"<h4 style='margin-bottom:0.2em'>{row['title']}</h4>", unsafe_allow_html=True)
+                st.markdown("🧠 <b>1. Textuelle Erklärung</b>", unsafe_allow_html=True)
+                explanation = generate_text_explanation(row, tags_selected)
+                st.markdown(f"<i>{explanation}</i>", unsafe_allow_html=True)
+
+                st.markdown("🧠 <b>2. SHAP-Visualisierung</b>", unsafe_allow_html=True)
+                fig, ax = plt.subplots()
+                shap.plots.bar(shap_values[i], max_display=5, show=False)
+                st.pyplot(fig)
+
+                st.markdown("🧠 <b>3. Vektorraum-Erklärung</b>", unsafe_allow_html=True)
+                from sklearn.decomposition import PCA
+                pca = PCA(n_components=2)
+                X_pca = pca.fit_transform(X_shap.values)
+                pca_df = pd.DataFrame(X_pca, columns=["PC1", "PC2"])
+                pca_df["movieId"] = movies["movieId"].values
+                pca_df["selected"] = pca_df["movieId"].isin(selected_ids)
+                pca_df["recommended"] = pca_df["movieId"] == row["movieId"]
+                user_point = (
+                    pca_df[pca_df["selected"]]["PC1"].mean(),
+                    pca_df[pca_df["selected"]]["PC2"].mean()
+                )
+
+                fig_pca, ax = plt.subplots()
+                ax.scatter(pca_df["PC1"], pca_df["PC2"], color="lightgray", alpha=0.3, label="Andere Filme")
+                ax.scatter(pca_df[pca_df["selected"]]["PC1"], pca_df[pca_df["selected"]]["PC2"], color="blue", label="Ausgewählte Filme")
+                ax.scatter(pca_df[pca_df["recommended"]]["PC1"], pca_df[pca_df["recommended"]]["PC2"], color="green", label="Diese Empfehlung")
+                ax.scatter(user_point[0], user_point[1], color="red", marker="x", s=100, label="Nutzerprofil")
+                ax.set_title("Position der Empfehlung im Merkmalsraum")
+                ax.legend()
+                st.pyplot(fig_pca)
+
+        # === Nachbefragung ===
+        st.subheader("🗣️ Dein Feedback")
+        rating = st.slider("**Wie gut passen die Empfehlungen zu deinem Geschmack?**", 1, 5, 3)
+        understanding = st.radio("**Welche Erklärung war für dich am verständlichsten?**", ["Textuelle Erklärung", "SHAP-Erklärung", "Vektorraumerklärung"])
+        trust_effect = st.slider("**Hat die Erklärung dein Vertrauen in die KI-Empfehlung gestärkt?**", 1, 5, 3)
 
 
-    #SHAP Erklärung
-    from sklearn.linear_model import LinearRegression
 
-    X_shap = build_shap_features(movie_features, genre_columns, tag_matrix, selected_tag_ids, movies)
-    model = LinearRegression()
-    model.fit(X_shap, movies["similarity"])
-
-    explainer = shap.Explainer(model, X_shap)
-    shap_values = explainer(X_shap)
-    #Ende SHAP Erklärung
-
-
-
-    st.subheader("\U0001F3AF Deine Filmempfehlungen")
-    api_key = st.secrets["TMDB_API_KEY"]
-
-    for i, (_, row) in enumerate(top_movies.iterrows()):
-        col1, col2 = st.columns([1, 3])
-        with col1:
-            poster_url = get_movie_poster(clean_title(row["title"]), api_key)
-            if poster_url:
-                st.image(poster_url, width=300)
-            else:
-                st.image("https://via.placeholder.com/120x180.png?text=No+Image", width=300)
-
-        with col2:
-            st.markdown(f"<h4 style='margin-bottom:0.2em'>{row['title']}</h4>", unsafe_allow_html=True)
-            st.markdown("🧠 <b>1. Textuelle Erklärung</b>", unsafe_allow_html=True)
-            explanation = generate_text_explanation(row, tags_selected)
-            st.markdown(f"<i>{explanation}</i>", unsafe_allow_html=True)
-
-            st.markdown("🧠 <b>2. SHAP-Visualisierung</b>", unsafe_allow_html=True)
-            fig, ax = plt.subplots()
-            shap.plots.bar(shap_values[i], max_display=5, show=False)
-            st.pyplot(fig)
-
-            # 🧠 Vektorraum-Erklärung pro Film
-            pca = PCA(n_components=2)
-            X_pca = pca.fit_transform(X_shap.values)
-
-            pca_df = pd.DataFrame(X_pca, columns=["PC1", "PC2"])
-            pca_df["movieId"] = movies["movieId"].values
-            pca_df["selected"] = pca_df["movieId"].isin(selected_ids)
-            pca_df["recommended"] = pca_df["movieId"] == row["movieId"]
-            user_point = (
-                pca_df[pca_df["selected"]]["PC1"].mean(),
-                pca_df[pca_df["selected"]]["PC2"].mean()
-            )
-
-            st.markdown("🧠 <b>3. Vektorraum-Erklärung</b>", unsafe_allow_html=True)
-            fig_pca, ax = plt.subplots()
-            ax.scatter(pca_df["PC1"], pca_df["PC2"], color="lightgray", alpha=0.3, label="Andere Filme")
-            ax.scatter(pca_df[pca_df["selected"]]["PC1"], pca_df[pca_df["selected"]]["PC2"], color="blue",
-                       label="Ausgewählte Filme")
-            ax.scatter(pca_df[pca_df["recommended"]]["PC1"], pca_df[pca_df["recommended"]]["PC2"], color="green",
-                       label="Diese Empfehlung")
-            ax.scatter(user_point[0], user_point[1], color="red", marker="x", s=100, label="Nutzerprofil")
-            ax.set_title("Position der Empfehlung im Merkmalsraum")
-            ax.legend()
-            st.pyplot(fig_pca)
-
-# === Nachbefragung: Bewertung der Erklärformate ===
-st.subheader("🗣️ Dein Feedback")
-
-# Bewertungsskala mit erklärenden Labels
-st.markdown("**Wie gut passen die Empfehlungen zu deinem Geschmack?**")
-rating = st.slider("Skala: 1 = gar nicht passend, 3 = mittelmäßig, 5 = sehr passend", 1, 5, 3)
-
-# Verständlichstes Erklärformat auswählen
-understanding = st.radio(
-    "**Welche Erklärung war für dich am verständlichsten?**",
-    ["Textuelle Erklärung", "SHAP-Erklärung", "Vektorraumerklärung"]
-)
-
-# Vertrauen durch Erklärung
-st.markdown("**Hat die Erklärung dein Vertrauen in die KI-Empfehlung gestärkt?**")
-trust_effect = st.slider("Skala: 1 = gar nicht, 3 = neutral, 5 = sehr stark", 1, 5, 3)
-
+##############################################################################################
 
 # === Feedback Speicherung via Google Sheets ===
 import gspread
