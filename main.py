@@ -517,6 +517,13 @@ creds = ServiceAccountCredentials.from_json_keyfile_dict(st.secrets["google_serv
 client = gspread.authorize(creds)
 sheet = client.open("KI_Umfrage_Responses").sheet1  # Muss existieren!
 
+
+
+
+# === Nur anzeigen, wenn Recommender aktiv ist ===
+if st.session_state.get("antworten_abgesendet", False):
+    st.markdown("---")
+    st.subheader("📩 Abschließende Umfrage absenden")
 # === Button zum Absenden ===
 if st.button("Antworten absenden"):
     try:
