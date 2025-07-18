@@ -31,6 +31,10 @@ def build_shap_features(movie_features, genre_columns, tag_matrix, selected_tag_
 if "user_id" not in st.session_state:
     st.session_state.user_id = str(uuid.uuid4())
 
+# Flag für gesendete Antworten initialisieren
+if "antworten_abgesendet" not in st.session_state:
+    st.session_state.antworten_abgesendet = False
+
 # === Banner / Einleitung für die Umfrage am Anfang===
 st.markdown("""
     <div style='background-color:#f0f2f6; padding:20px; border-radius:10px; border: 1px solid #ccc;'>
@@ -563,7 +567,7 @@ if st.button("Antworten absenden"):
             umfrage_data.get("aufgaben_moral", ""),
             umfrage_data.get("aufgaben_verantwortung", ""),
             umfrage_data.get("aufgaben_selbstlernen", ""),
-            umfrage_data.get("aufgaben_keines", ""),
+            "", 
             umfrage_data.get("navigation_entscheidung", ""),
             umfrage_data.get("vertrauen_produkte", ""),
             umfrage_data.get("vertrauen_medizin", ""),
@@ -573,7 +577,7 @@ if st.button("Antworten absenden"):
             umfrage_data.get("vertrauen_kunst", ""),
             umfrage_data.get("transparenz_vertrauen", ""),
             umfrage_data.get("job_szenario", ""),
-             "; ".join(umfrage_data.get("app_einstellungen", [])),
+            "; ".join(umfrage_data.get("app_einstellungen", [])),
             umfrage_data.get("ki_entscheidung", ""),
             umfrage_data.get("ki_unfaehigkeit", ""),
             st.session_state.get("rating", ""),
@@ -596,8 +600,12 @@ if st.button("Antworten absenden"):
             ]
             sheet.append_row(header)
 
-        # Speichern
+        # In Google Sheet schreiben
         sheet.append_row(row)
+
+        # Status für Recommender setzen
+        st.session_state.antworten_abgesendet = True
+
         st.success("✅ Vielen Dank für deine Teilnahme! Deine Antworten wurden gespeichert.")
     except Exception as e:
         st.error(f"❌ Fehler beim Speichern der Antworten: {e}")
