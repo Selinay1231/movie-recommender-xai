@@ -592,7 +592,7 @@ if st.button("Antworten absenden"):
                 "treffgenauigkeit", "transparenz", "einfachheit", "zugänglichkeit", "personalisierung", "datenschutz",
                 "ki_aktivitaeten", "erklaerung_kind", "ki_name", "ki_verstaendnis", "ki_rollenbild",
                 "aufgaben_emotionen", "aufgaben_imitieren", "aufgaben_kreativitaet", "aufgaben_moral",
-                "aufgaben_verantwortung", "aufgaben_selbstlernen", "aufgaben_keines",
+                "aufgaben_verantwortung", "aufgaben_selbstlernen",
                 "navigation_entscheidung", "vertrauen_produkte", "vertrauen_medizin", "vertrauen_verkehr",
                 "vertrauen_finanz", "vertrauen_bildung", "vertrauen_kunst", "transparenz_vertrauen",
                 "job_szenario", "app_einstellungen", "ki_entscheidung", "ki_unfaehigkeit",
