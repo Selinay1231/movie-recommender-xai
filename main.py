@@ -497,39 +497,24 @@ if st.session_state.get("umfrage_abgeschlossen", False):
                 ax.legend()
                 st.pyplot(fig_pca)
 
-        # === Nachbefragung ===
-        st.subheader("🗣️ Dein Feedback")
-        rating = st.slider("**Wie gut passen die Empfehlungen zu deinem Geschmack?**", 1, 5, 3)
-        understanding = st.radio("**Welche Erklärung war für dich am verständlichsten?**", ["Textuelle Erklärung", "SHAP-Erklärung", "Vektorraumerklärung"])
-        trust_effect = st.slider("**Hat die Erklärung dein Vertrauen in die KI-Empfehlung gestärkt?**", 1, 5, 3)
-
-
-
-##############################################################################################
+       # === Nachbefragung ===
+st.subheader("🗣️ Dein Feedback")
+rating = st.slider("**Wie gut passen die Empfehlungen zu deinem Geschmack?**", 1, 5, 3)
+understanding = st.radio("**Welche Erklärung war für dich am verständlichsten?**", ["Textuelle Erklärung", "SHAP-Erklärung", "Vektorraumerklärung"])
+trust_effect = st.slider("**Hat die Erklärung dein Vertrauen in die KI-Empfehlung gestärkt?**", 1, 5, 3)
 
 # === Feedback Speicherung via Google Sheets ===
-import gspread
-from oauth2client.service_account import ServiceAccountCredentials
-
-# Verbindung zu Google Sheets via Streamlit Secrets (kein JSON-File nötig)
-scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-creds = ServiceAccountCredentials.from_json_keyfile_dict(st.secrets["google_service_account"], scope)
-client = gspread.authorize(creds)
-sheet = client.open("KI_Umfrage_Responses").sheet1  # Muss existieren!
-
-
-
-
-# === Nur anzeigen, wenn Recommender aktiv ist ===
-if st.session_state.get("antworten_abgesendet", False):
-    st.markdown("---")
-    st.subheader("📩 Abschließende Umfrage absenden")
-# === Button zum Absenden ===
 if st.button("Antworten absenden"):
     try:
-        umfrage_data = st.session_state.umfrage_data  # Vorher gespeichert
+        import gspread
+        from oauth2client.service_account import ServiceAccountCredentials
+        scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+        creds = ServiceAccountCredentials.from_json_keyfile_dict(st.secrets["google_service_account"], scope)
+        client = gspread.authorize(creds)
+        sheet = client.open("KI_Umfrage_Responses").sheet1
 
-        # Neue Zeile mit allen Umfragefeldern
+        umfrage_data = st.session_state.umfrage_data
+
         row = [
             umfrage_data["user_id"],
             umfrage_data["timestamp"],
@@ -571,7 +556,6 @@ if st.button("Antworten absenden"):
             trust_effect
         ]
 
-        # Header bei leerem Sheet setzen
         if not sheet.get_all_values():
             header = [
                 "user_id", "timestamp", "age_group", "contact_ki", "ki_frequency", "most_used_ki",
@@ -586,13 +570,7 @@ if st.button("Antworten absenden"):
             ]
             sheet.append_row(header)
 
-        # In Google Sheet schreiben
         sheet.append_row(row)
-
-        # Recommender sichtbar machen
-        st.session_state.antworten_abgesendet = True
-
         st.success("✅ Vielen Dank für deine Teilnahme! Deine Antworten wurden gespeichert.")
     except Exception as e:
         st.error(f"❌ Fehler beim Speichern der Antworten: {e}")
-
