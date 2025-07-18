@@ -508,7 +508,7 @@ if len(selected_titles) == 5:
             ax.legend()
             st.pyplot(fig_pca)
 
-    # === Nachbefragung: Bewertung der Erklärformate ===
+# === Nachbefragung: Bewertung der Erklärformate ===
 st.subheader("🗣️ Dein Feedback")
 
 # Bewertungsskala mit erklärenden Labels
@@ -518,18 +518,17 @@ rating = st.slider("Skala: 1 = gar nicht passend, 3 = mittelmäßig, 5 = sehr pa
 # Verständlichstes Erklärformat auswählen
 understanding = st.radio(
     "**Welche Erklärung war für dich am verständlichsten?**",
-    [ "Textuelle Erklärung","SHAP-Erklärung","Vektorraumerklärung"]
+    ["Textuelle Erklärung", "SHAP-Erklärung", "Vektorraumerklärung"]
 )
 
+# Vertrauen durch Erklärung
 st.markdown("**Hat die Erklärung dein Vertrauen in die KI-Empfehlung gestärkt?**")
 trust_effect = st.slider("Skala: 1 = gar nicht, 3 = neutral, 5 = sehr stark", 1, 5, 3)
-
 
 
 # === Feedback Speicherung via Google Sheets ===
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
-import streamlit as st
 
 # Verbindung zu Google Sheets via Streamlit Secrets (kein JSON-File nötig)
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
@@ -566,7 +565,7 @@ if st.button("Antworten absenden"):
             umfrage_data.get("aufgaben_kreativitaet", ""),
             umfrage_data.get("aufgaben_moral", ""),
             umfrage_data.get("aufgaben_verantwortung", ""),
-            umfrage_data.get("aufgaben_selbstlernen", ""), 
+            umfrage_data.get("aufgaben_selbstlernen", ""),
             umfrage_data.get("navigation_entscheidung", ""),
             umfrage_data.get("vertrauen_produkte", ""),
             umfrage_data.get("vertrauen_medizin", ""),
@@ -579,9 +578,9 @@ if st.button("Antworten absenden"):
             "; ".join(umfrage_data.get("app_einstellungen", [])),
             umfrage_data.get("ki_entscheidung", ""),
             umfrage_data.get("ki_unfaehigkeit", ""),
-            st.session_state.get("rating", ""),
-            st.session_state.get("understanding", ""),
-            st.session_state.get("trust_effect", "")
+            rating,
+            understanding,
+            trust_effect
         ]
 
         # Header bei leerem Sheet setzen
@@ -602,7 +601,7 @@ if st.button("Antworten absenden"):
         # In Google Sheet schreiben
         sheet.append_row(row)
 
-        # Status für Recommender setzen
+        # Recommender sichtbar machen
         st.session_state.antworten_abgesendet = True
 
         st.success("✅ Vielen Dank für deine Teilnahme! Deine Antworten wurden gespeichert.")
