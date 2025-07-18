@@ -47,9 +47,11 @@ st.markdown("---")
 st.subheader("1. Allgemeine Angaben")
 
 # 1.1 Alter
-age_group = st.selectbox("1.1 Wie alt sind Sie?", [
+st.markdown('<p style="font-size:16px"><b>1.1 Wie alt sind Sie?</b></p>', unsafe_allow_html=True)
+age_group = st.selectbox("", [
     "Unter 18", "18–24", "25–34", "35–44", "45–54", "55–64", "65 oder älter"
 ])
+
 
 # 1.2 Kontakt mit KI
 contact_ki = st.radio("1.2 Hatten Sie bereits persönlichen Kontakt mit KI-Systemen (z. B. Siri, ChatGPT, Alexa)?",
