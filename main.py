@@ -491,10 +491,22 @@ if len(selected_titles) == 5:
             ax.legend()
             st.pyplot(fig_pca)
 
-    st.subheader("\U0001F5E3️ Dein Feedback")
-    rating = st.slider("Wie gut passen die Empfehlungen?", 1, 5, 3)
-    understanding = st.radio("Welche Erklärung war für dich verständlicher?", ["Textuelle Erklärung", "SHAP", "Tabelle"])
-    transparency = st.radio("Wie wichtig ist dir Transparenz in KI?", ["Unwichtig", "Wichtig", "Sehr wichtig"])
+    # === Nachbefragung: Bewertung der Erklärformate ===
+st.subheader("🗣️ Dein Feedback")
+
+# Bewertungsskala mit erklärenden Labels
+st.markdown("**Wie gut passen die Empfehlungen zu deinem Geschmack?**")
+rating = st.slider("Skala: 1 = gar nicht passend, 3 = mittelmäßig, 5 = sehr passend", 1, 5, 3)
+
+# Verständlichstes Erklärformat auswählen
+understanding = st.radio(
+    "**Welche Erklärung war für dich am verständlichsten?**",
+    ["Vektorraumerklärung (Tabelle)", "SHAP-Erklärung", "Textuelle Erklärung"]
+)
+
+st.markdown("**Hat die Erklärung dein Vertrauen in die KI-Empfehlung gestärkt?**")
+trust_effect = st.slider("Skala: 1 = gar nicht, 3 = neutral, 5 = sehr stark", 1, 5, 3)
+
 
 
 # === Feedback Speicherung via Google Sheets ===
