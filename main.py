@@ -65,16 +65,38 @@ if contact_ki != "Nein, noch nie":
 most_used_ki = st.selectbox("1.4 Welches KI-System nutzen Sie am häufigsten?", [
     "ChatGPT (OpenAI)", "Claude (Anthropic)", "Google Gemini", "Microsoft Copilot", "Perplexity AI"
 ])
-
+#################################################################################
 # 1.5 Wichtigkeit verschiedener Eigenschaften
 st.markdown("**1.5 Was ist Ihnen besonders wichtig bei einem KI-System?**")
-treffgenauigkeit = st.slider("Treffgenauigkeit (passt gut zu meinem Geschmack)", 1, 5, 3)
-transparenz = st.slider("Transparenz & Erklärbarkeit (ich verstehe, warum etwas empfohlen wird)", 1, 5, 3)
-einfachheit = st.slider("Einfachheit / intuitive Bedienung", 1, 5, 3)
-zugänglichkeit = st.slider("Zugänglichkeit", 1, 5, 3)
-personalisierung = st.slider("Personalisierung (es passt zu mir als Person)", 1, 5, 3)
-datenschutz = st.slider("Datenschutz", 1, 5, 3)
+st.caption("Skala: 1 = unwichtig, 3 = neutral, 5 = sehr wichtig")
 
+treffgenauigkeit = st.slider(
+    "Treffgenauigkeit (passt gut zu meinem Geschmack)", 1, 5, 3,
+    help="1 = unwichtig, 3 = neutral, 5 = sehr wichtig"
+)
+transparenz = st.slider(
+    "Transparenz & Erklärbarkeit (ich verstehe, warum etwas empfohlen wird)", 1, 5, 3,
+    help="1 = unwichtig, 3 = neutral, 5 = sehr wichtig"
+)
+einfachheit = st.slider(
+    "Einfachheit / intuitive Bedienung", 1, 5, 3,
+    help="1 = unwichtig, 3 = neutral, 5 = sehr wichtig"
+)
+zugänglichkeit = st.slider(
+    "Zugänglichkeit", 1, 5, 3,
+    help="1 = unwichtig, 3 = neutral, 5 = sehr wichtig"
+)
+personalisierung = st.slider(
+    "Personalisierung (es passt zu mir als Person)", 1, 5, 3,
+    help="1 = unwichtig, 3 = neutral, 5 = sehr wichtig"
+)
+datenschutz = st.slider(
+    "Datenschutz", 1, 5, 3,
+    help="1 = unwichtig, 3 = neutral, 5 = sehr wichtig"
+)
+
+
+#################################################################################
 
 # 1.6 KI-Aktivitäten (Mehrfachauswahl)
 st.markdown("**1.6 Für welche der folgenden Aktivitäten verwenden Sie KI?**")
