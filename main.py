@@ -66,34 +66,21 @@ most_used_ki = st.selectbox("1.4 Welches KI-System nutzen Sie am häufigsten?", 
     "ChatGPT (OpenAI)", "Claude (Anthropic)", "Google Gemini", "Microsoft Copilot", "Perplexity AI"
 ])
 #################################################################################
-# 1.5 Wichtigkeit verschiedener Eigenschaften
+# === 1.5 Wichtigkeit verschiedener Eigenschaften ===
 st.markdown("**1.5 Was ist Ihnen besonders wichtig bei einem KI-System?**")
-st.caption("Skala: 1 = unwichtig, 3 = neutral, 5 = sehr wichtig")
+st.markdown(
+    "<div style='margin-bottom: 12px;'>"
+    "<b>Skala:</b> 1 = unwichtig  3 = neutral  5 = sehr wichtig"
+    "</div>",
+    unsafe_allow_html=True
+)
 
-treffgenauigkeit = st.slider(
-    "Treffgenauigkeit (passt gut zu meinem Geschmack)", 1, 5, 3,
-    help="1 = unwichtig, 3 = neutral, 5 = sehr wichtig"
-)
-transparenz = st.slider(
-    "Transparenz & Erklärbarkeit (ich verstehe, warum etwas empfohlen wird)", 1, 5, 3,
-    help="1 = unwichtig, 3 = neutral, 5 = sehr wichtig"
-)
-einfachheit = st.slider(
-    "Einfachheit / intuitive Bedienung", 1, 5, 3,
-    help="1 = unwichtig, 3 = neutral, 5 = sehr wichtig"
-)
-zugänglichkeit = st.slider(
-    "Zugänglichkeit", 1, 5, 3,
-    help="1 = unwichtig, 3 = neutral, 5 = sehr wichtig"
-)
-personalisierung = st.slider(
-    "Personalisierung (es passt zu mir als Person)", 1, 5, 3,
-    help="1 = unwichtig, 3 = neutral, 5 = sehr wichtig"
-)
-datenschutz = st.slider(
-    "Datenschutz", 1, 5, 3,
-    help="1 = unwichtig, 3 = neutral, 5 = sehr wichtig"
-)
+treffgenauigkeit = st.slider("Treffgenauigkeit (passt gut zu meinem Geschmack)", 1, 5, 3)
+transparenz = st.slider("Transparenz & Erklärbarkeit (ich verstehe, warum etwas empfohlen wird)", 1, 5, 3)
+einfachheit = st.slider("Einfachheit / intuitive Bedienung", 1, 5, 3)
+zugänglichkeit = st.slider("Zugänglichkeit", 1, 5, 3)
+personalisierung = st.slider("Personalisierung (es passt zu mir als Person)", 1, 5, 3)
+datenschutz = st.slider("Datenschutz", 1, 5, 3)
 
 
 #################################################################################
@@ -160,14 +147,16 @@ navigation_entscheidung = st.radio(
     ["Mach das sofort", "Zeig mir erst die Optionen", "Frag mich vorher", "Ich entscheide das lieber selbst"]
 )
 
-# 3.3 Vertrauensbereiche (Slider oder Auswahl)
 st.markdown("**3.3 Wem würden Sie in den folgenden Bereichen eher vertrauen?**")
-vertrauen_produkte = st.slider("Produktempfehlungen (z. B. Filme, Bücher)", 0, 10, 5, format="%d")
-vertrauen_medizin = st.slider("Medizinische Diagnosen", 0, 10, 5, format="%d")
-vertrauen_verkehr = st.slider("Im Straßenverkehr (z. B. Navigation)", 0, 10, 5, format="%d")
-vertrauen_finanz = st.slider("Finanzielle Beratung (z. B. Kreditwürdigkeit)", 0, 10, 5, format="%d")
-vertrauen_bildung = st.slider("Schule und Studium", 0, 10, 5, format="%d")
-vertrauen_kunst = st.slider("Kunst und Kreativität", 0, 10, 5, format="%d")
+st.markdown("_Skala: 0 = Mensch  10 = KI_")
+
+vertrauen_produkte = st.slider("Produktempfehlungen (z. B. Filme, Bücher)", 0, 10, 5)
+vertrauen_medizin = st.slider("Medizinische Diagnosen", 0, 10, 5)
+vertrauen_verkehr = st.slider("Im Straßenverkehr (z. B. Navigation)", 0, 10, 5)
+vertrauen_finanz = st.slider("Finanzielle Beratung (z. B. Kreditwürdigkeit)", 0, 10, 5)
+vertrauen_bildung = st.slider("Schule und Studium", 0, 10, 5)
+vertrauen_kunst = st.slider("Kunst und Kreativität", 0, 10, 5)
+
 
 # 3.4 Transparenzfrage (direkt)
 transparenz_vertrauen = st.radio(
