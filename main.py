@@ -54,20 +54,20 @@ age_group = st.selectbox("**1.1 Wie alt sind Sie?**", [
 
 
 # 1.2 Kontakt mit KI
-contact_ki = st.radio("1.2 Hatten Sie bereits persönlichen Kontakt mit KI-Systemen (z. B. Siri, ChatGPT, Alexa)?",
+contact_ki = st.radio("**1.2 Hatten Sie bereits persönlichen Kontakt mit KI-Systemen (z. B. Siri, ChatGPT, Alexa)?**",
                       ["Ja, regelmäßig", "Ja, gelegentlich", "Nein, noch nie"])
 
 
 # 1.3 Nutzungshäufigkeit (nur anzeigen, wenn vorheriger Kontakt)
 if contact_ki != "Nein, noch nie":
-    ki_frequency = st.radio("1.3 Wie häufig nutzen Sie KI-Systeme?",
+    ki_frequency = st.radio("**1.3 Wie häufig nutzen Sie KI-Systeme?**",
                              ["Nie", "Wöchentlich", "Monatlich", "Täglich"])
 
 # 1.4 Genutztes System
-most_used_ki = st.selectbox("1.4 Welches KI-System nutzen Sie am häufigsten?", [
+most_used_ki = st.selectbox("**1.4 Welches KI-System nutzen Sie am häufigsten?**", [
     "ChatGPT (OpenAI)", "Claude (Anthropic)", "Google Gemini", "Microsoft Copilot", "Perplexity AI"
 ])
-#################################################################################
+
 # === 1.5 Wichtigkeit verschiedener Eigenschaften ===
 st.markdown("**1.5 Was ist Ihnen besonders wichtig bei einem KI-System?**")
 st.markdown(
@@ -108,13 +108,13 @@ ki_aktivitaeten = st.multiselect(
 st.subheader("2. Mentale Vorstellungen")
 
 # 2.1 Freitext: Erklärung für ein Kind
-erklaerung_kind = st.text_area("2.1 Wie würden Sie einem Kind erklären, was eine KI ist?")
+erklaerung_kind = st.text_area("**2.1 Wie würden Sie einem Kind erklären, was eine KI ist?**")
 
 # 2.2 Freitext: Name für KI
-ki_name = st.text_input("2.2 Stellen Sie sich vor, Sie sprechen mit einer KI über ein persönliches Problem. Welchen Namen würden Sie dieser KI geben?")
+ki_name = st.text_input("**2.2 Stellen Sie sich vor, Sie sprechen mit einer KI über ein persönliches Problem. Welchen Namen würden Sie dieser KI geben?**")
 
 # 2.3 Vorstellungen über KI-Denken
-ki_verstaendnis = st.radio("2.3 Eine KI …", [
+ki_verstaendnis = st.radio("**2.3 Eine KI …**", [
     "denkt ähnlich wie ein Mensch",
     "verarbeitet nur Informationen, ohne zu denken",
     "imitiert Denken, versteht aber nichts",
@@ -122,7 +122,7 @@ ki_verstaendnis = st.radio("2.3 Eine KI …", [
 ])
 
 # 2.4 Wahrnehmung der KI
-ki_rollenbild = st.radio("2.4 Ein KI-System ist für mich …", [
+ki_rollenbild = st.radio("**2.4 Ein KI-System ist für mich …**", [
     "Wie ein Werkzeug – es macht nur, was ich eingebe",
     "Wie ein Assistent – es hilft, aber trifft keine eigenen Entscheidungen",
     "Wie ein Agent – es handelt eigenständig",
@@ -145,7 +145,7 @@ st.subheader("3. Kontrolle & Vertrauen")
 
 # 3.1 Szenario Navigationssystem
 navigation_entscheidung = st.radio(
-    "3.1 Ihr Navigationssystem erkennt plötzlich einen Stau und möchte automatisch eine neue Route wählen.",
+    "**3.1 Ihr Navigationssystem erkennt plötzlich einen Stau und möchte automatisch eine neue Route wählen.**",
     ["Mach das sofort", "Zeig mir erst die Optionen", "Frag mich vorher", "Ich entscheide das lieber selbst"]
 )
 
@@ -162,13 +162,13 @@ vertrauen_kunst = st.slider("Kunst und Kreativität", 0, 10, 5)
 
 # 3.4 Transparenzfrage (direkt)
 transparenz_vertrauen = st.radio(
-    "3.4 Würden Sie der KI ein höheres Vertrauen schenken, wenn die Entscheidung transparent dargelegt wird?",
+    "**3.4 Würden Sie der KI ein höheres Vertrauen schenken, wenn die Entscheidung transparent dargelegt wird?**",
     ["Ja, auf jeden Fall", "Ja, aber nur in bestimmten Bereichen", "Nein, die Erklärung ändert nichts", "Ich weiß es nicht"]
 )
 
 # 3.4 Szenario Online-Jobplattform
 job_szenario = st.radio(
-    "3.5 Sie nutzen eine Online-Plattform, die mithilfe von KI passende Jobangebote für Sie auswählt. Die Plattform schlägt Ihnen eine konkrete Stelle vor. Wie möchten Sie diese Empfehlung dargestellt bekommen?",
+    "**3.5 Sie nutzen eine Online-Plattform, die mithilfe von KI passende Jobangebote für Sie auswählt. Die Plattform schlägt Ihnen eine konkrete Stelle vor. Wie möchten Sie diese Empfehlung dargestellt bekommen?**",
     [
         "Die Stelle reicht mir, ich vertraue der Auswahl der KI.",
         "Ich möchte zusätzlich eine kurze Erklärung erhalten, z. B.: 'Diese Stelle wurde empfohlen, weil sie gut zu Ihren bisherigen Berufserfahrungen und Interessen passt.'",
@@ -179,7 +179,7 @@ job_szenario = st.radio(
 
 # 3.6 App-Einstellungen (Kontrollverhalten)
 app_einstellungen = st.multiselect(
-    "3.6 Welche Einstellungen würden Sie bei einer neuen KI-basierten App am ehesten anpassen?",
+    "**3.6 Welche Einstellungen würden Sie bei einer neuen KI-basierten App am ehesten anpassen?**",
     [
         "Benachrichtigungen anpassen",
         "Empfehlungsalgorithmus konfigurieren",
@@ -189,10 +189,10 @@ app_einstellungen = st.multiselect(
 )
 
 # === 4. Verständnis von KI-Entscheidungen und Nutzung ===
-st.subheader("4. Verständnis von KI-Entscheidungen und Nutzung")
+st.subheader("**4. Verständnis von KI-Entscheidungen und Nutzung**")
 
 ki_entscheidung = st.radio(
-    "Wie glauben Sie, trifft eine KI ihre Entscheidungen?",
+    "**Wie glauben Sie, trifft eine KI ihre Entscheidungen?**",
     [
         "Sie folgt Regeln, die Menschen ihr beigebracht haben",
         "Sie lernt selbstständig aus vielen Beispielen",
@@ -202,7 +202,7 @@ ki_entscheidung = st.radio(
 )
 
 ki_unfaehigkeit = st.radio(
-    "Wenn eine KI eine Aufgabe nicht lösen kann – woran liegt das Ihrer Meinung nach?",
+    "**Wenn eine KI eine Aufgabe nicht lösen kann – woran liegt das Ihrer Meinung nach?**",
     [
         "Sie kennt zu wenig Beispiele aus der Vergangenheit",
         "Sie versteht keine Regeln für diese Aufgabe",
