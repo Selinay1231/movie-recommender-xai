@@ -44,61 +44,159 @@ st.markdown("""
 
 st.markdown("---")
 
-# === Umfrageformular ===
 st.subheader("1. Allgemeine Angaben")
-age_group = st.selectbox("Wie alt sind Sie?", [
+
+# 1.1 Alter
+age_group = st.selectbox("1.1 Wie alt sind Sie?", [
     "Unter 18", "18–24", "25–34", "35–44", "45–54", "55–64", "65 oder älter"
 ])
-contact_ki = st.radio("Hatten Sie bereits persönlichen Kontakt mit KI-Systemen (z.B. Siri. ChatGPT, Alexa)?",
+
+# 1.2 Kontakt mit KI
+contact_ki = st.radio("1.2 Hatten Sie bereits persönlichen Kontakt mit KI-Systemen (z. B. Siri, ChatGPT, Alexa)?",
                       ["Ja, regelmäßig", "Ja, gelegentlich", "Nein, noch nie"])
 
+
+# 1.3 Nutzungshäufigkeit (nur anzeigen, wenn vorheriger Kontakt)
+if contact_ki != "Nein, noch nie":
+    ki_frequency = st.radio("1.3 Wie häufig nutzen Sie KI-Systeme?",
+                             ["Nie", "Wöchentlich", "Monatlich", "Täglich"])
+
+# 1.4 Genutztes System
+most_used_ki = st.selectbox("1.4 Welches KI-System nutzen Sie am häufigsten?", [
+    "ChatGPT (OpenAI)", "Claude (Anthropic)", "Google Gemini", "Microsoft Copilot", "Perplexity AI"
+])
+
+# 1.5 Wichtigkeit verschiedener Eigenschaften
+st.markdown("**1.5 Was ist Ihnen besonders wichtig bei einem KI-System?**")
+treffgenauigkeit = st.slider("Treffgenauigkeit (passt gut zu meinem Geschmack)", 1, 5, 3)
+transparenz = st.slider("Transparenz & Erklärbarkeit (ich verstehe, warum etwas empfohlen wird)", 1, 5, 3)
+einfachheit = st.slider("Einfachheit / intuitive Bedienung", 1, 5, 3)
+zugänglichkeit = st.slider("Zugänglichkeit", 1, 5, 3)
+personalisierung = st.slider("Personalisierung (es passt zu mir als Person)", 1, 5, 3)
+datenschutz = st.slider("Datenschutz", 1, 5, 3)
+
+
+# 1.6 KI-Aktivitäten (Mehrfachauswahl)
+st.markdown("**1.6 Für welche der folgenden Aktivitäten verwenden Sie KI?**")
+ki_aktivitaeten = st.multiselect(
+    "Mehrfachauswahl möglich",
+    [
+        "Informationsbeschaffung (anstatt zu googlen)",
+        "Ratschläge",
+        "Lösung von technischen Problemen",
+        "Vereinfachung von komplexen Inhalten",
+        "Schreiben von Texten",
+        "Übersetzen von Texten",
+        "Ideenfindung / Brainstorming",
+        "Planung & Strukturierung",
+        "Smalltalk / Unterhaltung"
+    ]
+)
+
+
 st.subheader("2. Mentale Vorstellungen")
-assoziation = st.text_input("Welcher Begriff fällt Ihnen spontan ein, wenn Sie 'Künstliche Intelligenz' hören?")
-geschlecht_vorstellung = st.radio("Wenn Sie an eine KI denken – stellen Sie sich diese eher weiblich, männlich oder neutral vor?",
-                                    ["Weiblich", "Männlich", "Neutral", "Keine Vorstellung"])
+
+# 2.1 Freitext: Erklärung für ein Kind
+erklaerung_kind = st.text_area("2.1 Wie würden Sie einem Kind erklären, was eine KI ist?")
+
+# 2.2 Freitext: Name für KI
+ki_name = st.text_input("2.2 Stellen Sie sich vor, Sie sprechen mit einer KI über ein persönliches Problem. Welchen Namen würden Sie dieser KI geben?")
+
+# 2.3 Vorstellungen über KI-Denken
+ki_verstaendnis = st.radio("2.3 Eine KI …", [
+    "denkt ähnlich wie ein Mensch",
+    "verarbeitet nur Informationen, ohne zu denken",
+    "imitiert Denken, versteht aber nichts",
+    "keins davon"
+])
+
+# 2.4 Wahrnehmung der KI
+ki_rollenbild = st.radio("2.4 Ein KI-System ist für mich …", [
+    "Wie ein Werkzeug – es macht nur, was ich eingebe",
+    "Wie ein Assistent – es hilft, aber trifft keine eigenen Entscheidungen",
+    "Wie ein Agent – es handelt eigenständig",
+    "keins davon"
+])
+
+# 2.5 Mensch vs. KI Aufgabenvergleich (Mehrfachauswahl möglich)
+st.markdown("**2.5 Wer würde die Aufgabe besser lösen (Mensch vs. KI)?**")
+aufgabenvergleich = {
+    "Emotionen erkennen": st.radio("Emotionen erkennen", ["Mensch", "KI"]),
+    "Menschen täuschend echt imitieren": st.radio("Menschen täuschend echt imitieren", ["Mensch", "KI"]),
+    "Kreativ sein": st.radio("Kreativ sein", ["Mensch", "KI"]),
+    "Moralisch handeln": st.radio("Moralisch handeln", ["Mensch", "KI"]),
+    "Verantwortung übernehmen": st.radio("Verantwortung übernehmen", ["Mensch", "KI"]),
+    "Selbst lernen ohne menschliche Hilfe": st.radio("Selbst lernen, ohne menschliche Hilfe", ["Mensch", "KI"]),
+    "Keines dieser Dinge": st.radio("Keines dieser Dinge", ["Mensch", "KI"])
+}
 
 st.subheader("3. Kontrolle & Vertrauen")
-kontrolleinstellung = st.radio("Würden Sie einer KI erlauben, Entscheidungen allein zu treffen – oder möchten Sie immer die Kontrolle behalten?",
-                                ["Nur mit vollständiger Erklärung und Zustimmung",
-                                 "Entscheidung kann automatisiert erfolgen, wenn ich zustimmen kann",
-                                 "Entscheidung darf allein von der KI getroffen werden",
-                                 "Keine klare Meinung"])
 
-wichtige_aspekte = st.multiselect(
-    "Was ist Ihnen bei Empfehlungen durch ein System besonders wichtig?",
+# 3.1 Szenario Navigationssystem
+navigation_entscheidung = st.radio(
+    "3.1 Ihr Navigationssystem erkennt plötzlich einen Stau und möchte automatisch eine neue Route wählen.",
+    ["Mach das sofort", "Zeig mir erst die Optionen", "Frag mich vorher", "Ich entscheide das lieber selbst"]
+)
+
+# 3.3 Vertrauensbereiche (Slider oder Auswahl)
+st.markdown("**3.3 Wem würden Sie in den folgenden Bereichen eher vertrauen?**")
+vertrauen_produkte = st.slider("Produktempfehlungen (z. B. Filme, Bücher)", 0, 10, 5, format="%d")
+vertrauen_medizin = st.slider("Medizinische Diagnosen", 0, 10, 5, format="%d")
+vertrauen_verkehr = st.slider("Im Straßenverkehr (z. B. Navigation)", 0, 10, 5, format="%d")
+vertrauen_finanz = st.slider("Finanzielle Beratung (z. B. Kreditwürdigkeit)", 0, 10, 5, format="%d")
+vertrauen_bildung = st.slider("Schule und Studium", 0, 10, 5, format="%d")
+vertrauen_kunst = st.slider("Kunst und Kreativität", 0, 10, 5, format="%d")
+
+# 3.4 Transparenzfrage (direkt)
+transparenz_vertrauen = st.radio(
+    "3.4 Würden Sie der KI ein höheres Vertrauen schenken, wenn die Entscheidung transparent dargelegt wird?",
+    ["Ja, auf jeden Fall", "Ja, aber nur in bestimmten Bereichen", "Nein, die Erklärung ändert nichts", "Ich weiß es nicht"]
+)
+
+# 3.4 Szenario Online-Jobplattform
+job_szenario = st.radio(
+    "3.5 Sie nutzen eine Online-Plattform, die mithilfe von KI passende Jobangebote für Sie auswählt. Die Plattform schlägt Ihnen eine konkrete Stelle vor. Wie möchten Sie diese Empfehlung dargestellt bekommen?",
     [
-        "Treffgenauigkeit (passt gut zu meinem Geschmack)",
-        "Erklärbarkeit (ich verstehe, warum etwas empfohlen wird)",
-        "Einfachheit / intuitive Bedienung",
-        "Personalisierung (es passt zu mir als Person)",
-        "Transparenz, wie Daten verwendet werden",
-        "Keine der genannten"
+        "Die Stelle reicht mir, ich vertraue der Auswahl der KI.",
+        "Ich möchte zusätzlich eine kurze Erklärung erhalten, z. B.: 'Diese Stelle wurde empfohlen, weil sie gut zu Ihren bisherigen Berufserfahrungen und Interessen passt.'",
+        "Kommt auf die Art des Jobs oder den Kontext an",
+        "Ich bin mir nicht sicher"
     ]
 )
 
-vertrauensbereiche = st.multiselect(
-    "In welchen Bereichen würden Sie Entscheidungen einer KI eher vertrauen?",
-    options=[
-        "Produktempfehlungen (z.B. Filme, Bücher)",
-        "Medizinische Diagnosen",
-        "Sprachassistenten und Smart-Home-Geräte (z.B. Alexa, Siri, Google Assistant)",
-        "Intelligente Fahrzeugsysteme (z.B. autonomes Fahren, Assistenzsysteme)",
-        "Finanzielle Beratung (z.B. Kreditwürdigkeit)",
-        "Schule, Studium oder Online-Lernen (z.B. adaptive Lernplattformen)",
-        "Kunst und Kreativität (z.B. KI-generierte Bilder oder Texte)",
-        "Keine der genannten"
+# 3.6 App-Einstellungen (Kontrollverhalten)
+app_einstellungen = st.multiselect(
+    "3.6 Welche Einstellungen würden Sie bei einer neuen KI-basierten App am ehesten anpassen?",
+    [
+        "Benachrichtigungen anpassen",
+        "Empfehlungsalgorithmus konfigurieren",
+        "Datenschutzeinstellungen überprüfen",
+        "Automatische Funktionen deaktivieren"
     ]
 )
 
-erklaerung_vertrauen = st.radio("Würden Sie der KI ein höheres Vertrauen schenken, wenn die Entscheidung transparent dargelegt wird?",
-                                 ["Ja, auf jeden Fall", "Ja, aber nur in bestimmten Bereichen",
-                                  "Nein, die Erklärung ändert nichts", "Ich weiß es nicht"])
+# === 4. Verständnis von KI-Entscheidungen und Nutzung ===
+st.subheader("4. Verständnis von KI-Entscheidungen und Nutzung")
 
-beeinflussung = st.slider("Wie wichtig ist es Ihnen, die Entscheidungen eines KI-Systems selbst beeinflussen oder korrigieren zu können?",
-                          1, 5, 3, format="%d")
+ki_entscheidung = st.radio(
+    "Wie glauben Sie, trifft eine KI ihre Entscheidungen?",
+    [
+        "Sie folgt Regeln, die Menschen ihr beigebracht haben",
+        "Sie lernt selbstständig aus vielen Beispielen",
+        "Sie ist einfach sehr schlau – sie weiß es irgendwie",
+        "Ich weiß es nicht"
+    ]
+)
 
-# === Absenden und Daten merken ===
-
+ki_unfaehigkeit = st.radio(
+    "Wenn eine KI eine Aufgabe nicht lösen kann – woran liegt das Ihrer Meinung nach?",
+    [
+        "Sie kennt zu wenig Beispiele aus der Vergangenheit",
+        "Sie versteht keine Regeln für diese Aufgabe",
+        "Sie kann nicht so leicht adaptieren / ihr fehlt die nötige Logik",
+        "Ich weiß es nicht"
+    ]
+)
 
 
 # === Absenden und Daten merken ===
@@ -111,11 +209,22 @@ if st.button("Umfrage abschließen und starten"):
         "contact_ki": contact_ki,
         "assoziation": assoziation,
         "geschlecht_ki": geschlecht_vorstellung,
-        "kontrolleinstellung": kontrolleinstellung,
-        "wichtig": "; ".join(wichtige_aspekte),
-        "vertrauen_bereich": "; ".join(vertrauensbereiche),
-        "erklaerung_einfluss": erklaerung_vertrauen,
-        "beeinflussung_wichtigkeit": beeinflussung
+
+        # Abschnitt 3: Kontrolle & Vertrauen
+        "navigation_entscheidung": navigation_entscheidung,
+        "vertrauen_produkte": vertrauen_produkte,
+        "vertrauen_medizin": vertrauen_medizin,
+        "vertrauen_verkehr": vertrauen_verkehr,
+        "vertrauen_finanz": vertrauen_finanz,
+        "vertrauen_bildung": vertrauen_bildung,
+        "vertrauen_kunst": vertrauen_kunst,
+        "transparenz_vertrauen": transparenz_vertrauen,
+        "job_szenario": job_szenario,
+        "app_einstellungen": "; ".join(app_einstellungen),
+
+        # Abschnitt 4: Verständnis von KI
+        "ki_entscheidung": ki_entscheidung,
+        "ki_unfaehigkeit": ki_unfaehigkeit
     }
     st.success("Vielen Dank! Du kannst jetzt deine personalisierte Empfehlung erhalten.")
     st.markdown("---")
