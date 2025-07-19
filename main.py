@@ -496,60 +496,88 @@ if st.session_state.get("umfrage_abgeschlossen", False):
                 ax.legend()
                 st.pyplot(fig_pca)
 
-        # === Nachbefragung ===
-        st.subheader("🗣️ Dein Feedback")
-        rating = st.slider("**Wie gut passen die Empfehlungen zu deinem Geschmack?**", 1, 5, 3)
-        understanding = st.radio("**Welche Erklärung war für dich am verständlichsten?**", ["Textuelle Erklärung", "SHAP-Erklärung", "Vektorraumerklärung"])
-        trust_effect = st.slider("**Hat die Erklärung dein Vertrauen in die KI-Empfehlung gestärkt?**", 1, 5, 3)
+# === Nachbefragung ===
+st.subheader("🗣️ Dein Feedback")
 
-        # === Button + Google Sheets Speicherung ===
-        if st.button("Antworten absenden"):
-            try:
-                import gspread
-                from oauth2client.service_account import ServiceAccountCredentials
-                scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-                creds = ServiceAccountCredentials.from_json_keyfile_dict(st.secrets["google_service_account"], scope)
-                client = gspread.authorize(creds)
-                sheet = client.open("KI_Umfrage_Responses").sheet1
+# Gesamtbewertung der Empfehlungen
+rating = st.slider("**Wie gut passen die Empfehlungen zu deinem Geschmack?**\n(1 = gar nicht, 5 = sehr gut)", 1, 5, 3)
 
-                umfrage_data = st.session_state.umfrage_data
-                row = [
-                    umfrage_data["user_id"], umfrage_data["timestamp"], umfrage_data["age_group"], umfrage_data["contact_ki"],
-                    umfrage_data.get("ki_frequency", ""), umfrage_data.get("most_used_ki", ""),
-                    umfrage_data.get("treffgenauigkeit", ""), umfrage_data.get("transparenz", ""),
-                    umfrage_data.get("einfachheit", ""), umfrage_data.get("zugänglichkeit", ""),
-                    umfrage_data.get("personalisierung", ""), umfrage_data.get("datenschutz", ""),
-                    "; ".join(umfrage_data.get("ki_aktivitaeten", [])),
-                    umfrage_data.get("erklaerung_kind", ""), umfrage_data.get("ki_name", ""),
-                    umfrage_data.get("ki_verstaendnis", ""), umfrage_data.get("ki_rollenbild", ""),
-                    umfrage_data.get("aufgaben_emotionen", ""), umfrage_data.get("aufgaben_imitieren", ""),
-                    umfrage_data.get("aufgaben_kreativitaet", ""), umfrage_data.get("aufgaben_moral", ""),
-                    umfrage_data.get("aufgaben_verantwortung", ""), umfrage_data.get("aufgaben_selbstlernen", ""),
-                    umfrage_data.get("navigation_entscheidung", ""), umfrage_data.get("vertrauen_produkte", ""),
-                    umfrage_data.get("vertrauen_medizin", ""), umfrage_data.get("vertrauen_verkehr", ""),
-                    umfrage_data.get("vertrauen_finanz", ""), umfrage_data.get("vertrauen_bildung", ""),
-                    umfrage_data.get("vertrauen_kunst", ""), umfrage_data.get("transparenz_vertrauen", ""),
-                    umfrage_data.get("job_szenario", ""), "; ".join(umfrage_data.get("app_einstellungen", [])),
-                    umfrage_data.get("ki_entscheidung", ""), umfrage_data.get("ki_unfaehigkeit", ""),
-                    rating, understanding, trust_effect
-                ]
+# Verständlichkeit je Erklärformat
+st.markdown("**Wie verständlich waren die einzelnen Erklärformate?**")
+understanding_text = st.slider("Textuelle Erklärung (1 = unverständlich, 5 = sehr verständlich)", 1, 5, 3)
+understanding_shap = st.slider("SHAP-Erklärung (1 = unverständlich, 5 = sehr verständlich)", 1, 5, 3)
+understanding_vector = st.slider("Vektorraumerklärung (1 = unverständlich, 5 = sehr verständlich)", 1, 5, 3)
 
-                if not sheet.get_all_values():
-                    header = [
-                        "user_id", "timestamp", "age_group", "contact_ki", "ki_frequency", "most_used_ki",
-                        "treffgenauigkeit", "transparenz", "einfachheit", "zugänglichkeit", "personalisierung", "datenschutz",
-                        "ki_aktivitaeten", "erklaerung_kind", "ki_name", "ki_verstaendnis", "ki_rollenbild",
-                        "aufgaben_emotionen", "aufgaben_imitieren", "aufgaben_kreativitaet", "aufgaben_moral",
-                        "aufgaben_verantwortung", "aufgaben_selbstlernen", "navigation_entscheidung", "vertrauen_produkte",
-                        "vertrauen_medizin", "vertrauen_verkehr", "vertrauen_finanz", "vertrauen_bildung",
-                        "vertrauen_kunst", "transparenz_vertrauen", "job_szenario", "app_einstellungen",
-                        "ki_entscheidung", "ki_unfaehigkeit", "bewertung_empfehlung", "verstaendlichkeit_erklaerung",
-                        "vertrauenseffekt"
-                    ]
-                    sheet.append_row(header)
+# Vertrauen je Erklärformat
+st.markdown("**Wie sehr haben die Erklärformate dein Vertrauen in die Empfehlung gestärkt?**")
+trust_text = st.slider("Textuelle Erklärung (1 = gar nicht, 5 = sehr stark)", 1, 5, 3)
+trust_shap = st.slider("SHAP-Erklärung (1 = gar nicht, 5 = sehr stark)", 1, 5, 3)
+trust_vector = st.slider("Vektorraumerklärung (1 = gar nicht, 5 = sehr stark)", 1, 5, 3)
 
-                sheet.append_row(row)
-                st.success("✅ Vielen Dank für deine Teilnahme! Deine Antworten wurden gespeichert.")
-            except Exception as e:
-                st.error(f"❌ Fehler beim Speichern der Antworten: {e}")
+# Vergleichsfrage: Beste Erklärung
+understanding_best = st.radio(
+    "**Welche Erklärung war für dich insgesamt am verständlichsten?**",
+    ["Textuelle Erklärung", "SHAP-Erklärung", "Vektorraumerklärung"]
+)
+
+# Begründung
+explanation_reason = st.text_area("💬 Möchtest du kurz erläutern, warum du dieses Format gewählt hast?")
+
+# === Button + Google Sheets Speicherung ===
+if st.button("Antworten absenden"):
+    try:
+        import gspread
+        from oauth2client.service_account import ServiceAccountCredentials
+        scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+        creds = ServiceAccountCredentials.from_json_keyfile_dict(st.secrets["google_service_account"], scope)
+        client = gspread.authorize(creds)
+        sheet = client.open("KI_Umfrage_Responses").sheet1
+
+        umfrage_data = st.session_state.umfrage_data
+        row = [
+            umfrage_data["user_id"], umfrage_data["timestamp"], umfrage_data["age_group"], umfrage_data["contact_ki"],
+            umfrage_data.get("ki_frequency", ""), umfrage_data.get("most_used_ki", ""),
+            umfrage_data.get("treffgenauigkeit", ""), umfrage_data.get("transparenz", ""),
+            umfrage_data.get("einfachheit", ""), umfrage_data.get("zugänglichkeit", ""),
+            umfrage_data.get("personalisierung", ""), umfrage_data.get("datenschutz", ""),
+            "; ".join(umfrage_data.get("ki_aktivitaeten", [])),
+            umfrage_data.get("erklaerung_kind", ""), umfrage_data.get("ki_name", ""),
+            umfrage_data.get("ki_verstaendnis", ""), umfrage_data.get("ki_rollenbild", ""),
+            umfrage_data.get("aufgaben_emotionen", ""), umfrage_data.get("aufgaben_imitieren", ""),
+            umfrage_data.get("aufgaben_kreativitaet", ""), umfrage_data.get("aufgaben_moral", ""),
+            umfrage_data.get("aufgaben_verantwortung", ""), umfrage_data.get("aufgaben_selbstlernen", ""),
+            umfrage_data.get("navigation_entscheidung", ""), umfrage_data.get("vertrauen_produkte", ""),
+            umfrage_data.get("vertrauen_medizin", ""), umfrage_data.get("vertrauen_verkehr", ""),
+            umfrage_data.get("vertrauen_finanz", ""), umfrage_data.get("vertrauen_bildung", ""),
+            umfrage_data.get("vertrauen_kunst", ""), umfrage_data.get("transparenz_vertrauen", ""),
+            umfrage_data.get("job_szenario", ""), "; ".join(umfrage_data.get("app_einstellungen", [])),
+            umfrage_data.get("ki_entscheidung", ""), umfrage_data.get("ki_unfaehigkeit", ""),
+            rating,
+            understanding_text, understanding_shap, understanding_vector,
+            trust_text, trust_shap, trust_vector,
+            understanding_best,
+            explanation_reason
+        ]
+
+        if not sheet.get_all_values():
+            header = [
+                "user_id", "timestamp", "age_group", "contact_ki", "ki_frequency", "most_used_ki",
+                "treffgenauigkeit", "transparenz", "einfachheit", "zugänglichkeit", "personalisierung", "datenschutz",
+                "ki_aktivitaeten", "erklaerung_kind", "ki_name", "ki_verstaendnis", "ki_rollenbild",
+                "aufgaben_emotionen", "aufgaben_imitieren", "aufgaben_kreativitaet", "aufgaben_moral",
+                "aufgaben_verantwortung", "aufgaben_selbstlernen", "navigation_entscheidung", "vertrauen_produkte",
+                "vertrauen_medizin", "vertrauen_verkehr", "vertrauen_finanz", "vertrauen_bildung",
+                "vertrauen_kunst", "transparenz_vertrauen", "job_szenario", "app_einstellungen",
+                "ki_entscheidung", "ki_unfaehigkeit", "bewertung_empfehlung",
+                "verstaendlichkeit_text", "verstaendlichkeit_shap", "verstaendlichkeit_vector",
+                "vertrauen_text", "vertrauen_shap", "vertrauen_vector",
+                "beste_erklaerung", "begruendung"
+            ]
+            sheet.append_row(header)
+
+        sheet.append_row(row)
+        st.success("✅ Vielen Dank für deine Teilnahme! Deine Antworten wurden gespeichert.")
+    except Exception as e:
+        st.error(f"❌ Fehler beim Speichern der Antworten: {e}")
+
 
