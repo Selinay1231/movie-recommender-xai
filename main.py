@@ -137,7 +137,6 @@ ki_rollenbild = st.radio("**2.4 Ein KI-System ist für mich …**", [
 st.markdown("**2.5 Wer würde die Aufgabe besser lösen (Mensch vs. KI)?**")
 aufgabenvergleich = {
     "Emotionen erkennen": st.radio("Emotionen erkennen", ["Mensch", "KI"]),
-    "Menschen täuschend echt imitieren": st.radio("Menschen täuschend echt imitieren", ["Mensch", "KI"]),
     "Kreativ sein": st.radio("Kreativ sein", ["Mensch", "KI"]),
     "Moralisch handeln": st.radio("Moralisch handeln", ["Mensch", "KI"]),
     "Verantwortung übernehmen": st.radio("Verantwortung übernehmen", ["Mensch", "KI"]),
@@ -237,7 +236,6 @@ if st.button("Vorumfrage abschließen und Recommender starten"):
         "ki_verstaendnis": ki_verstaendnis,
         "ki_rollenbild": ki_rollenbild,
         "aufgaben_emotionen": aufgabenvergleich.get("Emotionen erkennen", ""),
-        "aufgaben_imitieren": aufgabenvergleich.get("Menschen täuschend echt imitieren", ""),
         "aufgaben_kreativitaet": aufgabenvergleich.get("Kreativ sein", ""),
         "aufgaben_moral": aufgabenvergleich.get("Moralisch handeln", ""),
         "aufgaben_verantwortung": aufgabenvergleich.get("Verantwortung übernehmen", ""),
@@ -543,7 +541,6 @@ if st.session_state.get("umfrage_abgeschlossen", False):
                     "; ".join(umfrage_data.get("ki_aktivitaeten", [])),
                     umfrage_data.get("erklaerung_kind", ""), umfrage_data.get("ki_name", ""),
                     umfrage_data.get("ki_verstaendnis", ""), umfrage_data.get("ki_rollenbild", ""),
-                    umfrage_data.get("aufgaben_emotionen", ""), umfrage_data.get("aufgaben_imitieren", ""),
                     umfrage_data.get("aufgaben_kreativitaet", ""), umfrage_data.get("aufgaben_moral", ""),
                     umfrage_data.get("aufgaben_verantwortung", ""), umfrage_data.get("aufgaben_selbstlernen", ""),
                     umfrage_data.get("navigation_entscheidung", ""), umfrage_data.get("vertrauen_produkte", ""),
@@ -564,7 +561,7 @@ if st.session_state.get("umfrage_abgeschlossen", False):
                         "user_id", "timestamp", "age_group", "contact_ki", "ki_frequency", "most_used_ki",
                         "treffgenauigkeit", "transparenz", "einfachheit", "zugänglichkeit", "personalisierung", "datenschutz",
                         "ki_aktivitaeten", "erklaerung_kind", "ki_name", "ki_verstaendnis", "ki_rollenbild",
-                        "aufgaben_emotionen", "aufgaben_imitieren", "aufgaben_kreativitaet", "aufgaben_moral",
+                        "aufgaben_emotionen", "aufgaben_kreativitaet", "aufgaben_moral",
                         "aufgaben_verantwortung", "aufgaben_selbstlernen", "navigation_entscheidung", "vertrauen_produkte",
                         "vertrauen_medizin", "vertrauen_verkehr", "vertrauen_finanz", "vertrauen_bildung",
                         "vertrauen_kunst", "transparenz_vertrauen", "job_szenario", "app_einstellungen",
