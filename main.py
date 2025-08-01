@@ -477,11 +477,11 @@ if st.session_state.get("umfrage_abgeschlossen", False):
                         st.markdown(f"<i>{explanation}</i>", unsafe_allow_html=True)
         
                     elif explanation_type == "shap":
-                        st.markdown(" <b>SHAP-Visualisierung</b>", unsafe_allow_html=True)
-                        movie_index = movies[movies["movieId"] == row["movieId"]].index[0]
+                        st.markdown("<b>SHAP-Visualisierung</b>", unsafe_allow_html=True)
                         fig, ax = plt.subplots()
-                        shap.plots.bar(shap_values[movie_index], max_display=5, show=False)
+                        shap.plots.bar(shap_values[i], max_display=5, show=False)
                         st.pyplot(fig)
+
         
                     elif explanation_type == "vector":
                         st.markdown(" <b>Vektorraum-Erklärung</b>", unsafe_allow_html=True)
