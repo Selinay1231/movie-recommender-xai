@@ -456,33 +456,28 @@ if "explanation_order" not in st.session_state:
     st.session_state.explanation_order = order_options[rotation_index]
 
 st.subheader("🎯 Deine Filmempfehlungen")
-api_key = st.secrets["TMDB_API_KEY"]
+        api_key = st.secrets["TMDB_API_KEY"]
 
-for i, (_, row) in enumerate(top_movies.iterrows()):
-    col1, col2 = st.columns([1, 3])
-    with col1:
-        poster_url = get_movie_poster(clean_title(row["title"]), api_key)
-        st.image(poster_url if poster_url else "https://via.placeholder.com/120x180.png?text=No+Image", width=300)
+        for i, (_, row) in enumerate(top_movies.iterrows()):
+            col1, col2 = st.columns([1, 3])
+            with col1:
+                poster_url = get_movie_poster(clean_title(row["title"]), api_key)
+                st.image(poster_url if poster_url else "https://via.placeholder.com/120x180.png?text=No+Image", width=300)
 
-    with col2:
-        st.markdown(f"<h4 style='margin-bottom:0.2em'>{row['title']}</h4>", unsafe_allow_html=True)
-
-        for explanation_type in st.session_state.explanation_order:
-            if explanation_type == "text":
-                st.markdown("🧠 <b>Textuelle Erklärung</b>", unsafe_allow_html=True)
+            with col2:
+                st.markdown(f"<h4 style='margin-bottom:0.2em'>{row['title']}</h4>", unsafe_allow_html=True)
+                st.markdown("🧠 <b>1. Textuelle Erklärung</b>", unsafe_allow_html=True)
                 explanation = generate_text_explanation(row, tags_selected)
                 st.markdown(f"<i>{explanation}</i>", unsafe_allow_html=True)
                 st.markdown("<div style='margin-top: 50px'></div>", unsafe_allow_html=True)
 
-            elif explanation_type == "shap":
-                st.markdown("🧠 <b>SHAP-Visualisierung</b>", unsafe_allow_html=True)
+                st.markdown("🧠 <b>2. SHAP-Visualisierung</b>", unsafe_allow_html=True)
                 fig, ax = plt.subplots()
                 shap.plots.bar(shap_values[i], max_display=5, show=False)
                 st.pyplot(fig)
                 st.markdown("<div style='margin-top: 50px'></div>", unsafe_allow_html=True)
 
-            elif explanation_type == "vector":
-                st.markdown("🧠 <b>Vektorraum-Erklärung</b>", unsafe_allow_html=True)
+                st.markdown("🧠 <b>3. Vektorraum-Erklärung</b>", unsafe_allow_html=True)
                 from sklearn.decomposition import PCA
                 pca = PCA(n_components=2)
                 X_pca = pca.fit_transform(X_shap.values)
@@ -503,7 +498,8 @@ for i, (_, row) in enumerate(top_movies.iterrows()):
                 ax.set_title("Position der Empfehlung im Merkmalsraum")
                 ax.legend()
                 st.pyplot(fig_pca)
-                st.markdown("<div style='margin-top: 50px'></div>", unsafe_allow_html=True)
+
+
 
                         # === Nachbefragung ===
         st.markdown("---")
