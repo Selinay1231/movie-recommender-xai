@@ -459,11 +459,13 @@ if st.session_state.get("umfrage_abgeschlossen", False):
                 st.markdown("🧠 <b>1. Textuelle Erklärung</b>", unsafe_allow_html=True)
                 explanation = generate_text_explanation(row, tags_selected)
                 st.markdown(f"<i>{explanation}</i>", unsafe_allow_html=True)
+                st.markdown("<div style='margin-top: 25px'></div>", unsafe_allow_html=True)
 
                 st.markdown("🧠 <b>2. SHAP-Visualisierung</b>", unsafe_allow_html=True)
                 fig, ax = plt.subplots()
                 shap.plots.bar(shap_values[i], max_display=5, show=False)
                 st.pyplot(fig)
+                st.markdown("<div style='margin-top: 25px'></div>", unsafe_allow_html=True)
 
                 st.markdown("🧠 <b>3. Vektorraum-Erklärung</b>", unsafe_allow_html=True)
                 from sklearn.decomposition import PCA
