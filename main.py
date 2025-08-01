@@ -162,15 +162,9 @@ vertrauen_bildung = st.slider("Schule und Studium", 0, 10, 5)
 vertrauen_kunst = st.slider("Kunst und Kreativität", 0, 10, 5)
 
 
-# 3.4 Transparenzfrage (direkt)
-transparenz_vertrauen = st.radio(
-    "**3.4 Würden Sie der KI ein höheres Vertrauen schenken, wenn die Entscheidung transparent dargelegt wird?**",
-    ["Ja, auf jeden Fall", "Ja, aber nur in bestimmten Bereichen", "Nein, die Erklärung ändert nichts", "Ich weiß es nicht"]
-)
-
 # 3.4 Szenario Online-Jobplattform
 job_szenario = st.radio(
-    "**3.5 Sie nutzen eine Online-Plattform, die mithilfe von KI passende Jobangebote für Sie auswählt. Die Plattform schlägt Ihnen eine konkrete Stelle vor. Wie möchten Sie diese Empfehlung dargestellt bekommen?**",
+    "**3.4 Sie nutzen eine Online-Plattform, die mithilfe von KI passende Jobangebote für Sie auswählt. Die Plattform schlägt Ihnen eine konkrete Stelle vor. Wie möchten Sie diese Empfehlung dargestellt bekommen?**",
     [
         "Die Stelle reicht mir, ich vertraue der Auswahl der KI.",
         "Ich möchte zusätzlich eine kurze Erklärung erhalten, z. B.: 'Diese Stelle wurde empfohlen, weil sie gut zu Ihren bisherigen Berufserfahrungen und Interessen passt.'",
@@ -179,7 +173,7 @@ job_szenario = st.radio(
     ]
 )
 
-# 3.6 App-Einstellungen (Kontrollverhalten)
+# 3.5 App-Einstellungen (Kontrollverhalten)
 app_einstellungen = st.multiselect(
     "**3.6 Welche Einstellungen würden Sie bei einer neuen KI-basierten App am ehesten anpassen?**",
     [
@@ -247,7 +241,6 @@ if st.button("Vorumfrage abschließen und Recommender starten"):
         "vertrauen_finanz": vertrauen_finanz,
         "vertrauen_bildung": vertrauen_bildung,
         "vertrauen_kunst": vertrauen_kunst,
-        "transparenz_vertrauen": transparenz_vertrauen,
         "job_szenario": job_szenario,
         "app_einstellungen": app_einstellungen,
         "ki_entscheidung": ki_entscheidung,
@@ -546,7 +539,7 @@ if st.session_state.get("umfrage_abgeschlossen", False):
                     umfrage_data.get("navigation_entscheidung", ""), umfrage_data.get("vertrauen_produkte", ""),
                     umfrage_data.get("vertrauen_medizin", ""), umfrage_data.get("vertrauen_verkehr", ""),
                     umfrage_data.get("vertrauen_finanz", ""), umfrage_data.get("vertrauen_bildung", ""),
-                    umfrage_data.get("vertrauen_kunst", ""), umfrage_data.get("transparenz_vertrauen", ""),
+                    umfrage_data.get("vertrauen_kunst", ""), 
                     umfrage_data.get("job_szenario", ""), "; ".join(umfrage_data.get("app_einstellungen", [])),
                     umfrage_data.get("ki_entscheidung", ""), umfrage_data.get("ki_unfaehigkeit", ""),
                     rating,
@@ -564,7 +557,7 @@ if st.session_state.get("umfrage_abgeschlossen", False):
                         "aufgaben_emotionen", "aufgaben_kreativitaet", "aufgaben_moral",
                         "aufgaben_verantwortung", "aufgaben_selbstlernen", "navigation_entscheidung", "vertrauen_produkte",
                         "vertrauen_medizin", "vertrauen_verkehr", "vertrauen_finanz", "vertrauen_bildung",
-                        "vertrauen_kunst", "transparenz_vertrauen", "job_szenario", "app_einstellungen",
+                        "vertrauen_kunst", "job_szenario", "app_einstellungen",
                         "ki_entscheidung", "ki_unfaehigkeit", "bewertung_empfehlung",
                         "verstaendlichkeit_text", "verstaendlichkeit_shap", "verstaendlichkeit_vector",
                         "vertrauen_text", "vertrauen_shap", "vertrauen_vector",
