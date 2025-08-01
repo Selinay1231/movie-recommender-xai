@@ -491,7 +491,7 @@ if st.session_state.get("umfrage_abgeschlossen", False):
         st.subheader("🗣️ Dein Feedback")
 
         # Gesamtbewertung der Empfehlungen
-        rating = st.slider("**Wie gut passen die Empfehlungen zu deinem Geschmack?**\n(1 = gar nicht, 5 = sehr gut)", 1, 5, 3)
+        rating = st.slider("**Wie gut passen die empfohlenen Filme – soweit du sie kennst – zu deinem Geschmack?**\n(1 = gar nicht, 5 = sehr gut)", 1, 5, 3)
 
         # Verständlichkeit je Erklärformat
         st.markdown("**Wie verständlich waren die einzelnen Erklärformate?**")
