@@ -487,7 +487,7 @@ for _, row in top_movies.iterrows():
                 st.pyplot(fig)
 
             elif explanation_type == "vector":
-                st.markdown("\ud83e\udde0 <b>Vektorraum-Erklärung</b>", unsafe_allow_html=True)
+                st.markdown("🧠 <b>Vektorraum-Erklärung</b>", unsafe_allow_html=True)
                 from sklearn.decomposition import PCA
                 pca = PCA(n_components=2)
                 X_pca = pca.fit_transform(X_shap.values)
