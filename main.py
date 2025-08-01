@@ -233,7 +233,7 @@ if st.button("Vorumfrage abschließen und Recommender starten"):
         "aufgaben_kreativitaet": aufgabenvergleich.get("Kreativ sein", ""),
         "aufgaben_moral": aufgabenvergleich.get("Moralisch handeln", ""),
         "aufgaben_verantwortung": aufgabenvergleich.get("Verantwortung übernehmen", ""),
-        "aufgaben_selbstlernen": aufgabenvergleich.get("Selbst lernen, ohne menschliche Hilfe", ""),
+        "aufgaben_selbstlernen": aufgabenvergleich.get("Selbst lernen ohne menschliche Hilfe", ""),
         "navigation_entscheidung": navigation_entscheidung,
         "vertrauen_produkte": vertrauen_produkte,
         "vertrauen_medizin": vertrauen_medizin,
