@@ -472,7 +472,7 @@ if st.session_state.get("umfrage_abgeschlossen", False):
         
                 for explanation_type in st.session_state.explanation_order:
                     if explanation_type == "text":
-                        st.markdown("\ud83e\udde0 <b>Textuelle Erklärung</b>", unsafe_allow_html=True)
+                        st.markdown(" <b>Textuelle Erklärung</b>", unsafe_allow_html=True)
                         explanation = generate_text_explanation(row, tags_selected)
                         st.markdown(f"<i>{explanation}</i>", unsafe_allow_html=True)
         
