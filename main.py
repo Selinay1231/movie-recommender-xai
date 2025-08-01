@@ -455,39 +455,37 @@ if st.session_state.get("umfrage_abgeschlossen", False):
                 st.image(poster_url if poster_url else "https://via.placeholder.com/120x180.png?text=No+Image", width=300)
 
             with col2:
-                for idx, explanation in enumerate(st.session_state.explanation_order):
-                    st.markdown(f"🧠 <b>{idx + 1}. {explanation.capitalize()}-Erklärung</b>", unsafe_allow_html=True)
-                
-                    if explanation == "text":
-                        explanation_text = generate_text_explanation(row, tags_selected)
-                        st.markdown(f"<i>{explanation_text}</i>", unsafe_allow_html=True)
-                
-                    elif explanation == "shap":
-                        fig, ax = plt.subplots()
-                        shap.plots.bar(shap_values[i], max_display=5, show=False)
-                        st.pyplot(fig)
-                
-                    elif explanation == "vector":
-                        from sklearn.decomposition import PCA
-                        pca = PCA(n_components=2)
-                        X_pca = pca.fit_transform(X_shap.values)
-                        pca_df = pd.DataFrame(X_pca, columns=["PC1", "PC2"])
-                        pca_df["movieId"] = movies["movieId"].values
-                        pca_df["selected"] = pca_df["movieId"].isin(selected_ids)
-                        pca_df["recommended"] = pca_df["movieId"] == row["movieId"]
-                        user_point = (
-                            pca_df[pca_df["selected"]]["PC1"].mean(),
-                            pca_df[pca_df["selected"]]["PC2"].mean()
-                        )
-                
-                        fig_pca, ax = plt.subplots()
-                        ax.scatter(pca_df["PC1"], pca_df["PC2"], color="lightgray", alpha=0.3, label="Andere Filme")
-                        ax.scatter(pca_df[pca_df["selected"]]["PC1"], pca_df[pca_df["selected"]]["PC2"], color="blue", label="Ausgewählte Filme")
-                        ax.scatter(pca_df[pca_df["recommended"]]["PC1"], pca_df[pca_df["recommended"]]["PC2"], color="green", label="Diese Empfehlung")
-                        ax.scatter(user_point[0], user_point[1], color="red", marker="x", s=100, label="Nutzerprofil")
-                        ax.set_title("Position der Empfehlung im Merkmalsraum")
-                        ax.legend()
-                        st.pyplot(fig_pca)
+                st.markdown(f"<h4 style='margin-bottom:0.2em'>{row['title']}</h4>", unsafe_allow_html=True)
+                st.markdown("🧠 <b>1. Textuelle Erklärung</b>", unsafe_allow_html=True)
+                explanation = generate_text_explanation(row, tags_selected)
+                st.markdown(f"<i>{explanation}</i>", unsafe_allow_html=True)
+
+                st.markdown("🧠 <b>2. SHAP-Visualisierung</b>", unsafe_allow_html=True)
+                fig, ax = plt.subplots()
+                shap.plots.bar(shap_values[i], max_display=5, show=False)
+                st.pyplot(fig)
+
+                st.markdown("🧠 <b>3. Vektorraum-Erklärung</b>", unsafe_allow_html=True)
+                from sklearn.decomposition import PCA
+                pca = PCA(n_components=2)
+                X_pca = pca.fit_transform(X_shap.values)
+                pca_df = pd.DataFrame(X_pca, columns=["PC1", "PC2"])
+                pca_df["movieId"] = movies["movieId"].values
+                pca_df["selected"] = pca_df["movieId"].isin(selected_ids)
+                pca_df["recommended"] = pca_df["movieId"] == row["movieId"]
+                user_point = (
+                    pca_df[pca_df["selected"]]["PC1"].mean(),
+                    pca_df[pca_df["selected"]]["PC2"].mean()
+                )
+
+                fig_pca, ax = plt.subplots()
+                ax.scatter(pca_df["PC1"], pca_df["PC2"], color="lightgray", alpha=0.3, label="Andere Filme")
+                ax.scatter(pca_df[pca_df["selected"]]["PC1"], pca_df[pca_df["selected"]]["PC2"], color="blue", label="Ausgewählte Filme")
+                ax.scatter(pca_df[pca_df["recommended"]]["PC1"], pca_df[pca_df["recommended"]]["PC2"], color="green", label="Diese Empfehlung")
+                ax.scatter(user_point[0], user_point[1], color="red", marker="x", s=100, label="Nutzerprofil")
+                ax.set_title("Position der Empfehlung im Merkmalsraum")
+                ax.legend()
+                st.pyplot(fig_pca)
                         # === Nachbefragung ===
         st.markdown("---")
         st.subheader("🗣️ Dein Feedback")
@@ -525,22 +523,6 @@ if st.session_state.get("umfrage_abgeschlossen", False):
                 creds = ServiceAccountCredentials.from_json_keyfile_dict(st.secrets["google_service_account"], scope)
                 client = gspread.authorize(creds)
                 sheet = client.open("KI_Umfrage_Responses").sheet1
-
-                # Position des aktuellen Nutzers für rotierende Erklärreihenfolge bestimmen
-                existing_rows = sheet.get_all_values()
-                num_existing_users = len(existing_rows) - 1 if existing_rows else 0  # -1 wegen Header
-                block_type = num_existing_users % 3
-                
-                if block_type == 0:
-                    explanation_order = ["text", "shap", "vector"]
-                elif block_type == 1:
-                    explanation_order = ["shap", "vector", "text"]
-                elif block_type == 2:
-                    explanation_order = ["vector", "text", "shap"]
-                
-                # In Session speichern
-                st.session_state.explanation_order = explanation_order
-
 
                 umfrage_data = st.session_state.umfrage_data
                 row = [
@@ -588,5 +570,4 @@ if st.session_state.get("umfrage_abgeschlossen", False):
             except Exception as e:
                 st.error(f"❌ Fehler beim Speichern der Antworten: {e}")
 
-            
 
