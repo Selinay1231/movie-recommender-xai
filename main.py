@@ -445,9 +445,6 @@ if st.session_state.get("umfrage_abgeschlossen", False):
         explainer = shap.Explainer(model, X_shap)
         shap_values = explainer(X_shap)
 
-        st.subheader("🎯 Deine Filmempfehlungen")
-        api_key = st.secrets["TMDB_API_KEY"]
-
 
         # Voraussetzung: st.session_state.user_id ist gesetzt
         # Diese Logik bitte früh im Skript einfügen (vor der Film-Empfehlung)
@@ -480,14 +477,14 @@ if st.session_state.get("umfrage_abgeschlossen", False):
                         st.markdown(f"<i>{explanation}</i>", unsafe_allow_html=True)
         
                     elif explanation_type == "shap":
-                        st.markdown("\ud83e\udde0 <b>SHAP-Visualisierung</b>", unsafe_allow_html=True)
+                        st.markdown(" <b>SHAP-Visualisierung</b>", unsafe_allow_html=True)
                         movie_index = movies[movies["movieId"] == row["movieId"]].index[0]
                         fig, ax = plt.subplots()
                         shap.plots.bar(shap_values[movie_index], max_display=5, show=False)
                         st.pyplot(fig)
         
                     elif explanation_type == "vector":
-                        st.markdown("🧠 <b>Vektorraum-Erklärung</b>", unsafe_allow_html=True)
+                        st.markdown(" <b>Vektorraum-Erklärung</b>", unsafe_allow_html=True)
                         from sklearn.decomposition import PCA
                         pca = PCA(n_components=2)
                         X_pca = pca.fit_transform(X_shap.values)
