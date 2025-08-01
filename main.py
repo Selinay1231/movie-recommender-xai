@@ -175,7 +175,7 @@ job_szenario = st.radio(
 
 # 3.5 App-Einstellungen (Kontrollverhalten)
 app_einstellungen = st.multiselect(
-    "**3.6 Welche Einstellungen würden Sie bei einer neuen KI-basierten App am ehesten anpassen?**",
+    "**3.5 Welche Einstellungen würden Sie bei einer neuen KI-basierten App am ehesten anpassen?**",
     [
         "Benachrichtigungen anpassen",
         "Empfehlungsalgorithmus konfigurieren",
