@@ -140,7 +140,7 @@ aufgabenvergleich = {
     "Kreativ sein": st.radio("Kreativ sein", ["Mensch", "KI"]),
     "Moralisch handeln": st.radio("Moralisch handeln", ["Mensch", "KI"]),
     "Verantwortung übernehmen": st.radio("Verantwortung übernehmen", ["Mensch", "KI"]),
-    "Selbst lernen ohne menschliche Hilfe": st.radio("Selbst lernen, ohne menschliche Hilfe", ["Mensch", "KI"]),
+    "Selbst lernen, ohne menschliche Hilfe": st.radio("Selbst lernen, ohne menschliche Hilfe", ["Mensch", "KI"]),
 }
 
 st.subheader("3. Kontrolle & Vertrauen")
