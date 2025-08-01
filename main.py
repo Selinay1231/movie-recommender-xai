@@ -472,19 +472,19 @@ if st.session_state.get("umfrage_abgeschlossen", False):
         
                 for explanation_type in st.session_state.explanation_order:
                     if explanation_type == "text":
-                        st.markdown(" <h2>Textuelle Erklärung</b>", unsafe_allow_html=True)
+                        st.markdown(" <h1>Textuelle Erklärung</b>", unsafe_allow_html=True)
                         explanation = generate_text_explanation(row, tags_selected)
                         st.markdown(f"<i>{explanation}</i>", unsafe_allow_html=True)
         
                     elif explanation_type == "shap":
-                        st.markdown("<b>SHAP-Visualisierung</b>", unsafe_allow_html=True)
+                        st.markdown("<h1>SHAP-Visualisierung</b>", unsafe_allow_html=True)
                         fig, ax = plt.subplots()
                         shap.plots.bar(shap_values[i], max_display=5, show=False)
                         st.pyplot(fig)
 
         
                     elif explanation_type == "vector":
-                        st.markdown(" <b>Vektorraum-Erklärung</b>", unsafe_allow_html=True)
+                        st.markdown(" <h1>Vektorraum-Erklärung</b>", unsafe_allow_html=True)
                         from sklearn.decomposition import PCA
                         pca = PCA(n_components=2)
                         X_pca = pca.fit_transform(X_shap.values)
