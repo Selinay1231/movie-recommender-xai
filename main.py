@@ -460,7 +460,7 @@ if st.session_state.get("umfrage_abgeschlossen", False):
         st.subheader("🌟 Deine Filmempfehlungen")
         api_key = st.secrets["TMDB_API_KEY"]
         
-        for _, row in top_movies.iterrows():
+        for i, (_, row) in enumerate(top_movies.iterrows()):
             col1, col2 = st.columns([1, 3])
         
             with col1:
