@@ -445,19 +445,24 @@ if st.session_state.get("umfrage_abgeschlossen", False):
         explainer = shap.Explainer(model, X_shap)
         shap_values = explainer(X_shap)
 
- # Erklärungstypen rotieren je nach User-ID
+        st.subheader("🎯 Deine Filmempfehlungen")
+        api_key = st.secrets["TMDB_API_KEY"]
+
+
+##############################################################
+# Reihenfolge der Erklärformate rotieren je nach User-ID
 if "explanation_order" not in st.session_state:
     order_options = [
         ["text", "shap", "vector"],
         ["shap", "vector", "text"],
         ["vector", "text", "shap"]
     ]
-    rotation_index = int(st.session_state.user_id[-2:], 16) % 3
+    rotation_index = int(st.session_state.user_id[-2:], 16) % 3  # letzte 2 Zeichen in int umwandeln
     st.session_state.explanation_order = order_options[rotation_index]
+##############################################################
 
-st.subheader("🎯 Deine Filmempfehlungen")
-        api_key = st.secrets["TMDB_API_KEY"]
 
+        
         for i, (_, row) in enumerate(top_movies.iterrows()):
             col1, col2 = st.columns([1, 3])
             with col1:
@@ -465,41 +470,40 @@ st.subheader("🎯 Deine Filmempfehlungen")
                 st.image(poster_url if poster_url else "https://via.placeholder.com/120x180.png?text=No+Image", width=300)
 
             with col2:
-                st.markdown(f"<h4 style='margin-bottom:0.2em'>{row['title']}</h4>", unsafe_allow_html=True)
-                st.markdown("🧠 <b>1. Textuelle Erklärung</b>", unsafe_allow_html=True)
-                explanation = generate_text_explanation(row, tags_selected)
-                st.markdown(f"<i>{explanation}</i>", unsafe_allow_html=True)
-                st.markdown("<div style='margin-top: 50px'></div>", unsafe_allow_html=True)
-
-                st.markdown("🧠 <b>2. SHAP-Visualisierung</b>", unsafe_allow_html=True)
-                fig, ax = plt.subplots()
-                shap.plots.bar(shap_values[i], max_display=5, show=False)
-                st.pyplot(fig)
-                st.markdown("<div style='margin-top: 50px'></div>", unsafe_allow_html=True)
-
-                st.markdown("🧠 <b>3. Vektorraum-Erklärung</b>", unsafe_allow_html=True)
-                from sklearn.decomposition import PCA
-                pca = PCA(n_components=2)
-                X_pca = pca.fit_transform(X_shap.values)
-                pca_df = pd.DataFrame(X_pca, columns=["PC1", "PC2"])
-                pca_df["movieId"] = movies["movieId"].values
-                pca_df["selected"] = pca_df["movieId"].isin(selected_ids)
-                pca_df["recommended"] = pca_df["movieId"] == row["movieId"]
-                user_point = (
-                    pca_df[pca_df["selected"]]["PC1"].mean(),
-                    pca_df[pca_df["selected"]]["PC2"].mean()
-                )
-
-                fig_pca, ax = plt.subplots()
-                ax.scatter(pca_df["PC1"], pca_df["PC2"], color="lightgray", alpha=0.3, label="Andere Filme")
-                ax.scatter(pca_df[pca_df["selected"]]["PC1"], pca_df[pca_df["selected"]]["PC2"], color="blue", label="Ausgewählte Filme")
-                ax.scatter(pca_df[pca_df["recommended"]]["PC1"], pca_df[pca_df["recommended"]]["PC2"], color="green", label="Diese Empfehlung")
-                ax.scatter(user_point[0], user_point[1], color="red", marker="x", s=100, label="Nutzerprofil")
-                ax.set_title("Position der Empfehlung im Merkmalsraum")
-                ax.legend()
-                st.pyplot(fig_pca)
-
-
+                for explanation_type in st.session_state.explanation_order:
+                    if explanation_type == "text":
+                        st.markdown("🧠 <b>Textuelle Erklärung</b>", unsafe_allow_html=True)
+                        explanation = generate_text_explanation(row, tags_selected)
+                        st.markdown(f"<i>{explanation}</i>", unsafe_allow_html=True)
+                
+                    elif explanation_type == "shap":
+                        st.markdown("<div style='margin-top: 25px'></div>", unsafe_allow_html=True)
+                        st.markdown("🧠 <b>SHAP-Visualisierung</b>", unsafe_allow_html=True)
+                        fig, ax = plt.subplots()
+                        shap.plots.bar(shap_values[i], max_display=5, show=False)
+                        st.pyplot(fig)
+                
+                    elif explanation_type == "vector":
+                        st.markdown("<div style='margin-top: 25px'></div>", unsafe_allow_html=True)
+                        st.markdown("🧠 <b>Vektorraum-Erklärung</b>", unsafe_allow_html=True)
+                        pca = PCA(n_components=2)
+                        X_pca = pca.fit_transform(X_shap.values)
+                        pca_df = pd.DataFrame(X_pca, columns=["PC1", "PC2"])
+                        pca_df["movieId"] = movies["movieId"].values
+                        pca_df["selected"] = pca_df["movieId"].isin(selected_ids)
+                        pca_df["recommended"] = pca_df["movieId"] == row["movieId"]
+                        user_point = (
+                            pca_df[pca_df["selected"]]["PC1"].mean(),
+                            pca_df[pca_df["selected"]]["PC2"].mean()
+                        )
+                        fig_pca, ax = plt.subplots()
+                        ax.scatter(pca_df["PC1"], pca_df["PC2"], color="lightgray", alpha=0.3, label="Andere Filme")
+                        ax.scatter(pca_df[pca_df["selected"]]["PC1"], pca_df[pca_df["selected"]]["PC2"], color="blue", label="Ausgewählte Filme")
+                        ax.scatter(pca_df[pca_df["recommended"]]["PC1"], pca_df[pca_df["recommended"]]["PC2"], color="green", label="Diese Empfehlung")
+                        ax.scatter(user_point[0], user_point[1], color="red", marker="x", s=100, label="Nutzerprofil")
+                        ax.set_title("Position der Empfehlung im Merkmalsraum")
+                        ax.legend()
+                        st.pyplot(fig_pca)
 
                         # === Nachbefragung ===
         st.markdown("---")
