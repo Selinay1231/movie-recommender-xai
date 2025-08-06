@@ -209,7 +209,7 @@ ki_unfaehigkeit = st.radio(
 
 
 # === Vorumfrage abschließen ===
-if st.button("Vorumfrage abschließen und Recommender starten"):
+if st.button("Filmempfehler starten"):
     st.session_state.umfrage_abgeschlossen = True  # Zeigt Recommender und Nachbefragung erst danach
     st.session_state.umfrage_data = {
         "user_id": st.session_state.user_id,
@@ -593,5 +593,6 @@ if st.session_state.get("umfrage_abgeschlossen", False):
                 st.success("✅ Vielen Dank für deine Teilnahme! Deine Antworten wurden gespeichert.")
             except Exception as e:
                 st.error(f"❌ Fehler beim Speichern der Antworten: {e}")
+
 
 
