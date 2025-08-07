@@ -410,7 +410,7 @@ if st.session_state.get("umfrage_abgeschlossen", False):
     movies = movies[movies["year"] >= min_year]
 
     available_movies = movies.sort_values("title")
-    selected_titles = st.multiselect("Wähle Filme:", available_movies["title"].tolist(), max_selections=5)
+    selected_titles = st.multiselect("Wähle 5 Filme:", available_movies["title"].tolist(), max_selections=5)
 
     tags_selected = []
     with st.expander("🔖 Optional: Wähle Tags, die dich interessieren"):
@@ -596,6 +596,7 @@ if st.session_state.get("umfrage_abgeschlossen", False):
                 st.success("✅ Vielen Dank für deine Teilnahme! Deine Antworten wurden gespeichert.")
             except Exception as e:
                 st.error(f"❌ Fehler beim Speichern der Antworten: {e}")
+
 
 
 
