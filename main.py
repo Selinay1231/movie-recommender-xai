@@ -505,6 +505,8 @@ if st.session_state.get("umfrage_abgeschlossen", False):
                         ax.scatter(pca_df[pca_df["recommended"]]["PC1"], pca_df[pca_df["recommended"]]["PC2"], color="green", label="Diese Empfehlung")
                         ax.scatter(user_point[0], user_point[1], color="red", marker="x", s=100, label="Nutzerprofil")
                         ax.set_title("Position der Empfehlung im Merkmalsraum")
+                        ax.set_xlabel("Genre & Beliebtheit")
+                        ax.set_ylabel("Bewertung & Stimmung")
                         ax.legend()
                         st.pyplot(fig_pca)
         
@@ -594,6 +596,7 @@ if st.session_state.get("umfrage_abgeschlossen", False):
                 st.success("✅ Vielen Dank für deine Teilnahme! Deine Antworten wurden gespeichert.")
             except Exception as e:
                 st.error(f"❌ Fehler beim Speichern der Antworten: {e}")
+
 
 
 
