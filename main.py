@@ -69,7 +69,7 @@ if contact_ki != "Nein, noch nie":
 
 # 1.4 Genutztes System
 most_used_ki = st.selectbox("**1.4 Welches KI-System nutzen Sie am häufigsten?**", [
-    "ChatGPT (OpenAI)", "Claude (Anthropic)", "Google Gemini", "Microsoft Copilot", "Perplexity AI"
+    "ChatGPT (OpenAI)", "Claude (Anthropic)", "Google Gemini", "Microsoft Copilot", "Perplexity AI", "Anderes"
 ])
 
 # === 1.5 Wichtigkeit verschiedener Eigenschaften ===
@@ -104,7 +104,8 @@ ki_aktivitaeten = st.multiselect(
         "Übersetzen von Texten",
         "Ideenfindung / Brainstorming",
         "Planung & Strukturierung",
-        "Smalltalk / Unterhaltung"
+        "Smalltalk / Unterhaltung",
+        "Bildgenerierung"
     ]
 )
 
@@ -122,7 +123,7 @@ ki_verstaendnis = st.radio("**2.3 Eine KI …**", [
     "denkt ähnlich wie ein Mensch",
     "verarbeitet nur Informationen, ohne zu denken",
     "imitiert Denken, versteht aber nichts",
-    "keins davon"
+    "keines davon"
 ])
 
 # 2.4 Wahrnehmung der KI
@@ -130,7 +131,7 @@ ki_rollenbild = st.radio("**2.4 Ein KI-System ist für mich …**", [
     "Wie ein Werkzeug – es macht nur, was ich eingebe",
     "Wie ein Assistent – es hilft, aber trifft keine eigenen Entscheidungen",
     "Wie ein Agent – es handelt eigenständig",
-    "keins davon"
+    "keines davon"
 ])
 
 # 2.5 Mensch vs. KI Aufgabenvergleich (Mehrfachauswahl möglich)
@@ -593,6 +594,7 @@ if st.session_state.get("umfrage_abgeschlossen", False):
                 st.success("✅ Vielen Dank für deine Teilnahme! Deine Antworten wurden gespeichert.")
             except Exception as e:
                 st.error(f"❌ Fehler beim Speichern der Antworten: {e}")
+
 
 
 
