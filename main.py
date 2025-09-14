@@ -1,4 +1,4 @@
-# MovieMate – eleganter Movie-Recommender (Hero Landing + Cards + Fix Farben)
+# MovieMate – eleganter Movie-Recommender (Hero Landing + Cards + Fix Farben + Grid + Widget-Text)
 
 import pandas as pd
 import streamlit as st
@@ -24,6 +24,21 @@ h1 {
   font-weight: 800;
   letter-spacing: .3px;
   color: #111 !important;   /* immer schwarz */
+}
+
+/* Labels & Widget-Texte */
+label, .stSelectbox label, .stMultiSelect label, .stSlider label {
+  color: #111 !important; 
+  font-weight: 600;
+}
+.stSelectbox div[data-baseweb="select"] > div {
+  color: #111 !important;
+}
+.stMultiSelect div[data-baseweb="select"] > div {
+  color: #111 !important;
+}
+.stSlider p {
+  color: #111 !important;
 }
 
 /* Buttons */
@@ -61,7 +76,7 @@ div.stButton > button:first-child:disabled{ opacity:.45; cursor:not-allowed; }
   justify-content: center;
   text-align: center;
   padding: 0 24px;
-  background: rgba(0,0,0,0.35); /* halbtransparenter Hintergrund */
+  background: rgba(0,0,0,0.35); /* halbtransparente Box */
 }
 .hero__title {
   font-size: clamp(24px, 6vw, 44px);
@@ -79,7 +94,7 @@ div.stButton > button:first-child:disabled{ opacity:.45; cursor:not-allowed; }
 /* Cards */
 .grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, 1fr);  /* immer 3 Karten pro Reihe */
   gap: 20px;
 }
 .card {
@@ -107,10 +122,10 @@ div.stButton > button:first-child:disabled{ opacity:.45; cursor:not-allowed; }
   margin: 0 0 8px;
   font-size: 17px;
   font-weight: 700;
-  color: #111 !important;  /* fix schwarz */
+  color: #111 !important;
 }
 .card__explain {
-  color: #374151 !important; /* fix dunkelgrau */
+  color: #374151 !important;
   line-height: 1.45;
   font-size: 15px;
 }
@@ -359,4 +374,3 @@ else:
 
         if not can_more:
             st.caption("🎉 Du hast alle passenden Empfehlungen gesehen. Ändere deine Auswahl, um neue Vorschläge zu bekommen.")
-
