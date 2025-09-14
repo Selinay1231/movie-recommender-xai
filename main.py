@@ -1,4 +1,4 @@
-# MovieMate – eleganter Movie-Recommender (Hero Landing + Cards + Step-by-Step Auswahl + Fix)
+# MovieMate – eleganter Movie-Recommender (Hero Landing + Cards + Step-by-Step Auswahl + Grid-Fix)
 
 import pandas as pd
 import streamlit as st
@@ -331,14 +331,14 @@ else:
         st.markdown("<h3 class='section-title'>🌟 Deine Empfehlungen</h3>", unsafe_allow_html=True)
         api_key = st.secrets.get("TMDB_API_KEY")
 
-        # Grid-Karten: einzeln rendern
-        st.markdown('<div class="grid">', unsafe_allow_html=True)
+        # Grid-Karten: alle sammeln und zusammen rendern
+        cards_html = ['<div class="grid">']
         for _, row in to_show.iterrows():
             poster = get_movie_poster(clean_title(row["title"]), api_key) if api_key else None
             poster = poster or "https://via.placeholder.com/500x750.png?text=No+Image"
             exp = generate_text_explanation(row, tags_selected)
 
-            st.markdown(f"""
+            cards_html.append(f"""
             <div class="card">
               <img src="{poster}" alt="Poster">
               <div class="card__body">
@@ -347,8 +347,9 @@ else:
                 <div class="card__explain">{exp}</div>
               </div>
             </div>
-            """, unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
+            """)
+        cards_html.append("</div>")
+        st.markdown("\n".join(cards_html), unsafe_allow_html=True)
 
         # Mehr laden
         can_more = show_n < max_n
@@ -361,8 +362,3 @@ else:
 
         if not can_more:
             st.caption("🎉 Du hast alle passenden Empfehlungen gesehen. Ändere deine Auswahl, um neue Vorschläge zu bekommen.")
-
-
-
-
-
