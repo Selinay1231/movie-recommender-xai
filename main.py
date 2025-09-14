@@ -3,7 +3,7 @@
 import pandas as pd
 import streamlit as st
 from sklearn.metrics.pairwise import cosine_similarity
-import os, requests, re, uuid, gdown, random, hashlib
+import os, requests, re, uuid, gdown, random, hashlib, textwrap
 
 # =========================
 # App Setup & Theme
@@ -37,6 +37,7 @@ div.stButton > button:first-child:disabled{ opacity:.45; cursor:not-allowed; }
   box-shadow:0 10px 40px rgba(0,0,0,.08); margin-top:8px;
 }
 .hero__bg{
+  /* Helleres Overlay; Bild kannst du tauschen */
   background:
     linear-gradient(rgba(15,16,40,.35), rgba(15,16,40,.25)),
     url('https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1600&q=80')
@@ -99,16 +100,44 @@ def generate_text_explanation(movie_row, tags_selected):
     year=int(movie_row.get("year",0)) if not pd.isna(movie_row.get("year",0)) else None
     n_ratings=movie_row.get("n_ratings",0)
 
-    if genre_sim>0.65: reasons.append("weil er sehr ähnliche Genres hat wie deine Lieblingsfilme")
-    elif genre_sim>0.4: reasons.append("weil er teilweise ähnliche Genre-Muster aufweist")
-    if tag_sim>0.4 and tags_selected: reasons.append("weil er viele deiner gewählten Schlagworte aufgreift")
-    elif tag_sim>0.2 and tags_selected: reasons.append("weil er in Teilen zu deinen gewählten Tags passt")
-    if rating>=4.0: reasons.append("weil er von anderen Nutzer:innen besonders gut bewertet wurde")
-    elif rating>=3.6: reasons.append("weil er solide und überdurchschnittliche Bewertungen bekommen hat")
-    if n_ratings>=5000: reasons.append("weil er extrem beliebt ist")
+    if genre_sim>0.65:
+        reasons.append(random.choice([
+            "weil er sehr ähnliche Genres hat wie deine Lieblingsfilme",
+            "da er thematisch stark an deine bevorzugten Genres anknüpft",
+            "weil er inhaltlich fast deckungsgleich mit deinen Genre-Präferenzen ist"]))
+    elif genre_sim>0.4:
+        reasons.append(random.choice([
+            "weil er teilweise ähnliche Genre-Muster aufweist",
+            "da sich bestimmte Themen mit deinen bisherigen Filmen überschneiden",
+            "weil er einige typische Elemente deiner Genres enthält"]))
+
+    if tag_sim>0.4 and tags_selected:
+        reasons.append(random.choice([
+            "weil er viele deiner gewählten Schlagworte aufgreift",
+            "da er stark mit den von dir markierten Themen übereinstimmt",
+            "weil die gewählten Tags hier deutlich vertreten sind"]))
+    elif tag_sim>0.2 and tags_selected:
+        reasons.append(random.choice([
+            "weil er in Teilen zu deinen gewählten Tags passt",
+            "da einige Themen mit deinen Interessen übereinstimmen",
+            "weil einzelne Schlagworte aus deinen Präferenzen enthalten sind"]))
+
+    if rating>=4.0:
+        reasons.append(random.choice([
+            "weil er von anderen Nutzer:innen besonders gut bewertet wurde",
+            "da er eine außergewöhnlich hohe Durchschnittsbewertung hat",
+            "weil er allgemein als sehr sehenswert gilt"]))
+    elif rating>=3.6:
+        reasons.append(random.choice([
+            "weil er solide und überdurchschnittliche Bewertungen bekommen hat",
+            "da viele Zuschauer:innen ihn als gut eingestuft haben",
+            "weil er von der Community als empfehlenswert angesehen wird"]))
+
+    if n_ratings>=5000: reasons.append("weil er extrem beliebt ist und von vielen Menschen gesehen wurde")
     elif n_ratings>=1000: reasons.append("weil er eine beachtliche Anzahl an Bewertungen erhalten hat")
-    if year and year>2010: reasons.append("weil er ein relativ neuer Film ist")
-    elif year and year<2000: reasons.append("weil er ein Klassiker ist")
+
+    if year and year>2010: reasons.append("weil er ein relativ neuer Film ist, der moderne Themen aufgreift")
+    elif year and year<2000: reasons.append("weil er ein Klassiker ist, der bis heute relevant geblieben ist")
 
     trust=movie_row.get("similarity",0)
     trust_percent=round(trust*100,1)
@@ -164,6 +193,7 @@ genome_tags, genome_scores = load_tag_data()
 # =========================
 st.markdown("<h1 style='text-align:center;'>🎬 MovieMate</h1>", unsafe_allow_html=True)
 
+# ---------- HERO / INTRO ----------
 if not st.session_state.intro_done:
     st.markdown("""
     <div class="hero">
@@ -176,14 +206,17 @@ if not st.session_state.intro_done:
     </div>
     """, unsafe_allow_html=True)
 
-    st.write("")
+    st.write("")  # spacing
     c1,c2,c3 = st.columns([1,2,1])
     with c2:
         if st.button("🎬 Los geht's", use_container_width=True):
             st.session_state.intro_done = True
             st.rerun()
+
+# ---------- MAIN RECOMMENDER ----------
 else:
     st.markdown("<h3 class='section-title'>✨ Deine Auswahl</h3>", unsafe_allow_html=True)
+
     min_year = st.slider("Zeige Filme ab Jahr:", 1950, 2015, 1999)
     movies_view = movies[movies["year"] >= min_year].copy()
     available_movies = movies_view.sort_values("title")
@@ -204,6 +237,7 @@ else:
             st.session_state.selection_key = sel_key
             st.session_state.rec_index = 3
 
+        # Features
         selected_ids = movies_view[movies_view["title"].isin(selected_titles)]["movieId"].values
         movie_features = movies_view.join(movies_view["genres"].str.get_dummies("|"))
         genre_cols = movies_view["genres"].str.get_dummies("|").columns
@@ -227,33 +261,42 @@ else:
 
         st.markdown("<h3 class='section-title'>🌟 Deine Empfehlungen</h3>", unsafe_allow_html=True)
 
-        # ✅ Karten via st.markdown (nicht st.write!)
-        cards_html = ['<div class="grid">']
-        for _, row in to_show.iterrows():
-            poster = get_movie_poster(clean_title(row["title"]), st.secrets.get("TMDB_API_KEY")) or "https://via.placeholder.com/500x750.png?text=No+Image"
-            exp = generate_text_explanation(row, tags_selected)
-            cards_html.append(f"""
-            <div class="card">
-              <img src="{poster}" alt="Poster">
-              <div class="card__body">
-                <div class="badge">Empfehlung</div>
-                <div class="card__title">{row['title']}</div>
-                <div class="card__explain">{exp}</div>
-              </div>
-            </div>
-            """)
-        cards_html.append("</div>")
-        st.markdown("\n".join(cards_html), unsafe_allow_html=True)
+        # ✅ Karten-HTML sauber ohne führende Indents rendern
+        grid_open = '<div class="grid">'
+        grid_close = '</div>'
+        card_blocks = []
+        tmdb_key = st.secrets.get("TMDB_API_KEY")
 
+        for _, row in to_show.iterrows():
+            poster = get_movie_poster(clean_title(row["title"]), tmdb_key) if tmdb_key else None
+            poster = poster or "https://via.placeholder.com/500x750.png?text=No+Image"
+            exp = generate_text_explanation(row, tags_selected)
+
+            card_html = textwrap.dedent(f"""\
+            <div class="card">
+            <img src="{poster}" alt="Poster">
+            <div class="card__body">
+            <div class="badge">Empfehlung</div>
+            <div class="card__title">{row['title']}</div>
+            <div class="card__explain">{exp}</div>
+            </div>
+            </div>
+            """).strip()  # strip entfernt evtl. führenden Zeilenumbruch
+
+            card_blocks.append(card_html)
+
+        st.markdown(grid_open + "\n".join(card_blocks) + grid_close, unsafe_allow_html=True)
+
+        # Mehr laden
         can_more = show_n < max_n
-        st.write("")
+        st.write("")  # spacing
         cc1, cc2, cc3 = st.columns([1,2,1])
         with cc2:
             if st.button("🔄 Mehr Empfehlungen laden", disabled=not can_more, use_container_width=True):
                 st.session_state.rec_index = min(st.session_state.rec_index + 3, max_n)
                 st.rerun()
-        if not can_more: st.caption("🎉 Du hast alle passenden Empfehlungen gesehen.")
 
-
+        if not can_more:
+            st.caption("🎉 Du hast alle passenden Empfehlungen gesehen. Ändere deine Auswahl, um neue Vorschläge zu bekommen.")
 
 
