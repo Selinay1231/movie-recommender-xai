@@ -237,12 +237,12 @@ if len(selected_titles) == 5:
             st.markdown(f"<p style='font-size:16px; color:#333;'>{explanation}</p>", unsafe_allow_html=True)
         st.markdown("---")
 
-    # Button für weitere Empfehlungen
-    if st.button("🔄 Mehr Empfehlungen anzeigen"):
-        st.session_state.rec_offset += 3
-        if st.session_state.rec_offset >= len(movies):
-            st.session_state.rec_offset = 0
-        st.experimental_rerun()
+if st.button("🔄 Mehr Empfehlungen anzeigen"):
+    st.session_state.rec_offset += 3
+    if st.session_state.rec_offset >= len(movies):
+        st.session_state.rec_offset = 0
+    st.rerun()
+
 
 
 
