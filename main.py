@@ -48,7 +48,7 @@ div.stButton > button:first-child:disabled{ opacity:.45; cursor:not-allowed; }
 .hero__bg{
   background-image:
     linear-gradient(rgba(15,16,40,.65), rgba(15,16,40,.55)),
-    url('https://sl.bing.net/g3T0wBJn2Mm');
+    url('https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1600&q=80');
   background-size:cover; background-position:center;
   height:290px;
 }
@@ -299,6 +299,7 @@ else:
 
         if not can_more:
             st.caption("🎉 Du hast alle passenden Empfehlungen gesehen. Ändere deine Auswahl, um neue Vorschläge zu bekommen.")
+
 
 
 
