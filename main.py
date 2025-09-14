@@ -1,9 +1,10 @@
-# MovieMate – eleganter Movie-Recommender (Hero Landing + Grid Cards + Fix Farben + Grid 3x)
+# MovieMate – eleganter Movie-Recommender (Hero Landing + Grid Cards + Fix Farben + dedent)
 
 import pandas as pd
 import streamlit as st
 from sklearn.metrics.pairwise import cosine_similarity
 import os, requests, re, uuid, gdown, random, hashlib
+from textwrap import dedent
 
 # =========================
 # App Setup & Theme
@@ -11,7 +12,7 @@ import os, requests, re, uuid, gdown, random, hashlib
 st.set_page_config(page_title="MovieMate", page_icon="🎬", layout="wide")
 
 # Global CSS
-st.markdown("""
+st.markdown(dedent("""
 <style>
 :root{
   --primary:#6c5ce7; --primary-dark:#5a4bd6;
@@ -25,6 +26,15 @@ h1 {
   letter-spacing: .3px;
   color: #111 !important;   /* immer schwarz */
 }
+
+/* Labels & Widget-Texte */
+label, .stSelectbox label, .stMultiSelect label, .stSlider label {
+  color: #111 !important; 
+  font-weight: 600;
+}
+.stSelectbox div[data-baseweb="select"] > div,
+.stMultiSelect div[data-baseweb="select"] > div,
+.stSlider p { color: #111 !important; }
 
 /* Buttons */
 div.stButton { display:flex; justify-content:center; }
@@ -128,16 +138,8 @@ div.stButton > button:first-child:disabled{ opacity:.45; cursor:not-allowed; }
   letter-spacing: .2px;
   color: #111 !important;
 }
-
-/* Widget Labels & Text */
-label, .stSelectbox label, .stMultiSelect label, .stSlider label {
-  color: #111 !important;
-  font-weight: 600;
-}
-.stSelectbox div[data-baseweb="select"] > div { color: #111 !important; }
-.stMultiSelect div[data-baseweb="select"] > div { color: #111 !important; }
 </style>
-""", unsafe_allow_html=True)
+"""), unsafe_allow_html=True)
 
 # =========================
 # Session State
@@ -153,56 +155,67 @@ if "intro_done" not in st.session_state: st.session_state.intro_done = False
 def clean_title(title): return re.sub(r"\s*\(\d{4}\)", "", title).strip()
 
 def get_movie_poster(title, api_key):
-    url="https://api.themoviedb.org/3/search/movie"; params={"api_key": api_key, "query": title}
+    url = "https://api.themoviedb.org/3/search/movie"
+    params = {"api_key": api_key, "query": title}
     try:
-        r=requests.get(url, params=params, timeout=8)
-        if r.status_code==200:
-            results=r.json().get("results",[])
+        r = requests.get(url, params=params, timeout=8)
+        if r.status_code == 200:
+            results = r.json().get("results", [])
             if results and results[0].get("poster_path"):
                 return f"https://image.tmdb.org/t/p/w500{results[0]['poster_path']}"
-    except Exception: pass
+    except Exception:
+        pass
     return None
 
 def generate_text_explanation(movie_row, tags_selected):
-    reasons=[]
-    genre_sim=movie_row.get("genre_similarity",0); tag_sim=movie_row.get("tag_similarity",0)
-    rating=movie_row.get("avg_rating",0); year=int(movie_row.get("year",0)) if not pd.isna(movie_row.get("year",0)) else None
-    n_ratings=movie_row.get("n_ratings",0)
+    reasons = []
+    genre_sim = movie_row.get("genre_similarity", 0)
+    tag_sim = movie_row.get("tag_similarity", 0)
+    rating = movie_row.get("avg_rating", 0)
+    year = int(movie_row.get("year", 0)) if not pd.isna(movie_row.get("year", 0)) else None
+    n_ratings = movie_row.get("n_ratings", 0)
 
-    if genre_sim>0.65:
+    if genre_sim > 0.65:
         reasons.append("weil er sehr ähnliche Genres hat wie deine Lieblingsfilme")
-    elif genre_sim>0.4:
+    elif genre_sim > 0.4:
         reasons.append("weil er einige typische Elemente deiner Genres enthält")
 
-    if tag_sim>0.4 and tags_selected:
+    if tag_sim > 0.4 and tags_selected:
         reasons.append("weil er viele deiner gewählten Schlagworte aufgreift")
 
-    if rating>=4.0:
+    if rating >= 4.0:
         reasons.append("weil er allgemein als sehr sehenswert gilt")
-    elif rating>=3.6:
+    elif rating >= 3.6:
         reasons.append("weil er solide und überdurchschnittliche Bewertungen bekommen hat")
 
-    if n_ratings>=5000: reasons.append("weil er extrem beliebt ist")
-    elif n_ratings>=1000: reasons.append("weil er viele Bewertungen hat")
+    if n_ratings >= 5000:
+        reasons.append("weil er extrem beliebt ist")
+    elif n_ratings >= 1000:
+        reasons.append("weil er viele Bewertungen hat")
 
-    if year and year>2010: reasons.append("weil er ein relativ neuer Film ist")
-    elif year and year<2000: reasons.append("weil er ein Klassiker ist")
+    if year and year > 2010:
+        reasons.append("weil er ein relativ neuer Film ist")
+    elif year and year < 2000:
+        reasons.append("weil er ein Klassiker ist")
 
-    trust=movie_row.get("similarity",0); trust_percent=round(trust*100,1)
-    trust_label="sehr hoch" if trust>=0.8 else "hoch" if trust>=0.6 else "mittel"
-    vt=f"🔒 Vertrauenswert: {trust_percent}% ({trust_label})"
+    trust = movie_row.get("similarity", 0)
+    trust_percent = round(trust * 100, 1)
+    trust_label = "sehr hoch" if trust >= 0.8 else "hoch" if trust >= 0.6 else "mittel"
+    vt = f"🔒 Vertrauenswert: {trust_percent}% ({trust_label})"
 
-    return "Dieser Film wurde empfohlen, " + " und ".join(reasons) + ". " + vt if reasons else "Dieser Film passt zu deinem Profil. " + vt
+    return ("Dieser Film wurde empfohlen, " + " und ".join(reasons) + ". " + vt) if reasons else ("Dieser Film passt zu deinem Profil. " + vt)
 
 def download_and_verify_csv(file_id, dest_path):
-    url=f"https://drive.google.com/uc?export=download&id={file_id}"
-    if not os.path.exists(dest_path): gdown.download(url, dest_path, quiet=False)
+    url = f"https://drive.google.com/uc?export=download&id={file_id}"
+    if not os.path.exists(dest_path):
+        gdown.download(url, dest_path, quiet=False)
     with open(dest_path, "r", encoding="utf-8") as f:
         if "<html" in f.readline().lower():
-            st.error(f"❌ Fehler beim Download: '{dest_path}' enthält HTML statt CSV."); st.stop()
+            st.error(f"❌ Fehler beim Download: '{dest_path}' enthält HTML statt CSV.")
+            st.stop()
 
 def selection_hash(titles, tags, year_from):
-    raw="|".join(sorted(titles))+"||"+"|".join(sorted(tags))+f"||{year_from}"
+    raw = "|".join(sorted(titles)) + "||" + "|".join(sorted(tags)) + f"||{year_from}"
     return hashlib.sha1(raw.encode("utf-8")).hexdigest()
 
 # =========================
@@ -216,22 +229,22 @@ download_and_verify_csv("1M0v8mSSbgS7Wz1HoMdCM_YqpXTh0bGd9","./data/genome-score
 
 @st.cache_data
 def load_data():
-    base="./data/"
-    movies=pd.read_csv(base+"movies.csv", sep=";", encoding="utf-8")
-    ratings=pd.read_csv(base+"ratings.csv", sep=";", encoding="utf-8")
-    movies["year"]=movies["title"].str.extract(r"\((\d{4})\)").astype(float)
-    avg=ratings.groupby("movieId")["rating"].mean()
-    cnt=ratings.groupby("movieId")["rating"].count()
-    movies=movies.join(avg.rename("avg_rating"), on="movieId").join(cnt.rename("n_ratings"), on="movieId")
-    movies=movies[(movies["avg_rating"]>=3) & (movies["n_ratings"]>=50)]
+    base = "./data/"
+    movies = pd.read_csv(base + "movies.csv", sep=";", encoding="utf-8")
+    ratings = pd.read_csv(base + "ratings.csv", sep=";", encoding="utf-8")
+    movies["year"] = movies["title"].str.extract(r"\((\d{4})\)").astype(float)
+    avg = ratings.groupby("movieId")["rating"].mean()
+    cnt = ratings.groupby("movieId")["rating"].count()
+    movies = movies.join(avg.rename("avg_rating"), on="movieId").join(cnt.rename("n_ratings"), on="movieId")
+    movies = movies[(movies["avg_rating"] >= 3) & (movies["n_ratings"] >= 50)]
     return movies.reset_index(drop=True), ratings
 
 @st.cache_data
 def load_tag_data():
-    base="./data/"
+    base = "./data/"
     return (
-        pd.read_csv(base+"genome-tags.csv", sep=";", encoding="utf-8"),
-        pd.read_csv(base+"genome-scores.csv", sep=";", encoding="utf-8")
+        pd.read_csv(base + "genome-tags.csv", sep=";", encoding="utf-8"),
+        pd.read_csv(base + "genome-scores.csv", sep=";", encoding="utf-8")
     )
 
 movies, ratings = load_data()
@@ -244,7 +257,7 @@ st.markdown("<h1 style='text-align:center;'>🎬 MovieMate</h1>", unsafe_allow_h
 
 # ---------- HERO / INTRO ----------
 if not st.session_state.intro_done:
-    st.markdown("""
+    hero_html = dedent("""
     <div class="hero">
       <div class="hero__bg"></div>
       <div class="hero__content">
@@ -253,10 +266,11 @@ if not st.session_state.intro_done:
         <div class="hero__subtitle" style="margin-top:6px;">Wähle 5 Filme, die du magst – wir erklären dir klar, warum die Vorschläge zu dir passen.</div>
       </div>
     </div>
-    """, unsafe_allow_html=True)
+    """)
+    st.markdown(hero_html, unsafe_allow_html=True)
 
     st.write("")  # spacing
-    c1,c2,c3 = st.columns([1,2,1])
+    c1, c2, c3 = st.columns([1,2,1])
     with c2:
         if st.button("🎬 Los geht's", use_container_width=True):
             st.session_state.intro_done = True
@@ -271,11 +285,13 @@ else:
     available_movies = movies_view.sort_values("title")
 
     selected_titles = []
-    for i in range(1,6):
+    for i in range(1, 6):
         if i == 1 or len(selected_titles) >= (i - 1):
-            film = st.selectbox(f"🎥 Film {i} auswählen oder suchen:",
-                ["-- auswählen / suchen --"]+available_movies["title"].tolist(),
-                key=f"film_{i}")
+            film = st.selectbox(
+                f"🎥 Film {i} auswählen oder suchen:",
+                ["-- auswählen / suchen --"] + available_movies["title"].tolist(),
+                key=f"film_{i}"
+            )
             if film != "-- auswählen / suchen --":
                 selected_titles.append(film)
 
@@ -295,34 +311,42 @@ else:
         selected_ids = movies_view[movies_view["title"].isin(selected_titles)]["movieId"].values
         movie_features = movies_view.join(movies_view["genres"].str.get_dummies("|"))
         genre_cols = movies_view["genres"].str.get_dummies("|").columns
-        user_profile = movie_features[movie_features["movieId"].isin(selected_ids)][genre_cols].mean().values.reshape(1,-1)
+        user_profile = movie_features[movie_features["movieId"].isin(selected_ids)][genre_cols].mean().values.reshape(1, -1)
         all_profiles = movie_features[genre_cols].values
         movies_view["genre_similarity"] = cosine_similarity(user_profile, all_profiles)[0]
 
         tag_matrix = pd.pivot_table(genome_scores, values="relevance", index="movieId", columns="tagId", fill_value=0)
         selected_tag_ids = genome_tags[genome_tags["tag"].isin(tags_selected)]["tagId"].tolist()
         user_tag_vector = pd.Series(0, index=tag_matrix.columns, dtype=float)
-        for t in selected_tag_ids: user_tag_vector[t] = 1.0
+        for t in selected_tag_ids:
+            user_tag_vector[t] = 1.0
         movies_view["tag_similarity"] = cosine_similarity(
-            [user_tag_vector], tag_matrix.reindex(movies_view["movieId"].values, fill_value=0).fillna(0).values
+            [user_tag_vector],
+            tag_matrix.reindex(movies_view["movieId"].values, fill_value=0).fillna(0).values
         )[0]
 
-        movies_view["similarity"] = 0.5*movies_view["genre_similarity"] + 0.5*movies_view["tag_similarity"] if tags_selected else movies_view["genre_similarity"]
-        sorted_movies = movies_view[~movies_view["movieId"].isin(selected_ids)].sort_values("similarity", ascending=False).reset_index(drop=True)
+        movies_view["similarity"] = (
+            0.5 * movies_view["genre_similarity"] + 0.5 * movies_view["tag_similarity"]
+            if tags_selected else movies_view["genre_similarity"]
+        )
+        sorted_movies = movies_view[~movies_view["movieId"].isin(selected_ids)] \
+            .sort_values("similarity", ascending=False) \
+            .reset_index(drop=True)
 
-        max_n=len(sorted_movies); show_n=min(st.session_state.rec_index, max_n)
+        max_n = len(sorted_movies)
+        show_n = min(st.session_state.rec_index, max_n)
         to_show = sorted_movies.iloc[:show_n]
 
         st.markdown("<h3 class='section-title'>🌟 Deine Empfehlungen</h3>", unsafe_allow_html=True)
         api_key = st.secrets.get("TMDB_API_KEY")
 
-        # Cards sammeln → ein Block
-        cards_html = ['<div class="grid">']
+        # Cards sammeln → EIN Block, dedented HTML → kein Codeblock
+        cards = ['<div class="grid">']
         for _, row in to_show.iterrows():
             poster = get_movie_poster(clean_title(row["title"]), api_key) if api_key else None
             poster = poster or "https://via.placeholder.com/500x750.png?text=No+Image"
             exp = generate_text_explanation(row, tags_selected)
-            cards_html.append(f"""
+            cards.append(dedent(f"""
             <div class="card">
               <img src="{poster}" alt="Poster">
               <div class="card__body">
@@ -331,13 +355,14 @@ else:
                 <div class="card__explain">{exp}</div>
               </div>
             </div>
-            """)
-        cards_html.append("</div>")
-        st.markdown("".join(cards_html), unsafe_allow_html=True)
+            """))
+        cards.append("</div>")
+        st.markdown("".join(cards), unsafe_allow_html=True)
 
+        # Mehr laden
         can_more = show_n < max_n
         st.write("")
-        cc1, cc2, cc3 = st.columns([1,2,1])
+        cc1, cc2, cc3 = st.columns([1, 2, 1])
         with cc2:
             if st.button("🔄 Mehr Empfehlungen laden", disabled=not can_more, use_container_width=True):
                 st.session_state.rec_index = min(st.session_state.rec_index + 3, max_n)
@@ -345,4 +370,3 @@ else:
 
         if not can_more:
             st.caption("🎉 Du hast alle passenden Empfehlungen gesehen. Ändere deine Auswahl, um neue Vorschläge zu bekommen.")
-
