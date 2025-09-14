@@ -1,4 +1,4 @@
-# MovieMate – eleganter Movie-Recommender (Hero mit Overlay, Fixe Farben, Grid-Cards)
+# MovieMate – eleganter Movie-Recommender (Hero Landing + Responsive Hero Text)
 
 import pandas as pd
 import streamlit as st
@@ -19,9 +19,8 @@ st.markdown("""
 }
 html, body, [data-testid="stApp"] { background: var(--bg-soft); }
 
-/* Headline */
-h1,h2,h3,h4,h5,h6 { color:#111 !important; }
-.section-title { color:#111 !important; }
+/* Fixierte Textfarben für Dark/Light Mode */
+h1,h2,h3,h4,h5,h6,label,div,span,p { color:#111 !important; }
 
 /* Buttons */
 div.stButton { display:flex; justify-content:center; }
@@ -53,57 +52,47 @@ div.stButton > button:first-child:disabled{ opacity:.45; cursor:not-allowed; }
   position: absolute;
   inset: 0;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
   padding: 0 24px;
 }
 .hero__overlay {
-  background: rgba(0,0,0,0.55);   /* halbtransparent schwarz */
-  padding: 20px 30px;
-  border-radius: 12px;
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.45);  /* schwarze Transparenz für Lesbarkeit */
 }
 .hero__title {
-  font-size: 44px;
+  position: relative;
+  font-size: clamp(24px, 6vw, 44px);  /* responsive Größe */
   font-weight: 800;
   margin: 0 0 4px;
   color: #fff;
+  z-index: 1;
 }
 .hero__subtitle {
-  font-size: 18px;
+  position: relative;
+  font-size: clamp(14px, 4vw, 18px);  /* responsive Größe */
   margin: 8px 0 0;
   color: #fff;
   opacity: .95;
+  z-index: 1;
 }
 
 /* Cards */
-.grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);  /* 3 Karten pro Reihe */
-  gap: 20px;
-}
+.grid { display:grid; grid-template-columns: repeat(3, 1fr); gap:20px; }
 .card {
-  background: var(--card-bg);
-  border-radius: 14px;
-  overflow: hidden;
-  box-shadow: 0 8px 20px rgba(0,0,0,.06);
-  transition: transform .08s ease, box-shadow .2s ease;
+  background: var(--card-bg); border-radius:14px; overflow:hidden;
+  box-shadow:0 8px 20px rgba(0,0,0,.06); transition:transform .08s ease, box-shadow .2s ease;
 }
-.card:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(0,0,0,.12); }
-.card img {
-  width: 100%;
-  height: 300px;
-  object-fit: cover;
-  border-bottom: 1px solid #eee;
-  background: #e5e7eb;
-}
-.card__body { padding: 14px 16px 18px; }
-.card__title { margin: 0 0 8px; font-size: 17px; font-weight: 700; color:#111; }
+.card:hover { transform:translateY(-3px); box-shadow:0 12px 28px rgba(0,0,0,.12); }
+.card img { width:100%; height:300px; object-fit:cover; border-bottom:1px solid #eee; background:#e5e7eb; }
+.card__body { padding:14px 16px 18px; }
+.card__title { margin:0 0 8px; font-size:17px; font-weight:700; }
 .card__explain { color:#374151; line-height:1.45; font-size:15px; }
-.badge {
-  display:inline-block; background:#eef2ff; color:#4338ca;
-  padding:4px 10px; border-radius:999px; font-size:12px; font-weight:700; margin-bottom:8px;
-}
+.badge { display:inline-block; background:#eef2ff; color:#4338ca; padding:4px 10px; border-radius:999px; font-size:12px; font-weight:700; margin-bottom:8px; }
+.section-title { margin:10px 0 8px; font-weight:800; letter-spacing:.2px; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -140,9 +129,11 @@ def generate_text_explanation(movie_row, tags_selected):
     if genre_sim>0.65: reasons.append("weil er sehr ähnliche Genres hat wie deine Lieblingsfilme")
     elif genre_sim>0.4: reasons.append("weil er teilweise ähnliche Genre-Muster aufweist")
     if tag_sim>0.4 and tags_selected: reasons.append("weil er viele deiner gewählten Schlagworte aufgreift")
+    elif tag_sim>0.2 and tags_selected: reasons.append("weil er in Teilen zu deinen gewählten Tags passt")
     if rating>=4.0: reasons.append("weil er von anderen Nutzer:innen besonders gut bewertet wurde")
     elif rating>=3.6: reasons.append("weil er solide und überdurchschnittliche Bewertungen bekommen hat")
     if n_ratings>=5000: reasons.append("weil er extrem beliebt ist und von vielen Menschen gesehen wurde")
+    elif n_ratings>=1000: reasons.append("weil er eine beachtliche Anzahl an Bewertungen erhalten hat")
     if year and year>2010: reasons.append("weil er ein relativ neuer Film ist, der moderne Themen aufgreift")
     elif year and year<2000: reasons.append("weil er ein Klassiker ist, der bis heute relevant geblieben ist")
 
@@ -204,14 +195,11 @@ if not st.session_state.intro_done:
     st.markdown("""
     <div class="hero">
       <div class="hero__bg"></div>
+      <div class="hero__overlay"></div>
       <div class="hero__content">
-        <div class="hero__overlay">
-          <div class="hero__title">Willkommen bei MovieMate</div>
-          <div class="hero__subtitle">Unsere KI findet Filme, die perfekt zu deinem Geschmack passen.</div>
-          <div class="hero__subtitle" style="margin-top:6px; opacity:.9;">
-            Wähle 5 Filme, die du magst – wir erklären dir klar, warum die Vorschläge zu dir passen.
-          </div>
-        </div>
+        <div class="hero__title">Willkommen bei MovieMate</div>
+        <div class="hero__subtitle">Unsere KI findet Filme, die perfekt zu deinem Geschmack passen.</div>
+        <div class="hero__subtitle" style="margin-top:6px;">Wähle 5 Filme, die du magst – wir erklären dir klar, warum die Vorschläge zu dir passen.</div>
       </div>
     </div>
     """, unsafe_allow_html=True)
@@ -233,13 +221,9 @@ else:
 
     selected_titles=[]
     for i in range(1,6):
-        if i==1 or len(selected_titles) >= (i-1):
-            film = st.selectbox(
-                f"🎥 Wähle Film {i}:",
-                ["🔍 Film suchen oder auswählen …"] + available_movies["title"].tolist(),
-                key=f"film_{i}"
-            )
-            if film != "🔍 Film suchen oder auswählen …": selected_titles.append(film)
+        if i == 1 or len(selected_titles) >= (i - 1):
+            film = st.selectbox(f"🎥 Film {i} auswählen (Suchfunktion möglich):", ["-- bitte auswählen --"]+available_movies["title"].tolist(), key=f"film_{i}")
+            if film != "-- bitte auswählen --": selected_titles.append(film)
 
     tags_selected=[]
     if len(selected_titles)==5:
@@ -264,9 +248,7 @@ else:
         selected_tag_ids = genome_tags[genome_tags["tag"].isin(tags_selected)]["tagId"].tolist()
         user_tag_vector = pd.Series(0, index=tag_matrix.columns, dtype=float)
         for t in selected_tag_ids: user_tag_vector[t] = 1.0
-        movies_view["tag_similarity"] = cosine_similarity(
-            [user_tag_vector], tag_matrix.reindex(movies_view["movieId"].values, fill_value=0).fillna(0).values
-        )[0]
+        movies_view["tag_similarity"] = cosine_similarity([user_tag_vector], tag_matrix.reindex(movies_view["movieId"].values, fill_value=0).fillna(0).values)[0]
 
         movies_view["similarity"] = 0.5*movies_view["genre_similarity"] + 0.5*movies_view["tag_similarity"] if tags_selected else movies_view["genre_similarity"]
         sorted_movies = movies_view[~movies_view["movieId"].isin(selected_ids)].sort_values("similarity", ascending=False).reset_index(drop=True)
@@ -277,28 +259,26 @@ else:
         st.markdown("<h3 class='section-title'>🌟 Deine Empfehlungen</h3>", unsafe_allow_html=True)
         api_key = st.secrets.get("TMDB_API_KEY")
 
-        # Karten sammeln
-        cards_html = ['<div class="grid">']
+        st.markdown('<div class="grid">', unsafe_allow_html=True)
         for _, row in to_show.iterrows():
             poster = get_movie_poster(clean_title(row["title"]), api_key) if api_key else None
             poster = poster or "https://via.placeholder.com/500x750.png?text=No+Image"
             exp = generate_text_explanation(row, tags_selected)
-            cards_html.append(
-                f'<div class="card">'
-                f'<img src="{poster}" alt="Poster">'
-                f'<div class="card__body">'
-                f'<div class="badge">Empfehlung</div>'
-                f'<div class="card__title">{row["title"]}</div>'
-                f'<div class="card__explain">{exp}</div>'
-                f'</div>'
-                f'</div>'
-            )
-        cards_html.append("</div>")
-        st.markdown("".join(cards_html), unsafe_allow_html=True)
+            st.markdown(f"""
+            <div class="card">
+              <img src="{poster}" alt="Poster">
+              <div class="card__body">
+                <div class="badge">Empfehlung</div>
+                <div class="card__title">{row['title']}</div>
+                <div class="card__explain">{exp}</div>
+              </div>
+            </div>
+            """, unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
         can_more = show_n < max_n
         st.write("")
-        cc1,cc2,cc3 = st.columns([1,2,1])
+        cc1, cc2, cc3 = st.columns([1,2,1])
         with cc2:
             if st.button("🔄 Mehr Empfehlungen laden", disabled=not can_more, use_container_width=True):
                 st.session_state.rec_index = min(st.session_state.rec_index + 3, max_n)
