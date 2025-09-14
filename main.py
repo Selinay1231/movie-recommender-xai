@@ -1,4 +1,4 @@
-# MovieMate – eleganter Movie-Recommender (Hero Landing + Responsive Hero Text)
+# MovieMate – Recommender mit fixierten Farben (Dark/Light-Mode sicher)
 
 import pandas as pd
 import streamlit as st
@@ -19,8 +19,14 @@ st.markdown("""
 }
 html, body, [data-testid="stApp"] { background: var(--bg-soft); }
 
-/* Fixierte Textfarben für Dark/Light Mode */
-h1,h2,h3,h4,h5,h6,label,div,span,p { color:#111 !important; }
+/* Headline */
+h1{ font-weight:800; letter-spacing:.3px; }
+
+/* Fixierte Farben nur für UI-Elemente */
+label, .stSelectbox label, .stSlider label, .stRadio label, .stMultiSelect label,
+.stExpander, .stCheckbox, .stText, .stNumberInput label {
+  color:#111 !important;
+}
 
 /* Buttons */
 div.stButton { display:flex; justify-content:center; }
@@ -48,6 +54,11 @@ div.stButton > button:first-child:disabled{ opacity:.45; cursor:not-allowed; }
   background-position: center;
   height: 290px;
 }
+.hero__overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.45);  /* schwarze Transparenz für Lesbarkeit */
+}
 .hero__content {
   position: absolute;
   inset: 0;
@@ -58,24 +69,17 @@ div.stButton > button:first-child:disabled{ opacity:.45; cursor:not-allowed; }
   text-align: center;
   padding: 0 24px;
 }
-.hero__overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,0.45);  /* schwarze Transparenz für Lesbarkeit */
-}
 .hero__title {
-  position: relative;
-  font-size: clamp(24px, 6vw, 44px);  /* responsive Größe */
+  font-size: clamp(24px, 6vw, 44px);
   font-weight: 800;
   margin: 0 0 4px;
-  color: #fff;
+  color: #fff !important;   /* immer weiß */
   z-index: 1;
 }
 .hero__subtitle {
-  position: relative;
-  font-size: clamp(14px, 4vw, 18px);  /* responsive Größe */
+  font-size: clamp(14px, 4vw, 18px);
   margin: 8px 0 0;
-  color: #fff;
+  color: #fff !important;   /* immer weiß */
   opacity: .95;
   z-index: 1;
 }
@@ -89,10 +93,10 @@ div.stButton > button:first-child:disabled{ opacity:.45; cursor:not-allowed; }
 .card:hover { transform:translateY(-3px); box-shadow:0 12px 28px rgba(0,0,0,.12); }
 .card img { width:100%; height:300px; object-fit:cover; border-bottom:1px solid #eee; background:#e5e7eb; }
 .card__body { padding:14px 16px 18px; }
-.card__title { margin:0 0 8px; font-size:17px; font-weight:700; }
-.card__explain { color:#374151; line-height:1.45; font-size:15px; }
+.card__title { margin:0 0 8px; font-size:17px; font-weight:700; color:#111 !important; }
+.card__explain { color:#374151 !important; line-height:1.45; font-size:15px; }
 .badge { display:inline-block; background:#eef2ff; color:#4338ca; padding:4px 10px; border-radius:999px; font-size:12px; font-weight:700; margin-bottom:8px; }
-.section-title { margin:10px 0 8px; font-weight:800; letter-spacing:.2px; }
+.section-title { margin:10px 0 8px; font-weight:800; letter-spacing:.2px; color:#111 !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -286,5 +290,3 @@ else:
 
         if not can_more:
             st.caption("🎉 Du hast alle passenden Empfehlungen gesehen. Ändere deine Auswahl, um neue Vorschläge zu bekommen.")
-
-
