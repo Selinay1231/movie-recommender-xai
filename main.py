@@ -1,4 +1,4 @@
-# MovieMate – eleganter Movie-Recommender (Hero Landing + Cards Grid Fix)
+# MovieMate – eleganter Movie-Recommender (Dark-Mode Fix)
 
 import pandas as pd
 import streamlit as st
@@ -10,52 +10,123 @@ import os, requests, re, uuid, gdown, random, hashlib
 # =========================
 st.set_page_config(page_title="MovieMate", page_icon="🎬", layout="wide")
 
-# Global CSS
+# =========================
+# Global CSS – Dark Mode Fix
+# =========================
 st.markdown("""
 <style>
-:root{
-  --primary:#6c5ce7; --primary-dark:#5a4bd6;
-  --bg-soft:#f4f6fb; --card-bg:#ffffff; --muted:#6b7280;
+:root {
+  --primary: #6c5ce7;
+  --primary-dark: #5a4bd6;
+  --bg-soft: #f4f6fb;
+  --card-bg: #ffffff;
+  --muted: #374151;
 }
-html, body, [data-testid="stApp"] { background: var(--bg-soft); }
 
-/* Headline */
-h1{ font-weight:800; letter-spacing:.3px; }
+/* Hintergrund immer hell */
+html, body, [data-testid="stApp"] {
+  background: var(--bg-soft) !important;
+  color: #111 !important;
+}
+
+/* Headline / Texte immer dunkel */
+h1, h2, h3, h4, h5, h6, label, p, span, .stMarkdown, .stSelectbox label {
+  color: #111 !important;
+}
+
+/* Section-Titel */
+.section-title {
+  color: #111 !important;
+  font-weight: 800;
+  letter-spacing: .2px;
+}
 
 /* Buttons */
-div.stButton { display:flex; justify-content:center; }
-div.stButton > button:first-child{
+div.stButton { display: flex; justify-content: center; }
+div.stButton > button:first-child {
   background: var(--primary);
-  color:#fff; border:none; border-radius:12px;
-  padding:14px 28px; font-size:18px; font-weight:600;
-  box-shadow:0 6px 20px rgba(108,92,231,.25);
-  transition:transform .06s ease, background .2s ease;
+  color: #fff !important;
+  border: none;
+  border-radius: 12px;
+  padding: 14px 28px;
+  font-size: 18px;
+  font-weight: 600;
+  box-shadow: 0 6px 20px rgba(108,92,231,.25);
+  transition: transform .06s ease, background .2s ease;
 }
-div.stButton > button:first-child:hover{ background: var(--primary-dark); transform: translateY(-1px); }
-div.stButton > button:first-child:disabled{ opacity:.45; cursor:not-allowed; }
+div.stButton > button:first-child:hover {
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+}
+div.stButton > button:first-child:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
 
 /* Hero */
-.hero { position: relative; border-radius: 18px; overflow: hidden;
-        box-shadow: 0 10px 40px rgba(0,0,0,.08); margin-top: 8px; }
-.hero__bg { background-image: url('https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1600&q=80');
-            background-size: cover; background-position: center; height: 290px; }
-.hero__content { position: absolute; inset: 0; display: flex; flex-direction: column;
-                 align-items: center; justify-content: center; color: #fff; text-align: center; padding: 0 24px; }
-.hero__title { font-size: 44px; font-weight: 800; margin: 0 0 4px; }
-.hero__subtitle { font-size: 18px; opacity: .95; margin: 8px 0 0; }
+.hero {
+  position: relative;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 10px 40px rgba(0,0,0,.08);
+  margin-top: 8px;
+}
+.hero__bg {
+  background-image: url('https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1600&q=80');
+  background-size: cover;
+  background-position: center;
+  height: 290px;
+}
+.hero__content {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #fff !important;
+  text-align: center;
+  padding: 0 24px;
+}
+.hero__title { font-size: 44px; font-weight: 800; margin: 0 0 4px; color: #fff !important; }
+.hero__subtitle { font-size: 18px; opacity: .95; margin: 8px 0 0; color: #fff !important; }
 
-/* Cards Grid */
+/* Cards */
 .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-.card { background: var(--card-bg); border-radius: 14px; overflow: hidden;
-        box-shadow: 0 8px 20px rgba(0,0,0,.06); transition: transform .08s ease, box-shadow .2s ease; }
+.card {
+  background: var(--card-bg);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 8px 20px rgba(0,0,0,.06);
+  transition: transform .08s ease, box-shadow .2s ease;
+}
 .card:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(0,0,0,.12); }
-.card img { width: 100%; height: 300px; object-fit: cover; border-bottom: 1px solid #eee; background: #e5e7eb; }
+.card img {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+  border-bottom: 1px solid #eee;
+  background: #e5e7eb;
+}
 .card__body { padding: 14px 16px 18px; }
-.card__title { margin: 0 0 8px; font-size: 17px; font-weight: 700; }
-.card__explain { color: #374151; line-height: 1.45; font-size: 15px; }
-.badge { display: inline-block; background: #eef2ff; color: #4338ca;
-         padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; margin-bottom: 8px; }
-.section-title { margin: 10px 0 8px; font-weight: 800; letter-spacing: .2px; }
+.card__title { margin: 0 0 8px; font-size: 17px; font-weight: 700; color: #111 !important; }
+.card__explain { color: var(--muted) !important; line-height: 1.45; font-size: 15px; }
+.badge {
+  display: inline-block;
+  background: #eef2ff;
+  color: #4338ca !important;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+/* Expander Titel */
+.streamlit-expanderHeader {
+  color: #111 !important;
+  font-weight: 600;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -89,38 +160,32 @@ def generate_text_explanation(movie_row, tags_selected):
     rating=movie_row.get("avg_rating",0); year=int(movie_row.get("year",0)) if not pd.isna(movie_row.get("year",0)) else None
     n_ratings=movie_row.get("n_ratings",0)
 
-    if genre_sim>0.65:
-        reasons.append(random.choice([
-            "weil er sehr ähnliche Genres hat wie deine Lieblingsfilme",
-            "da er thematisch stark an deine bevorzugten Genres anknüpft",
-            "weil er inhaltlich fast deckungsgleich mit deinen Genre-Präferenzen ist"]))
-    elif genre_sim>0.4:
-        reasons.append(random.choice([
-            "weil er teilweise ähnliche Genre-Muster aufweist",
-            "da sich bestimmte Themen mit deinen bisherigen Filmen überschneiden",
-            "weil er einige typische Elemente deiner Genres enthält"]))
+    if genre_sim>0.65: reasons.append(random.choice([
+        "weil er sehr ähnliche Genres hat wie deine Lieblingsfilme",
+        "da er thematisch stark an deine bevorzugten Genres anknüpft",
+        "weil er inhaltlich fast deckungsgleich mit deinen Genre-Präferenzen ist"]))
+    elif genre_sim>0.4: reasons.append(random.choice([
+        "weil er teilweise ähnliche Genre-Muster aufweist",
+        "da sich bestimmte Themen mit deinen bisherigen Filmen überschneiden",
+        "weil er einige typische Elemente deiner Genres enthält"]))
 
-    if tag_sim>0.4 and tags_selected:
-        reasons.append(random.choice([
-            "weil er viele deiner gewählten Schlagworte aufgreift",
-            "da er stark mit den von dir markierten Themen übereinstimmt",
-            "weil die gewählten Tags hier deutlich vertreten sind"]))
-    elif tag_sim>0.2 and tags_selected:
-        reasons.append(random.choice([
-            "weil er in Teilen zu deinen gewählten Tags passt",
-            "da einige Themen mit deinen Interessen übereinstimmen",
-            "weil einzelne Schlagworte aus deinen Präferenzen enthalten sind"]))
+    if tag_sim>0.4 and tags_selected: reasons.append(random.choice([
+        "weil er viele deiner gewählten Schlagworte aufgreift",
+        "da er stark mit den von dir markierten Themen übereinstimmt",
+        "weil die gewählten Tags hier deutlich vertreten sind"]))
+    elif tag_sim>0.2 and tags_selected: reasons.append(random.choice([
+        "weil er in Teilen zu deinen gewählten Tags passt",
+        "da einige Themen mit deinen Interessen übereinstimmen",
+        "weil einzelne Schlagworte aus deinen Präferenzen enthalten sind"]))
 
-    if rating>=4.0:
-        reasons.append(random.choice([
-            "weil er von anderen Nutzer:innen besonders gut bewertet wurde",
-            "da er eine außergewöhnlich hohe Durchschnittsbewertung hat",
-            "weil er allgemein als sehr sehenswert gilt"]))
-    elif rating>=3.6:
-        reasons.append(random.choice([
-            "weil er solide und überdurchschnittliche Bewertungen bekommen hat",
-            "da viele Zuschauer:innen ihn als gut eingestuft haben",
-            "weil er von der Community als empfehlenswert angesehen wird"]))
+    if rating>=4.0: reasons.append(random.choice([
+        "weil er von anderen Nutzer:innen besonders gut bewertet wurde",
+        "da er eine außergewöhnlich hohe Durchschnittsbewertung hat",
+        "weil er allgemein als sehr sehenswert gilt"]))
+    elif rating>=3.6: reasons.append(random.choice([
+        "weil er solide und überdurchschnittliche Bewertungen bekommen hat",
+        "da viele Zuschauer:innen ihn als gut eingestuft haben",
+        "weil er von der Community als empfehlenswert angesehen wird"]))
 
     if n_ratings>=5000: reasons.append("weil er extrem beliebt ist und von vielen Menschen gesehen wurde")
     elif n_ratings>=1000: reasons.append("weil er eine beachtliche Anzahl an Bewertungen erhalten hat")
@@ -195,7 +260,7 @@ if not st.session_state.intro_done:
     </div>
     """, unsafe_allow_html=True)
 
-    st.write("")  # spacing
+    st.write("")
     c1,c2,c3 = st.columns([1,2,1])
     with c2:
         if st.button("🎬 Los geht's", use_container_width=True):
@@ -212,16 +277,17 @@ else:
 
     selected_titles = []
     for i in range(1,6):
-        film = st.selectbox(f"🎥 Wähle Film {i}:", ["-- bitte auswählen --"]+available_movies["title"].tolist(), key=f"film_{i}")
-        if film != "-- bitte auswählen --": selected_titles.append(film)
+        if i == 1 or len(selected_titles) >= (i - 1):
+            film = st.selectbox(f"🎥 Wähle Film {i}:", ["-- bitte auswählen --"]+available_movies["title"].tolist(), key=f"film_{i}")
+            if film != "-- bitte auswählen --": selected_titles.append(film)
 
     tags_selected=[]
-    if len(selected_titles) == 5:
+    if len(selected_titles)==5:
         with st.expander("🔖 Optional: Tags auswählen"):
             all_tags = genome_tags["tag"].sort_values().unique().tolist()
             tags_selected = st.multiselect("Bis zu 5 Tags:", all_tags, max_selections=5)
 
-    if len(selected_titles) == 5:
+    if len(selected_titles)==5:
         sel_key = selection_hash(selected_titles, tags_selected, int(min_year))
         if st.session_state.selection_key != sel_key:
             st.session_state.selection_key = sel_key
@@ -251,7 +317,6 @@ else:
         st.markdown("<h3 class='section-title'>🌟 Deine Empfehlungen</h3>", unsafe_allow_html=True)
         api_key = st.secrets.get("TMDB_API_KEY")
 
-        # Grid-Karten: alles als ein HTML-Block
         cards_html = ['<div class="grid">']
         for _, row in to_show.iterrows():
             poster = get_movie_poster(clean_title(row["title"]), api_key) if api_key else None
@@ -267,10 +332,9 @@ else:
                 f'</div>'
                 f'</div>'
             )
-        cards_html.append("</div>")
+        cards_html.append('</div>')
         st.markdown("".join(cards_html), unsafe_allow_html=True)
 
-        # Mehr laden
         can_more = show_n < max_n
         st.write("")
         cc1, cc2, cc3 = st.columns([1,2,1])
@@ -281,3 +345,5 @@ else:
 
         if not can_more:
             st.caption("🎉 Du hast alle passenden Empfehlungen gesehen. Ändere deine Auswahl, um neue Vorschläge zu bekommen.")
+
+
