@@ -1,4 +1,4 @@
-# Projekt: MovieMate – finaler Movie-Recommender mit UI/UX Verbesserungen
+# Projekt: MovieMate – finaler Movie-Recommender mit verbesserten Text-Erklärungen & UI
 
 import pandas as pd
 import streamlit as st
@@ -8,6 +8,7 @@ import requests
 import re
 import uuid
 import gdown
+import random
 
 # === App Setup ===
 st.set_page_config(page_title="MovieMate", page_icon="🎬", layout="wide")
@@ -33,36 +34,91 @@ def get_movie_poster(title, api_key):
                 return f"https://image.tmdb.org/t/p/w500{poster_path}"
     return None
 
-# Text-Erklärung
+# === Neue, diversere Text-Erklärung ===
 def generate_text_explanation(movie_row, tags_selected):
     reasons = []
+
     genre_sim = movie_row.get("genre_similarity", 0)
     tag_sim = movie_row.get("tag_similarity", 0)
     rating = movie_row.get("avg_rating", 0)
+    year = int(movie_row.get("year", 0)) if not pd.isna(movie_row.get("year", 0)) else None
+    n_ratings = movie_row.get("n_ratings", 0)
 
+    # Genre-Erklärungen
     if genre_sim > 0.65:
-        reasons.append("<b>starke Genre-Überschneidungen</b> mit deinen Lieblingsfilmen")
+        reasons.append(random.choice([
+            "weil er sehr ähnliche Genres hat wie deine Lieblingsfilme",
+            "da er thematisch stark an deine bevorzugten Genres anknüpft",
+            "weil er inhaltlich fast deckungsgleich mit deinen Genre-Präferenzen ist"
+        ]))
     elif genre_sim > 0.4:
-        reasons.append("gewisse <b>inhaltliche Ähnlichkeiten</b> in den Genres")
+        reasons.append(random.choice([
+            "weil er teilweise ähnliche Genre-Muster aufweist",
+            "da sich bestimmte Themen mit deinen bisherigen Filmen überschneiden",
+            "weil er einige typische Elemente deiner Genres enthält"
+        ]))
 
+    # Tag-Erklärungen
     if tag_sim > 0.4 and tags_selected:
-        reasons.append("viele deiner <b>gewählten Tags</b> werden abgedeckt")
+        reasons.append(random.choice([
+            "weil er viele deiner gewählten Schlagworte aufgreift",
+            "da er stark mit den von dir markierten Themen übereinstimmt",
+            "weil die gewählten Tags hier deutlich vertreten sind"
+        ]))
     elif tag_sim > 0.2 and tags_selected:
-        reasons.append("einige Schlagworte <b>passen zu deinen Interessen</b>")
+        reasons.append(random.choice([
+            "weil er in Teilen zu deinen gewählten Tags passt",
+            "da einige Themen mit deinen Interessen übereinstimmen",
+            "weil einzelne Schlagworte aus deinen Präferenzen enthalten sind"
+        ]))
 
+    # Bewertung
     if rating >= 4.0:
-        reasons.append("von anderen Nutzer:innen <b>sehr gut bewertet</b>")
+        reasons.append(random.choice([
+            "weil er von anderen Nutzer:innen besonders gut bewertet wurde",
+            "da er eine außergewöhnlich hohe Durchschnittsbewertung hat",
+            "weil er allgemein als sehr sehenswert gilt"
+        ]))
     elif rating >= 3.6:
-        reasons.append("<b>solide Bewertungen</b> von der Community")
+        reasons.append(random.choice([
+            "weil er solide und überdurchschnittliche Bewertungen bekommen hat",
+            "da viele Zuschauer:innen ihn als gut eingestuft haben",
+            "weil er von der Community als empfehlenswert angesehen wird"
+        ]))
 
+    # Beliebtheit / Anzahl Ratings
+    if n_ratings >= 5000:
+        reasons.append("weil er extrem beliebt ist und von vielen Menschen gesehen wurde")
+    elif n_ratings >= 1000:
+        reasons.append("weil er eine beachtliche Anzahl an Bewertungen erhalten hat")
+
+    # Jahr
+    if year and year > 2010:
+        reasons.append("weil er ein relativ neuer Film ist, der moderne Themen aufgreift")
+    elif year and year < 2000:
+        reasons.append("weil er ein Klassiker ist, der bis heute relevant geblieben ist")
+
+    # Vertrauenswert
     trust_score = movie_row.get("similarity", 0)
     trust_percent = round(trust_score * 100, 1)
-    vertrauen_text = f" 🔒 <b>Vertrauenswert:</b> {trust_percent} %"
-
-    if reasons:
-        return "Empfohlen, weil " + " und ".join(reasons) + ". " + vertrauen_text
+    if trust_score >= 0.8:
+        trust_label = "sehr hoch"
+    elif trust_score >= 0.6:
+        trust_label = "hoch"
+    elif trust_score >= 0.4:
+        trust_label = "mittel"
     else:
-        return "Empfohlen, weil er in mehreren Aspekten zu deinem Profil passt. " + vertrauen_text
+        trust_label = "niedrig"
+
+    vertrauen_text = f" 🔒 <b>Vertrauenswert:</b> {trust_percent} % ({trust_label})"
+
+    # Erklärung zusammensetzen
+    if reasons:
+        explanation = "Dieser Film wurde empfohlen, " + " und ".join(reasons) + ". " + vertrauen_text
+    else:
+        explanation = "Dieser Film passt in mehreren Aspekten zu deinem Profil. " + vertrauen_text
+
+    return explanation
 
 # === Google Drive CSV-Download ===
 def download_and_verify_csv(file_id, dest_path):
@@ -167,8 +223,6 @@ if len(selected_titles) == 5:
                 explanation = generate_text_explanation(row, tags_selected)
                 st.markdown(f"<p style='font-size:16px; color:#333;'>{explanation}</p>", unsafe_allow_html=True)
             st.markdown("---")
-
-
 
 
 
