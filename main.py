@@ -262,14 +262,15 @@ if len(selected_titles) == 5:
 
     # Session-State für gespeicherte Empfehlungen
     if "shown_recs" not in st.session_state:
-        st.session_state.shown_recs = []
+        # Initial: gleich die ersten 3 Empfehlungen anzeigen
+        st.session_state.shown_recs = sorted_movies.head(3)["movieId"].tolist()
 
-    # Wenn Button gedrückt → nächste 3 Empfehlungen hinzufügen
+    # Button -> nächste 3 hinzufügen
     if st.button("🔄 Mehr Empfehlungen laden"):
         next_batch = sorted_movies[~sorted_movies["movieId"].isin(st.session_state.shown_recs)].head(3)
         st.session_state.shown_recs.extend(next_batch["movieId"].tolist())
 
-    # Immer aktuelle Empfehlungen anzeigen
+    # Anzeige der gespeicherten Empfehlungen
     if st.session_state.shown_recs:
         st.subheader("🌟 Deine Empfehlungen")
         api_key = st.secrets["TMDB_API_KEY"]
@@ -291,6 +292,7 @@ if len(selected_titles) == 5:
                     explanation = generate_text_explanation(row, tags_selected)
                     st.markdown(f"<p style='font-size:16px; color:#333;'>{explanation}</p>", unsafe_allow_html=True)
                 st.markdown("---")
+
 
 
 
