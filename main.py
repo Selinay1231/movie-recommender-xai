@@ -1,69 +1,60 @@
-# MovieMate – eleganter Movie-Recommender (Hero Landing + Cards + Append Loading)
+# MovieMate – eleganter Movie-Recommender (Hero Landing + Cards + Step-by-Step Auswahl)
 
 import pandas as pd
 import streamlit as st
 from sklearn.metrics.pairwise import cosine_similarity
-import os, requests, re, uuid, gdown, random, hashlib, textwrap
+import os, requests, re, uuid, gdown, random, hashlib
 
 # =========================
 # App Setup & Theme
 # =========================
 st.set_page_config(page_title="MovieMate", page_icon="🎬", layout="wide")
 
-# Global CSS (Farben, Buttons, Cards, Hero)
+# Global CSS
 st.markdown("""
 <style>
 :root{
-  --primary:#6c5ce7;
-  --primary-dark:#5a4bd6;
-  --bg-soft:#f4f6fb;
-  --card-bg:#ffffff;
-  --muted:#6b7280;
+  --primary:#6c5ce7; --primary-dark:#5a4bd6;
+  --bg-soft:#f4f6fb; --card-bg:#ffffff; --muted:#6b7280;
 }
 html, body, [data-testid="stApp"] { background: var(--bg-soft); }
 
+/* Headline */
+h1{ font-weight:800; letter-spacing:.3px; }
+
+/* Buttons */
 div.stButton { display:flex; justify-content:center; }
 div.stButton > button:first-child{
   background: var(--primary);
   color:#fff; border:none; border-radius:12px;
   padding:14px 28px; font-size:18px; font-weight:600;
   box-shadow:0 6px 20px rgba(108,92,231,.25);
+  transition:transform .06s ease, background .2s ease;
 }
 div.stButton > button:first-child:hover{ background: var(--primary-dark); transform: translateY(-1px); }
 div.stButton > button:first-child:disabled{ opacity:.45; cursor:not-allowed; }
 
-.hero{
-  position:relative; border-radius:18px; overflow:hidden;
-  box-shadow:0 10px 40px rgba(0,0,0,.08); margin-top:8px;
-}
+/* Hero */
+.hero{ position:relative; border-radius:18px; overflow:hidden; box-shadow:0 10px 40px rgba(0,0,0,.08); margin-top:8px; }
 .hero__bg{
-  /* Helleres Overlay; Bild kannst du tauschen */
-  background:
-    linear-gradient(rgba(15,16,40,.35), rgba(15,16,40,.25)),
-    url('https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1600&q=80')
-    center / cover no-repeat;
-  height:290px;
+  background-image:url('https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1600&q=80');
+  background-size:cover; background-position:center; height:290px;
 }
-.hero__content{
-  position:absolute; inset:0;
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
-  color:#fff; text-align:center; padding:0 24px;
-}
+.hero__content{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  color:#fff; text-align:center; padding:0 24px; }
 .hero__title{ font-size:44px; font-weight:800; margin:0 0 4px; }
 .hero__subtitle{ font-size:18px; opacity:.95; margin:8px 0 0; }
 
+/* Cards */
 .grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap:20px; }
-.card{
-  background:var(--card-bg); border-radius:14px; overflow:hidden;
-  box-shadow:0 8px 20px rgba(0,0,0,.06); transition:transform .08s ease, box-shadow .2s ease;
-}
+.card{ background:var(--card-bg); border-radius:14px; overflow:hidden;
+  box-shadow:0 8px 20px rgba(0,0,0,.06); transition:transform .08s ease, box-shadow .2s ease; }
 .card:hover{ transform:translateY(-3px); box-shadow:0 12px 28px rgba(0,0,0,.12); }
 .card img{ width:100%; height:390px; object-fit:cover; background:#e5e7eb; }
 .card__body{ padding:14px 16px 18px; }
 .card__title{ margin:0 0 8px; font-size:17px; font-weight:700; }
 .card__explain{ color:#374151; line-height:1.45; font-size:15px; }
-.badge{ display:inline-block; background:#eef2ff; color:#4338ca;
-  padding:4px 10px; border-radius:999px; font-size:12px; font-weight:700; margin-bottom:8px; }
+.badge{ display:inline-block; background:#eef2ff; color:#4338ca; padding:4px 10px; border-radius:999px; font-size:12px; font-weight:700; margin-bottom:8px; }
 .section-title{ margin:10px 0 8px; font-weight:800; letter-spacing:.2px; }
 </style>
 """, unsafe_allow_html=True)
@@ -94,10 +85,8 @@ def get_movie_poster(title, api_key):
 
 def generate_text_explanation(movie_row, tags_selected):
     reasons=[]
-    genre_sim=movie_row.get("genre_similarity",0)
-    tag_sim=movie_row.get("tag_similarity",0)
-    rating=movie_row.get("avg_rating",0)
-    year=int(movie_row.get("year",0)) if not pd.isna(movie_row.get("year",0)) else None
+    genre_sim=movie_row.get("genre_similarity",0); tag_sim=movie_row.get("tag_similarity",0)
+    rating=movie_row.get("avg_rating",0); year=int(movie_row.get("year",0)) if not pd.isna(movie_row.get("year",0)) else None
     n_ratings=movie_row.get("n_ratings",0)
 
     if genre_sim>0.65:
@@ -139,8 +128,7 @@ def generate_text_explanation(movie_row, tags_selected):
     if year and year>2010: reasons.append("weil er ein relativ neuer Film ist, der moderne Themen aufgreift")
     elif year and year<2000: reasons.append("weil er ein Klassiker ist, der bis heute relevant geblieben ist")
 
-    trust=movie_row.get("similarity",0)
-    trust_percent=round(trust*100,1)
+    trust=movie_row.get("similarity",0); trust_percent=round(trust*100,1)
     trust_label="sehr hoch" if trust>=0.8 else "hoch" if trust>=0.6 else "mittel" if trust>=0.4 else "niedrig"
     vt=f"🔒 <b>Vertrauenswert:</b> {trust_percent}% ({trust_label})"
 
@@ -150,7 +138,8 @@ def download_and_verify_csv(file_id, dest_path):
     url=f"https://drive.google.com/uc?export=download&id={file_id}"
     if not os.path.exists(dest_path): gdown.download(url, dest_path, quiet=False)
     with open(dest_path, "r", encoding="utf-8") as f:
-        if "<html" in f.readline().lower(): st.error(f"❌ Fehler beim Download: {dest_path} enthält HTML"); st.stop()
+        if "<html" in f.readline().lower():
+            st.error(f"❌ Fehler beim Download: '{dest_path}' enthält HTML statt CSV."); st.stop()
 
 def selection_hash(titles, tags, year_from):
     raw="|".join(sorted(titles))+"||"+"|".join(sorted(tags))+f"||{year_from}"
@@ -221,17 +210,28 @@ else:
     movies_view = movies[movies["year"] >= min_year].copy()
     available_movies = movies_view.sort_values("title")
 
-    selected_titles=[]
-    for i in range(1,6):
-        film = st.selectbox(f"🎥 Wähle Film {i}:", ["-- bitte auswählen --"]+available_movies["title"].tolist(), key=f"film_{i}")
-        if film != "-- bitte auswählen --": selected_titles.append(film)
+    selected_titles = []
 
-    tags_selected=[]
-    with st.expander("🔖 Optional: Tags auswählen"):
-        all_tags = genome_tags["tag"].sort_values().unique().tolist()
-        tags_selected = st.multiselect("Bis zu 5 Tags:", all_tags, max_selections=5)
+    # Schritt-für-Schritt Auswahl
+    for i in range(1, 6):
+        if i == 1 or len(selected_titles) >= (i - 1):
+            film = st.selectbox(
+                f"🎥 Wähle Film {i}:",
+                ["-- bitte auswählen --"] + available_movies["title"].tolist(),
+                key=f"film_{i}"
+            )
+            if film != "-- bitte auswählen --":
+                selected_titles.append(film)
 
-    if len(selected_titles)==5:
+    # Tags erst wenn 5 Filme gewählt
+    tags_selected = []
+    if len(selected_titles) == 5:
+        with st.expander("🔖 Optional: Tags auswählen"):
+            all_tags = genome_tags["tag"].sort_values().unique().tolist()
+            tags_selected = st.multiselect("Bis zu 5 Tags:", all_tags, max_selections=5)
+
+    # Empfehlungen erst wenn 5 Filme da sind
+    if len(selected_titles) == 5:
         sel_key = selection_hash(selected_titles, tags_selected, int(min_year))
         if st.session_state.selection_key != sel_key:
             st.session_state.selection_key = sel_key
@@ -260,36 +260,30 @@ else:
         to_show = sorted_movies.iloc[:show_n]
 
         st.markdown("<h3 class='section-title'>🌟 Deine Empfehlungen</h3>", unsafe_allow_html=True)
+        api_key = st.secrets.get("TMDB_API_KEY")
 
-        # ✅ Karten-HTML sauber ohne führende Indents rendern
-        grid_open = '<div class="grid">'
-        grid_close = '</div>'
-        card_blocks = []
-        tmdb_key = st.secrets.get("TMDB_API_KEY")
-
+        # Grid-Karten
+        cards_html = ['<div class="grid">']
         for _, row in to_show.iterrows():
-            poster = get_movie_poster(clean_title(row["title"]), tmdb_key) if tmdb_key else None
+            poster = get_movie_poster(clean_title(row["title"]), api_key) if api_key else None
             poster = poster or "https://via.placeholder.com/500x750.png?text=No+Image"
             exp = generate_text_explanation(row, tags_selected)
-
-            card_html = textwrap.dedent(f"""\
+            cards_html.append(f"""
             <div class="card">
-            <img src="{poster}" alt="Poster">
-            <div class="card__body">
-            <div class="badge">Empfehlung</div>
-            <div class="card__title">{row['title']}</div>
-            <div class="card__explain">{exp}</div>
+              <img src="{poster}" alt="Poster">
+              <div class="card__body">
+                <div class="badge">Empfehlung</div>
+                <div class="card__title">{row['title']}</div>
+                <div class="card__explain">{exp}</div>
+              </div>
             </div>
-            </div>
-            """).strip()  # strip entfernt evtl. führenden Zeilenumbruch
-
-            card_blocks.append(card_html)
-
-        st.markdown(grid_open + "\n".join(card_blocks) + grid_close, unsafe_allow_html=True)
+            """)
+        cards_html.append("</div>")
+        st.markdown("\n".join(cards_html), unsafe_allow_html=True)
 
         # Mehr laden
         can_more = show_n < max_n
-        st.write("")  # spacing
+        st.write("")
         cc1, cc2, cc3 = st.columns([1,2,1])
         with cc2:
             if st.button("🔄 Mehr Empfehlungen laden", disabled=not can_more, use_container_width=True):
@@ -298,5 +292,6 @@ else:
 
         if not can_more:
             st.caption("🎉 Du hast alle passenden Empfehlungen gesehen. Ändere deine Auswahl, um neue Vorschläge zu bekommen.")
+
 
 
