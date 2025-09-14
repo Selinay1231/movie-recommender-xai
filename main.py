@@ -46,13 +46,13 @@ div.stButton > button:first-child:disabled{ opacity:.45; cursor:not-allowed; }
   margin-top:8px;
 }
 .hero__bg{
-  /* Unsplash Bild + Overlay; tausche URL gern durch eigenes Bild */
   background-image:
     linear-gradient(rgba(15,16,40,.65), rgba(15,16,40,.55)),
-    url('https://images.unsplash.com/photo-1517602302552-471fe67acf66?q=80&w=1600&auto=format&fit=crop');
+    url('https://images.unsplash.com/photo-1598899134739-24c46f58b8b4?q=80&w=1600&auto=format&fit=crop');
   background-size:cover; background-position:center;
   height:290px;
 }
+
 .hero__content{
   position:absolute; inset:0;
   display:flex; flex-direction:column; align-items:center; justify-content:center;
@@ -299,6 +299,7 @@ else:
 
         if not can_more:
             st.caption("🎉 Du hast alle passenden Empfehlungen gesehen. Ändere deine Auswahl, um neue Vorschläge zu bekommen.")
+
 
 
 
