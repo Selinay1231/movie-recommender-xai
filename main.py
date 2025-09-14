@@ -276,10 +276,15 @@ else:
     available_movies = movies_view.sort_values("title")
 
     selected_titles = []
-    for i in range(1,6):
+    for i in range(1, 6):
         if i == 1 or len(selected_titles) >= (i - 1):
-            film = st.selectbox(f"🎥 Wähle Film {i}:", ["-- bitte auswählen --"]+available_movies["title"].tolist(), key=f"film_{i}")
-            if film != "-- bitte auswählen --": selected_titles.append(film)
+            film = st.selectbox(
+                f"🎥 Wähle Film {i}:",
+                ["🔍 Film suchen oder auswählen …"] + available_movies["title"].tolist(),
+                key=f"film_{i}"
+            )
+            if film != "🔍 Film suchen oder auswählen …":
+                selected_titles.append(film)
 
     tags_selected=[]
     if len(selected_titles)==5:
@@ -345,5 +350,6 @@ else:
 
         if not can_more:
             st.caption("🎉 Du hast alle passenden Empfehlungen gesehen. Ändere deine Auswahl, um neue Vorschläge zu bekommen.")
+
 
 
