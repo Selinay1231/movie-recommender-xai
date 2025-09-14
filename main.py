@@ -50,7 +50,7 @@ div.stButton > button:first-child:disabled{ opacity:.45; cursor:not-allowed; }
 .card{ background:var(--card-bg); border-radius:14px; overflow:hidden;
   box-shadow:0 8px 20px rgba(0,0,0,.06); transition:transform .08s ease, box-shadow .2s ease; }
 .card:hover{ transform:translateY(-3px); box-shadow:0 12px 28px rgba(0,0,0,.12); }
-.card img{ width:100%; height:390px; object-fit:cover; background:#e5e7eb; }
+.card img{ width:100%; height:300px; object-fit:cover;  border-bottom:1px solid #eee; background:#e5e7eb; }
 .card__body{ padding:14px 16px 18px; }
 .card__title{ margin:0 0 8px; font-size:17px; font-weight:700; }
 .card__explain{ color:#374151; line-height:1.45; font-size:15px; }
@@ -292,4 +292,5 @@ else:
 
         if not can_more:
             st.caption("🎉 Du hast alle passenden Empfehlungen gesehen. Ändere deine Auswahl, um neue Vorschläge zu bekommen.")
+
 
