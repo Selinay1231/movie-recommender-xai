@@ -258,43 +258,39 @@ if len(selected_titles) == 5:
     movies["tag_similarity"] = tag_similarities
 
     movies["similarity"] = 0.5 * movies["genre_similarity"] + 0.5 * movies["tag_similarity"] if tags_selected else movies["genre_similarity"]
-    sorted_movies = movies[~movies["movieId"].isin(selected_ids)].sort_values("similarity", ascending=False)
+    sorted_movies = movies[~movies["movieId"].isin(selected_ids)].sort_values("similarity", ascending=False).reset_index(drop=True)
 
-    # Session-State für gespeicherte Empfehlungen
-    if "shown_recs" not in st.session_state:
-        # Initial: gleich die ersten 3 Empfehlungen anzeigen
-        st.session_state.shown_recs = sorted_movies.head(3)["movieId"].tolist()
+    # Session-State für Index initialisieren
+    if "rec_index" not in st.session_state:
+        st.session_state.rec_index = 3  # starte mit 3 Empfehlungen
 
-    # Button -> nächste 3 hinzufügen
+    # Button -> Index erhöhen
     if st.button("🔄 Mehr Empfehlungen laden"):
-        next_batch = sorted_movies[~sorted_movies["movieId"].isin(st.session_state.shown_recs)].head(3)
-        st.session_state.shown_recs.extend(next_batch["movieId"].tolist())
+        st.session_state.rec_index += 3
 
-    # Anzeige der gespeicherten Empfehlungen
-    if st.session_state.shown_recs:
-        st.subheader("🌟 Deine Empfehlungen")
-        api_key = st.secrets["TMDB_API_KEY"]
+    # Zeige alle Filme bis zum aktuellen Index
+    to_show = sorted_movies.iloc[:st.session_state.rec_index]
 
-        for _, row in sorted_movies[sorted_movies["movieId"].isin(st.session_state.shown_recs)].iterrows():
-            with st.container():
-                st.markdown(f"""
-                <div style="background-color:#f9f9f9; padding:20px; margin-bottom:20px;
-                            border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.15);">
-                    <h3>🎥 {row['title']}</h3>
-                </div>
-                """, unsafe_allow_html=True)
+    st.subheader("🌟 Deine Empfehlungen")
+    api_key = st.secrets["TMDB_API_KEY"]
 
-                col1, col2 = st.columns([1, 3])
-                with col1:
-                    poster_url = get_movie_poster(clean_title(row["title"]), api_key)
-                    st.image(poster_url if poster_url else "https://via.placeholder.com/120x180.png?text=No+Image", width=220)
-                with col2:
-                    explanation = generate_text_explanation(row, tags_selected)
-                    st.markdown(f"<p style='font-size:16px; color:#333;'>{explanation}</p>", unsafe_allow_html=True)
-                st.markdown("---")
+    for _, row in to_show.iterrows():
+        with st.container():
+            st.markdown(f"""
+            <div style="background-color:#f9f9f9; padding:20px; margin-bottom:20px;
+                        border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.15);">
+                <h3>🎥 {row['title']}</h3>
+            </div>
+            """, unsafe_allow_html=True)
 
-
-
+            col1, col2 = st.columns([1, 3])
+            with col1:
+                poster_url = get_movie_poster(clean_title(row["title"]), api_key)
+                st.image(poster_url if poster_url else "https://via.placeholder.com/120x180.png?text=No+Image", width=220)
+            with col2:
+                explanation = generate_text_explanation(row, tags_selected)
+                st.markdown(f"<p style='font-size:16px; color:#333;'>{explanation}</p>", unsafe_allow_html=True)
+            st.markdown("---")
 
 
 
