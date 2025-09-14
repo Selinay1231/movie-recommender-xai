@@ -34,19 +34,44 @@ div.stButton > button:first-child{
 div.stButton > button:first-child:hover{ background: var(--primary-dark); transform: translateY(-1px); }
 div.stButton > button:first-child:disabled{ opacity:.45; cursor:not-allowed; }
 
-/* Hero */
-.hero{ position:relative; border-radius:18px; overflow:hidden; box-shadow:0 10px 40px rgba(0,0,0,.08); margin-top:8px; }
-.hero__bg{
-  background-image:url('https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1600&q=80');
-  background-size:cover; background-position:center; height:290px;
-}
-.hero__content{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;
-  color:#fff; text-align:center; padding:0 24px; }
-.hero__title{ font-size:44px; font-weight:800; margin:0 0 4px; }
-.hero__subtitle{ font-size:18px; opacity:.95; margin:8px 0 0; }
-
 st.markdown("""
 <style>
+/* Hero */
+.hero {
+  position: relative;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 10px 40px rgba(0,0,0,.08);
+  margin-top: 8px;
+}
+.hero__bg {
+  background-image: url('https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1600&q=80');
+  background-size: cover;
+  background-position: center;
+  height: 290px;
+}
+.hero__content {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  text-align: center;
+  padding: 0 24px;
+}
+.hero__title {
+  font-size: 44px;
+  font-weight: 800;
+  margin: 0 0 4px;
+}
+.hero__subtitle {
+  font-size: 18px;
+  opacity: .95;
+  margin: 8px 0 0;
+}
+
 /* Cards */
 .grid {
   display: grid;
@@ -338,6 +363,7 @@ else:
 
         if not can_more:
             st.caption("🎉 Du hast alle passenden Empfehlungen gesehen. Ändere deine Auswahl, um neue Vorschläge zu bekommen.")
+
 
 
 
