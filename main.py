@@ -197,9 +197,30 @@ if not st.session_state.intro_done:
         unsafe_allow_html=True
     )
 
-    if st.button("🎬 Los geht's"):
-        st.session_state.intro_done = True
-        st.rerun()
+    # Button in zentriertem, größerem Stil
+st.markdown(
+    """
+    <div style="display: flex; justify-content: center; margin-top: 25px;">
+        <button style="
+            background-color: #1f77b4;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 20px;
+            border-radius: 10px;
+            cursor: pointer;
+        " onclick="window.dispatchEvent(new Event('streamlit_button_click'))">
+            🎬 Los geht's
+        </button>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
+# Workaround: echtes st.button, unsichtbar, aber löst State aus
+if st.button("Los geht's", key="real_button", help="Start", type="primary", use_container_width=True):
+    st.session_state.intro_done = True
+    st.rerun()
 else:
     st.subheader("✨ Deine Auswahl")
 
@@ -292,5 +313,6 @@ else:
         if st.button("🔄 Mehr Empfehlungen laden", disabled=not more_possible):
             st.session_state.rec_index = min(st.session_state.rec_index + 3, max_n)
             st.rerun()
+
 
 
