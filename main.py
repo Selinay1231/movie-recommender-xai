@@ -1,4 +1,4 @@
-# MovieMate – eleganter Movie-Recommender (Hero Landing + Grid Cards + Fix Farben + dedent)
+# MovieMate – eleganter Movie-Recommender (Hero Landing + Grid Cards + Fix Farben + weiße Inputs)
 
 import pandas as pd
 import streamlit as st
@@ -32,9 +32,17 @@ label, .stSelectbox label, .stMultiSelect label, .stSlider label {
   color: #111 !important; 
   font-weight: 600;
 }
-.stSelectbox div[data-baseweb="select"] > div,
-.stMultiSelect div[data-baseweb="select"] > div,
 .stSlider p { color: #111 !important; }
+
+/* Eingabefelder: Hintergrund immer weiß */
+.stSelectbox div[data-baseweb="select"],
+.stMultiSelect div[data-baseweb="select"],
+.stTextInput input {
+  background: #fff !important;
+  color: #111 !important;
+  border: 1px solid #ccc !important;
+  border-radius: 6px !important;
+}
 
 /* Buttons */
 div.stButton { display:flex; justify-content:center; }
@@ -340,7 +348,7 @@ else:
         st.markdown("<h3 class='section-title'>🌟 Deine Empfehlungen</h3>", unsafe_allow_html=True)
         api_key = st.secrets.get("TMDB_API_KEY")
 
-        # Cards sammeln → EIN Block, dedented HTML → kein Codeblock
+        # Cards sammeln
         cards = ['<div class="grid">']
         for _, row in to_show.iterrows():
             poster = get_movie_poster(clean_title(row["title"]), api_key) if api_key else None
@@ -370,3 +378,4 @@ else:
 
         if not can_more:
             st.caption("🎉 Du hast alle passenden Empfehlungen gesehen. Ändere deine Auswahl, um neue Vorschläge zu bekommen.")
+
