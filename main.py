@@ -45,17 +45,63 @@ div.stButton > button:first-child:disabled{ opacity:.45; cursor:not-allowed; }
 .hero__title{ font-size:44px; font-weight:800; margin:0 0 4px; }
 .hero__subtitle{ font-size:18px; opacity:.95; margin:8px 0 0; }
 
+st.markdown("""
+<style>
 /* Cards */
-.grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap:20px; }
-.card{ background:var(--card-bg); border-radius:14px; overflow:hidden;
-  box-shadow:0 8px 20px rgba(0,0,0,.06); transition:transform .08s ease, box-shadow .2s ease; }
-.card:hover{ transform:translateY(-3px); box-shadow:0 12px 28px rgba(0,0,0,.12); }
-.card img{ width:100%; height:300px; object-fit:cover;  border-bottom:1px solid #eee; background:#e5e7eb; }
-.card__body{ padding:14px 16px 18px; }
-.card__title{ margin:0 0 8px; font-size:17px; font-weight:700; }
-.card__explain{ color:#374151; line-height:1.45; font-size:15px; }
-.badge{ display:inline-block; background:#eef2ff; color:#4338ca; padding:4px 10px; border-radius:999px; font-size:12px; font-weight:700; margin-bottom:8px; }
-.section-title{ margin:10px 0 8px; font-weight:800; letter-spacing:.2px; }
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);  /* exakt 3 Karten pro Reihe */
+  gap: 20px;
+}
+
+.card {
+  background: var(--card-bg);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 8px 20px rgba(0,0,0,.06);
+  transition: transform .08s ease, box-shadow .2s ease;
+}
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px rgba(0,0,0,.12);
+}
+
+.card img {
+  width: 100%;
+  height: 300px;                 /* kleinere Posterhöhe */
+  object-fit: cover;             /* behält Seitenverhältnis */
+  border-bottom: 1px solid #eee;
+  background: #e5e7eb;
+}
+
+.card__body {
+  padding: 14px 16px 18px;
+}
+.card__title {
+  margin: 0 0 8px;
+  font-size: 17px;
+  font-weight: 700;
+}
+.card__explain {
+  color: #374151;
+  line-height: 1.45;
+  font-size: 15px;
+}
+.badge {
+  display: inline-block;
+  background: #eef2ff;
+  color: #4338ca;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.section-title {
+  margin: 10px 0 8px;
+  font-weight: 800;
+  letter-spacing: .2px;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -292,5 +338,6 @@ else:
 
         if not can_more:
             st.caption("🎉 Du hast alle passenden Empfehlungen gesehen. Ändere deine Auswahl, um neue Vorschläge zu bekommen.")
+
 
 
