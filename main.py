@@ -197,31 +197,12 @@ if not st.session_state.intro_done:
         unsafe_allow_html=True
     )
 
-    # Button CSS
-    st.markdown(
-        """
-        <style>
-        div.stButton {
-            display: flex;
-            justify-content: center;
-        }
-        div.stButton > button:first-child {
-            background-color: #1f77b4;
-            color: white;
-            padding: 15px 40px;
-            font-size: 20px;
-            border-radius: 10px;
-            border: none;
-            cursor: pointer;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
-
-    if st.button("🎬 Los geht's"):
-        st.session_state.intro_done = True
-        st.rerun()
+    # Button mittig über Spalten
+    col1, col2, col3 = st.columns([1,2,1])
+    with col2:
+        if st.button("🎬 Los geht's", use_container_width=True):
+            st.session_state.intro_done = True
+            st.rerun()
 
 else:
     # =========================
@@ -316,6 +297,7 @@ else:
         if st.button("🔄 Mehr Empfehlungen laden", disabled=not more_possible):
             st.session_state.rec_index = min(st.session_state.rec_index + 3, max_n)
             st.rerun()
+
 
 
 
