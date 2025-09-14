@@ -237,11 +237,61 @@ if len(selected_titles) == 5:
             st.markdown(f"<p style='font-size:16px; color:#333;'>{explanation}</p>", unsafe_allow_html=True)
         st.markdown("---")
 
-if st.button("🔄 Mehr Empfehlungen anzeigen"):
-    st.session_state.rec_offset += 3
-    if st.session_state.rec_offset >= len(movies):
-        st.session_state.rec_offset = 0
-    st.rerun()
+# === Empfehlungen ===
+if len(selected_titles) == 5:
+    selected_ids = movies[movies["title"].isin(selected_titles)]["movieId"].values
+    movie_features = movies.copy()
+    movie_features = movie_features.join(movies["genres"].str.get_dummies("|"))
+    genre_columns = movies["genres"].str.get_dummies("|").columns
+    user_profile = movie_features[movie_features["movieId"].isin(selected_ids)][genre_columns].mean().values.reshape(1, -1)
+    all_profiles = movie_features[genre_columns].values
+    genre_similarities = cosine_similarity(user_profile, all_profiles)[0]
+    movies["genre_similarity"] = genre_similarities
+
+    tag_matrix = pd.pivot_table(genome_scores, values="relevance", index="movieId", columns="tagId", fill_value=0)
+    selected_tag_ids = genome_tags[genome_tags["tag"].isin(tags_selected)]["tagId"].tolist()
+    user_tag_vector = pd.Series(0, index=tag_matrix.columns, dtype=float)
+    for tag_id in selected_tag_ids:
+        user_tag_vector[tag_id] = 1.0
+
+    tag_similarities = cosine_similarity([user_tag_vector], tag_matrix.reindex(movies["movieId"].values, fill_value=0).fillna(0).values)[0]
+    movies["tag_similarity"] = tag_similarities
+
+    movies["similarity"] = 0.5 * movies["genre_similarity"] + 0.5 * movies["tag_similarity"] if tags_selected else movies["genre_similarity"]
+    sorted_movies = movies[~movies["movieId"].isin(selected_ids)].sort_values("similarity", ascending=False)
+
+    # Session-State für gespeicherte Empfehlungen
+    if "shown_recs" not in st.session_state:
+        st.session_state.shown_recs = []
+
+    # Wenn Button gedrückt → nächste 3 Empfehlungen hinzufügen
+    if st.button("🔄 Mehr Empfehlungen laden"):
+        next_batch = sorted_movies[~sorted_movies["movieId"].isin(st.session_state.shown_recs)].head(3)
+        st.session_state.shown_recs.extend(next_batch["movieId"].tolist())
+
+    # Immer aktuelle Empfehlungen anzeigen
+    if st.session_state.shown_recs:
+        st.subheader("🌟 Deine Empfehlungen")
+        api_key = st.secrets["TMDB_API_KEY"]
+
+        for _, row in sorted_movies[sorted_movies["movieId"].isin(st.session_state.shown_recs)].iterrows():
+            with st.container():
+                st.markdown(f"""
+                <div style="background-color:#f9f9f9; padding:20px; margin-bottom:20px;
+                            border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.15);">
+                    <h3>🎥 {row['title']}</h3>
+                </div>
+                """, unsafe_allow_html=True)
+
+                col1, col2 = st.columns([1, 3])
+                with col1:
+                    poster_url = get_movie_poster(clean_title(row["title"]), api_key)
+                    st.image(poster_url if poster_url else "https://via.placeholder.com/120x180.png?text=No+Image", width=220)
+                with col2:
+                    explanation = generate_text_explanation(row, tags_selected)
+                    st.markdown(f"<p style='font-size:16px; color:#333;'>{explanation}</p>", unsafe_allow_html=True)
+                st.markdown("---")
+
 
 
 
