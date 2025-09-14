@@ -1,4 +1,4 @@
-# Projekt: MovieMate – finaler Movie-Recommender mit verbesserten Text-Erklärungen & UI
+# Projekt: MovieMate – finaler Movie-Recommender mit Card-Design & "Mehr Empfehlungen"-Funktion
 
 import pandas as pd
 import streamlit as st
@@ -17,6 +17,10 @@ st.set_page_config(page_title="MovieMate", page_icon="🎬", layout="wide")
 if "user_id" not in st.session_state:
     st.session_state.user_id = str(uuid.uuid4())
 
+# Initialisiere Offset für "Mehr Empfehlungen"-Funktion
+if "rec_offset" not in st.session_state:
+    st.session_state.rec_offset = 0
+
 # Funktion Titel bereinigen
 def clean_title(title):
     return re.sub(r"\s*\(\d{4}\)", "", title).strip()
@@ -34,7 +38,7 @@ def get_movie_poster(title, api_key):
                 return f"https://image.tmdb.org/t/p/w500{poster_path}"
     return None
 
-# === Neue, diversere Text-Erklärung ===
+# === Diversere Text-Erklärung ===
 def generate_text_explanation(movie_row, tags_selected):
     reasons = []
 
@@ -110,7 +114,7 @@ def generate_text_explanation(movie_row, tags_selected):
     else:
         trust_label = "niedrig"
 
-    vertrauen_text = f" 🔒 <b>Vertrauenswert:</b> {trust_percent} % ({trust_label})"
+    vertrauen_text = f"🔒 <b>Vertrauenswert:</b> {trust_percent} % ({trust_label})"
 
     # Erklärung zusammensetzen
     if reasons:
@@ -205,24 +209,42 @@ if len(selected_titles) == 5:
     movies["tag_similarity"] = tag_similarities
 
     movies["similarity"] = 0.5 * movies["genre_similarity"] + 0.5 * movies["tag_similarity"] if tags_selected else movies["genre_similarity"]
-    top_movies = movies[~movies["movieId"].isin(selected_ids)].sort_values("similarity", ascending=False).head(3)
+    
+    # Offset für "Mehr Empfehlungen"
+    start = st.session_state.rec_offset
+    end = start + 3
+    top_movies = movies[~movies["movieId"].isin(selected_ids)].sort_values("similarity", ascending=False).iloc[start:end]
 
     st.subheader("🌟 Deine Empfehlungen")
 
     api_key = st.secrets["TMDB_API_KEY"]
 
     for _, row in top_movies.iterrows():
-        with st.container():
-            col1, col2 = st.columns([1, 3])
-            with col1:
-                poster_url = get_movie_poster(clean_title(row["title"]), api_key)
-                st.image(poster_url if poster_url else "https://via.placeholder.com/120x180.png?text=No+Image", width=250)
+        # Card Design
+        st.markdown(f"""
+        <div style="background-color:#f9f9f9; padding:20px; margin-bottom:20px;
+                    border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.15);">
+            <h3>🎥 {row['title']}</h3>
+        </div>
+        """, unsafe_allow_html=True)
 
-            with col2:
-                st.markdown(f"<h3>{row['title']}</h3>", unsafe_allow_html=True)
-                explanation = generate_text_explanation(row, tags_selected)
-                st.markdown(f"<p style='font-size:16px; color:#333;'>{explanation}</p>", unsafe_allow_html=True)
-            st.markdown("---")
+        col1, col2 = st.columns([1, 3])
+        with col1:
+            poster_url = get_movie_poster(clean_title(row["title"]), api_key)
+            st.image(poster_url if poster_url else "https://via.placeholder.com/120x180.png?text=No+Image", width=220)
+        with col2:
+            explanation = generate_text_explanation(row, tags_selected)
+            st.markdown(f"<p style='font-size:16px; color:#333;'>{explanation}</p>", unsafe_allow_html=True)
+        st.markdown("---")
+
+    # Button für weitere Empfehlungen
+    if st.button("🔄 Mehr Empfehlungen anzeigen"):
+        st.session_state.rec_offset += 3
+        if st.session_state.rec_offset >= len(movies):
+            st.session_state.rec_offset = 0
+        st.experimental_rerun()
+
+
 
 
 
