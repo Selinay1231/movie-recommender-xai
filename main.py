@@ -1,4 +1,4 @@
-# MovieMate – eleganter Movie-Recommender (Hero Landing + Cards + Step-by-Step Auswahl + Grid-Fix)
+# MovieMate – eleganter Movie-Recommender (Hero Landing + Cards + Step-by-Step Auswahl + Grid-Fix ohne HTML-Fehler)
 
 import pandas as pd
 import streamlit as st
@@ -199,7 +199,7 @@ def generate_text_explanation(movie_row, tags_selected):
 
     trust=movie_row.get("similarity",0); trust_percent=round(trust*100,1)
     trust_label="sehr hoch" if trust>=0.8 else "hoch" if trust>=0.6 else "mittel" if trust>=0.4 else "niedrig"
-    vt=f"🔒 <b>Vertrauenswert:</b> {trust_percent}% ({trust_label})"
+    vt=f"🔒 Vertrauenswert: {trust_percent}% ({trust_label})"
 
     return ("Dieser Film wurde empfohlen, "+ " und ".join(reasons) + ". " + vt) if reasons else ("Dieser Film passt in mehreren Aspekten zu deinem Profil. " + vt)
 
