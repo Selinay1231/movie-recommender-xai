@@ -247,8 +247,8 @@ if not st.session_state.intro_done:
       <div class="hero__bg"></div>
       <div class="hero__content">
         <div class="hero__title">Willkommen bei MovieMate</div>
-        <div class="hero__subtitle">Unsere KI findet Filme, die perfekt zu deinem Geschmack passen.</div>
-        <div class="hero__subtitle" style="margin-top:6px;">Wähle 5 Filme, die du magst – wir erklären dir klar, warum die Vorschläge zu dir passen.</div>
+        <div class="hero__subtitle">Hier findest du Filme, die perfekt zu deinem Geschmack passen.</div>
+        <div class="hero__subtitle" style="margin-top:6px;">Wähle dafür lediglich 5 Filme, die du magst.</div>
       </div>
     </div>
     """)
@@ -347,6 +347,7 @@ else:
 
         if not can_more:
             st.caption("🎉 Du hast alle passenden Empfehlungen gesehen. Ändere deine Auswahl, um neue Vorschläge zu bekommen.")
+
 
 
 
