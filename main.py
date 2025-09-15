@@ -60,7 +60,7 @@ div.stButton > button:first-child:disabled{ opacity:.45; cursor:not-allowed; }
 .hero__content {
   position: absolute; inset: 0; display: flex; flex-direction: column;
   align-items: center; justify-content: center; text-align: center;
-  padding: 0 24px; background: rgba(0,0,0,0.45);
+  padding: 0 24px; background: rgba(0,0,0,0.25);
 }
 .hero__title {
   font-size: clamp(24px, 6vw, 44px); font-weight: 800;
@@ -347,4 +347,5 @@ else:
 
         if not can_more:
             st.caption("🎉 Du hast alle passenden Empfehlungen gesehen. Ändere deine Auswahl, um neue Vorschläge zu bekommen.")
+
 
