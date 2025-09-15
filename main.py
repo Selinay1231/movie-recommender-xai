@@ -37,16 +37,32 @@ label, .stSelectbox label, .stMultiSelect label, .stSlider label { color: #111 !
   border-radius: 6px !important;
 }
 
-/* Buttons */
-div.stButton { display:flex; justify-content:center; }
-div.stButton > button:first-child{
-  background: var(--primary); color:#fff; border:none; border-radius:12px;
-  padding:14px 28px; font-size:18px; font-weight:600;
-  box-shadow:0 6px 20px rgba(108,92,231,.25);
-  transition:transform .06s ease, background .2s ease;
+/* Buttons – Netflix Style */
+div.stButton { 
+  display:flex; 
+  justify-content:center; 
 }
-div.stButton > button:first-child:hover{ background: var(--primary-dark); transform: translateY(-1px); }
-div.stButton > button:first-child:disabled{ opacity:.45; cursor:not-allowed; }
+div.stButton > button:first-child {
+  background: #e50914;         /* Netflix Rot */
+  color: #fff; 
+  border: none; 
+  border-radius: 4px;          /* fast eckig */
+  padding: 16px 36px;          /* größer */
+  font-size: 20px; 
+  font-weight: 700; 
+  text-transform: uppercase;   /* Netflix typisch */
+  letter-spacing: .5px;
+  box-shadow: 0 6px 20px rgba(229,9,20,.4);
+  transition: background .2s ease, transform .1s ease;
+}
+div.stButton > button:first-child:hover {
+  background: #f6121d;         /* helleres Rot beim Hover */
+  transform: scale(1.03); 
+}
+div.stButton > button:first-child:disabled {
+  opacity: .5; 
+  cursor: not-allowed; 
+}
 
 /* Hero */
 .hero {
@@ -347,6 +363,7 @@ else:
 
         if not can_more:
             st.caption("🎉 Du hast alle passenden Empfehlungen gesehen. Ändere deine Auswahl, um neue Vorschläge zu bekommen.")
+
 
 
 
