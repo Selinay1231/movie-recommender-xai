@@ -140,13 +140,61 @@ if "selection_key" not in st.session_state: st.session_state.selection_key = Non
 if "intro_done" not in st.session_state: st.session_state.intro_done = False
 
 # =========================
-# Helpers (clean_title, get_movie_poster, generate_text_explanation, download_and_verify_csv, selection_hash)
-# ... unverändert wie bei dir ...
+# Helpers
+# =========================
+def clean_title(title):
+    return re.sub(r"\(\d{4}\)", "", title).strip()
+
+def get_movie_poster(title, api_key):
+    if not api_key:
+        return None
+    try:
+        url = f"https://api.themoviedb.org/3/search/movie?api_key={api_key}&query={title}"
+        r = requests.get(url)
+        data = r.json()
+        if data["results"]:
+            poster_path = data["results"][0].get("poster_path")
+            if poster_path:
+                return f"https://image.tmdb.org/t/p/w500{poster_path}"
+    except:
+        return None
+    return None
+
+def generate_text_explanation(row, tags_selected):
+    # hier kannst du abwechslungsreiche Text-Erklärungen einbauen
+    base = f"Wir empfehlen dir **{row['title']}**, da er ähnliche Genres hat wie deine Auswahl."
+    if tags_selected:
+        base += " Außerdem passen deine gewählten Tags dazu."
+    return base
+
+def selection_hash(selected_titles, tags_selected, min_year):
+    h = hashlib.sha1()
+    h.update("".join(sorted(selected_titles)).encode())
+    h.update("".join(sorted(tags_selected)).encode())
+    h.update(str(min_year).encode())
+    return h.hexdigest()
 
 # =========================
 # Daten laden
 # =========================
-# ... unverändert wie bei dir ...
+@st.cache_data
+def load_data():
+    # Pfade anpassen je nach Ablageort
+    movies = pd.read_csv("movies.csv")
+    genome_tags = pd.read_csv("genome-tags.csv")
+    genome_scores = pd.read_csv("genome-scores.csv")
+
+    # Falls kein year-Feld vorhanden: aus Titel extrahieren
+    if "year" not in movies.columns:
+        movies["year"] = (
+            movies["title"]
+            .str.extract(r"\((\d{4})\)")
+            .fillna(0)
+            .astype(int)
+        )
+    return movies, genome_tags, genome_scores
+
+movies, genome_tags, genome_scores = load_data()
 
 # =========================
 # UI
@@ -180,7 +228,6 @@ else:
 
     min_year = st.slider("Zeige Filme ab Jahr:", 1950, 2015, 1999)
 
-    # --- Neue Auswahl mit Grid + Search + Pagination ---
     if "selected_titles" not in st.session_state:
         st.session_state.selected_titles = []
     if "search_page" not in st.session_state:
@@ -216,7 +263,6 @@ else:
 
             st.image(poster, use_container_width=True)
 
-    # Pagination + Fortschritt unten
     col1, col2, col3 = st.columns([1,2,1])
     with col1:
         if st.button("⬅️ Zurück", disabled=st.session_state.search_page == 0):
@@ -231,9 +277,6 @@ else:
     st.write(f"Ausgewählt: {len(st.session_state.selected_titles)}/5 Filme")
 
     selected_titles = st.session_state.selected_titles
-    # --- Ab hier bleibt deine Logik für Tags + Empfehlungen unverändert ---
-
-
 
     # ⚡ Für die Empfehlungen nach Jahr filtern
     movies_view = movies[movies["year"] >= min_year].copy()
@@ -305,18 +348,3 @@ else:
 
         if not can_more:
             st.caption("🎉 Du hast alle passenden Empfehlungen gesehen. Ändere deine Auswahl, um neue Vorschläge zu bekommen.")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
