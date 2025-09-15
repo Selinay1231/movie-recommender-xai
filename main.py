@@ -88,12 +88,6 @@ div.stButton > button:first-child:disabled {
   text-align: center;
   padding: 0 24px;
 
-  /* Gradient Overlay */
-  background: linear-gradient(
-    to bottom,
-    rgba(0,0,0,0) 0%,
-    rgba(0,0,0,0.6) 100%
-  );
 }
 .hero__title {
   font-size: clamp(24px, 6vw, 44px);
@@ -387,6 +381,7 @@ else:
 
         if not can_more:
             st.caption("🎉 Du hast alle passenden Empfehlungen gesehen. Ändere deine Auswahl, um neue Vorschläge zu bekommen.")
+
 
 
 
