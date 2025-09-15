@@ -97,6 +97,7 @@ h1 {
   box-shadow: 0 6px 20px rgba(229,9,20,.4) !important;
   transition: background .2s ease, transform .1s ease;
   width: 100% !important;
+  margin-top: 20px !important; 
 }
 .stButton > button:hover {
   background-color: #f6121d !important;
@@ -457,6 +458,7 @@ else:
             if st.button("🔄 Mehr Empfehlungen laden", disabled=not can_more, use_container_width=True):
                 st.session_state.rec_index = min(st.session_state.rec_index + 3, max_n)
                 st.rerun()
+
 
 
 
