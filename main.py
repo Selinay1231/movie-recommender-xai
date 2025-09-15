@@ -5,6 +5,8 @@ import streamlit as st
 from sklearn.metrics.pairwise import cosine_similarity
 import os, requests, re, uuid, gdown, random, hashlib
 from textwrap import dedent
+from rapidfuzz import process
+
 
 # =========================
 # App Setup & Theme
@@ -122,6 +124,14 @@ if "search_page" not in st.session_state: st.session_state.search_page = 0
 # =========================
 def clean_title(title: str) -> str:
     return re.sub(r"\s*\(\d{4}\)", "", str(title)).strip()
+  
+def fuzzy_filter(query, choices, limit=100, threshold=60):
+    """
+    Liefert eine Liste von Titeln, die dem Query ähnlich sind.
+    threshold = minimaler Matching-Score (0–100).
+    """
+    results = process.extract(query, choices, limit=limit, score_cutoff=threshold)
+    return [title for title, score, _ in results]
 
 def get_movie_poster(title, api_key):
     if not api_key: return None
@@ -289,13 +299,15 @@ else:
         movies_view = movies[movies["year"] >= min_year].copy()
         available_movies = movies_view.sort_values("title")
         if search:
-            # Alle Titel, die den Suchbegriff enthalten
-            mask = available_movies["title"].str.contains(search, case=False, na=False, regex=False)
-            available_movies = available_movies[mask].copy()
+            titles = available_movies["title"].tolist()
+            matches = fuzzy_filter(search, titles, limit=200, threshold=55)  # tolerance einstellbar
+            available_movies = available_movies[available_movies["title"].isin(matches)].copy()
         
-            # Filme, die mit dem Suchbegriff beginnen, nach oben sortieren
+            # Filme, die exakt mit dem Suchbegriff anfangen, nach oben sortieren
             available_movies["starts"] = available_movies["title"].str.lower().str.startswith(search.lower())
-            available_movies = available_movies.sort_values(by="starts", ascending=False).drop(columns=["starts"])
+            available_movies = available_movies.sort_values(by=["starts","title"], ascending=[False, True])
+            available_movies = available_movies.drop(columns=["starts"])
+
 
 
         page_size = 25
@@ -428,6 +440,7 @@ else:
             if st.button("🔄 Mehr Empfehlungen laden", disabled=not can_more, use_container_width=True):
                 st.session_state.rec_index = min(st.session_state.rec_index + 3, max_n)
                 st.rerun()
+
 
 
 
