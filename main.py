@@ -164,8 +164,14 @@ def fuzzy_filter(query, choices, limit=100, threshold=60):
 
 
 
+# =========================
+# Poster laden (mit Caching)
+# =========================
+@st.cache_data(show_spinner=False)
 def get_movie_poster(title, api_key):
-    if not api_key: return None
+    """Lädt ein Poster über TMDb und cached das Ergebnis."""
+    if not api_key:
+        return None
     try:
         url = "https://api.themoviedb.org/3/search/movie"
         params = {"api_key": api_key, "query": title}
@@ -177,6 +183,7 @@ def get_movie_poster(title, api_key):
     except Exception:
         pass
     return None
+
 
 def generate_text_explanation(movie_row, tags_selected):
     # Abwechslungsreiche Begründungen (dein Baustein-Ansatz)
@@ -480,6 +487,7 @@ else:
             if st.button("🔄 Mehr Empfehlungen laden", disabled=not can_more, use_container_width=True):
                 st.session_state.rec_index = min(st.session_state.rec_index + 3, max_n)
                 st.rerun()
+
 
 
 
