@@ -80,8 +80,6 @@ h1 {
 .card__explain { font-size: 15px; line-height: 1.4; text-align: left; }
 .badge { display:inline-block; background:#eef2ff; color:#4338ca; padding:4px 10px; border-radius:999px; font-size:12px; font-weight:700; margin-bottom:6px; }
 .section-title { margin:12px 0 10px; font-weight:800; color:#111 !important; }
-</style>
-"""), unsafe_allow_html=True)
 
 /* Netflix Style Buttons */
 .stButton > button {
@@ -106,6 +104,8 @@ h1 {
   opacity: .5 !important;
   cursor: not-allowed !important;
 }
+</style>
+"""), unsafe_allow_html=True)
 
 # =========================
 # Session State
@@ -421,6 +421,7 @@ else:
             if st.button("🔄 Mehr Empfehlungen laden", disabled=not can_more, use_container_width=True):
                 st.session_state.rec_index = min(st.session_state.rec_index + 3, max_n)
                 st.rerun()
+
 
 
 
