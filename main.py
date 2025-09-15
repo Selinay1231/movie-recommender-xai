@@ -65,6 +65,7 @@ h1 {
   color: #fff !important;
   opacity: .95;
   text-shadow: 0 1px 4px rgba(0,0,0,.6);
+  color: #111 !important;
 }
 
 /* Cards */
@@ -487,6 +488,7 @@ else:
             if st.button("🔄 Mehr Empfehlungen laden", disabled=not can_more, use_container_width=True):
                 st.session_state.rec_index = min(st.session_state.rec_index + 3, max_n)
                 st.rerun()
+
 
 
 
