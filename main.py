@@ -173,44 +173,44 @@ def generate_text_explanation(movie_row, tags_selected):
 
     # --- Textbausteine ---
     genre_high = [
-        " ,weil er perfekt zu deinen Lieblingsgenres passt",
-        " ,weil er inhaltlich stark an deine bevorzugten Genres angelehnt",
-        " ,denn er spiegelt viele deiner Genre-Vorlieben wider"
+        " weil er perfekt zu deinen Lieblingsgenres passt",
+        " weil er inhaltlich stark an deine bevorzugten Genres angelehnt",
+        " denn er spiegelt viele deiner Genre-Vorlieben wider"
     ]
     genre_mid = [
-        " ,weil er einige Elemente deiner bevorzugten Genres enthält",
-        " , denn er überschneidet sich teilweise mit deinen Genre-Präferenzen",
-        " ,weil er bekannte Genre-Themen mitbringt"
+        " weil er einige Elemente deiner bevorzugten Genres enthält",
+        " denn er überschneidet sich teilweise mit deinen Genre-Präferenzen",
+        " weil er bekannte Genre-Themen mitbringt"
     ]
     tag_texts = [
-        " ,denn er greift viele deiner gewählten Schlagworte auf",
-        " ,denn er deckt sich mit den von dir markierten Themen",
-        " ,weil er deine Tag-Auswahl deutlich widerspiegelt"
+        " denn er greift viele deiner gewählten Schlagworte auf",
+        " denn er deckt sich mit den von dir markierten Themen",
+        " weil er deine Tag-Auswahl deutlich widerspiegelt"
     ]
     rating_high = [
-        " ,denn er zählt zu den bestbewerteten Filmen seiner Art",
-        " ,denn er hat außergewöhnlich gute Bewertungen",
-        " ,denn er wird von vielen Zuschauer:innen als Highlight gesehen"
+        " denn er zählt zu den bestbewerteten Filmen seiner Art",
+        " denn er hat außergewöhnlich gute Bewertungen",
+        " denn er wird von vielen Zuschauer:innen als Highlight gesehen"
     ]
     rating_mid = [
-        " ,denn er wurde solide und überdurchschnittlich bewertet",
-        " ,denn er gilt als empfehlenswert in seiner Kategorie",
-        " ,denn er hat viele positive Stimmen erhalten"
+        " denn er wurde solide und überdurchschnittlich bewertet",
+        " denn er gilt als empfehlenswert in seiner Kategorie",
+        " denn er hat viele positive Stimmen erhalten"
     ]
     popular_texts = [
-        " ,denn er ist extrem beliebt und wurde oft gesehen",
-        " ,denn er wurde schon tausendfach bewertet",
-        " ,denn er erfreut sich großer Bekanntheit"
+        " denn er ist extrem beliebt und wurde oft gesehen",
+        " denn er wurde schon tausendfach bewertet",
+        " denn er erfreut sich großer Bekanntheit"
     ]
     classic_texts = [
-        " ,denn er gilt als zeitloser Klassiker",
-        " ,denn er ist ein Film, der bis heute relevant geblieben ist",
-        " ,denn er wird seit Jahrzehnten geschätzt"
+        " denn er gilt als zeitloser Klassiker",
+        " denn er ist ein Film, der bis heute relevant geblieben ist",
+        " denn er wird seit Jahrzehnten geschätzt"
     ]
     modern_texts = [
-        " ,denn er bringt moderne Themen auf die Leinwand",
-        " ,denn er ist ein aktuellerer Film mit frischem Stil",
-        " ,denn er greift zeitgemäße Inhalte auf"
+        " denn er bringt moderne Themen auf die Leinwand",
+        " denn er ist ein aktuellerer Film mit frischem Stil",
+        " denn er greift zeitgemäße Inhalte auf"
     ]
 
     # --- Regeln ---
@@ -393,6 +393,7 @@ else:
 
         if not can_more:
             st.caption("🎉 Du hast alle passenden Empfehlungen gesehen. Ändere deine Auswahl, um neue Vorschläge zu bekommen.")
+
 
 
 
