@@ -83,6 +83,30 @@ h1 {
 </style>
 """), unsafe_allow_html=True)
 
+/* Netflix Style Buttons */
+.stButton > button {
+  background-color: #e50914 !important;
+  color: #fff !important;
+  font-weight: 700 !important;
+  border: none !important;
+  border-radius: 6px !important;
+  padding: 14px 28px !important;
+  font-size: 16px !important;
+  text-transform: uppercase !important;
+  letter-spacing: .5px !important;
+  box-shadow: 0 6px 20px rgba(229,9,20,.4) !important;
+  transition: background .2s ease, transform .1s ease;
+  width: 100% !important;
+}
+.stButton > button:hover {
+  background-color: #f6121d !important;
+  transform: scale(1.03) !important;
+}
+.stButton > button:disabled {
+  opacity: .5 !important;
+  cursor: not-allowed !important;
+}
+
 # =========================
 # Session State
 # =========================
@@ -397,6 +421,7 @@ else:
             if st.button("🔄 Mehr Empfehlungen laden", disabled=not can_more, use_container_width=True):
                 st.session_state.rec_index = min(st.session_state.rec_index + 3, max_n)
                 st.rerun()
+
 
 
 
