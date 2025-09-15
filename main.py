@@ -301,6 +301,14 @@ if not st.session_state.intro_done:
 else:
     min_year = st.slider("Zeige Filme ab Jahr:", 1950, 2015, 1999)
 
+    # Tags direkt in der Auswahlphase anzeigen
+    all_tags = genome_tags["tag"].astype(str).sort_values().unique().tolist()
+    tags_selected = st.multiselect(
+        "🔖 Tags auswählen (optional, max. 5)", 
+        all_tags, 
+        max_selections=5
+    )
+
     # Auswahlphase: Grid anzeigen, solange <5 gewählt
     if len(st.session_state.selected_titles) < 5:
         search = st.text_input("🔎 Film suchen oder aus Liste wählen:")
@@ -308,14 +316,17 @@ else:
         available_movies = movies_view.sort_values("title")
         if search:
             # Alle Filme, die den eingegebenen Text irgendwo im Titel enthalten
-            mask = available_movies["title"].str.contains(search, case=False, na=False, regex=False)
+            mask = available_movies["title"].str.contains(
+                search, case=False, na=False, regex=False
+            )
             available_movies = available_movies[mask].copy()
         
             # Filme, die direkt mit dem Text beginnen, nach oben sortieren
             available_movies["starts"] = available_movies["title"].str.lower().str.startswith(search.lower())
-            available_movies = available_movies.sort_values(by=["starts","title"], ascending=[False, True])
+            available_movies = available_movies.sort_values(
+                by=["starts","title"], ascending=[False, True]
+            )
             available_movies = available_movies.drop(columns=["starts"])
-        
 
 
 
@@ -362,9 +373,6 @@ else:
     else:
         st.success("✅ Du hast 5 Filme ausgewählt – hier deine Empfehlungen:")
 
-        with st.expander("🔖 Optional: Tags auswählen"):
-            all_tags = genome_tags["tag"].astype(str).sort_values().unique().tolist()
-            tags_selected = st.multiselect("Bis zu 5 Tags:", all_tags, max_selections=5)
 
         sel_key = selection_hash(st.session_state.selected_titles, tags_selected, int(min_year))
         if st.session_state.selection_key != sel_key:
@@ -449,6 +457,7 @@ else:
             if st.button("🔄 Mehr Empfehlungen laden", disabled=not can_more, use_container_width=True):
                 st.session_state.rec_index = min(st.session_state.rec_index + 3, max_n)
                 st.rerun()
+
 
 
 
