@@ -81,12 +81,10 @@ h1 {
 }
 .card__explain { 
   font-size: 14px; 
-  line-height: 1.6;          /* mehr Zeilenhöhe */
-  text-align: left; 
-  margin-top: 8px;           /* etwas Abstand zum Titel */
-  max-height: 120px;         /* Höhe begrenzen */
-  overflow: hidden; 
-  text-overflow: ellipsis;   /* falls Text zu lang ist */
+  line-height: 1.6;       /* mehr Luft zwischen den Zeilen */
+  text-align: justify;    /* schöner Blocksatz */
+  margin-top: 10px;       /* Abstand zum Titel */
+  padding: 0 6px;         /* links/rechts etwas Abstand geben */
 }
 
 .badge { 
@@ -97,11 +95,11 @@ h1 {
   border-radius: 999px; 
   font-size: 12px; 
   font-weight: 700; 
-  margin-bottom: 8px;        /* mehr Abstand unter Badge */
+  margin-bottom: 10px; 
 }
 
 .section-title { 
-  margin: 16px 0 12px;       /* etwas mehr Abstand drumherum */
+  margin: 16px 0 12px; 
   font-weight: 800; 
   color: #111 !important; 
 }
@@ -482,6 +480,7 @@ else:
             if st.button("🔄 Mehr Empfehlungen laden", disabled=not can_more, use_container_width=True):
                 st.session_state.rec_index = min(st.session_state.rec_index + 3, max_n)
                 st.rerun()
+
 
 
 
