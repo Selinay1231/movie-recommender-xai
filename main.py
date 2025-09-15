@@ -312,16 +312,67 @@ else:
     # ⚡ Wichtig: Für die Auswahl NICHT nach Jahr filtern
     available_movies = movies.sort_values("title")
 
-    selected_titles = []
-    for i in range(1,6):
-        if i == 1 or len(selected_titles) >= (i - 1):
-            film = st.selectbox(
-                f"🎥 Film {i} auswählen oder suchen:",
-                ["-- auswählen / suchen --"] + available_movies["title"].tolist(),
-                key=f"film_{i}"
-            )
-            if film != "-- auswählen / suchen --":
-                selected_titles.append(film)
+# ---------- NEUE FILMAUSWAHL MIT SEARCH + GRID + PROGRESS + PAGINATION ----------
+
+# Session state vorbereiten
+if "selected_titles" not in st.session_state:
+    st.session_state.selected_titles = []
+if "search_page" not in st.session_state:
+    st.session_state.search_page = 0  # aktuelle Seite
+
+# Suchfeld
+search = st.text_input("🔎 Film suchen oder aus Liste wählen:")
+
+# Filter Movies
+movies_view = movies[movies["year"] >= min_year].copy()
+available_movies = movies_view.sort_values("title")
+
+if search:
+    available_movies = available_movies[available_movies["title"].str.contains(search, case=False, na=False)]
+
+# Pagination: 25 Filme pro Seite
+page_size = 25
+total_pages = max(1, (len(available_movies) - 1) // page_size + 1)
+start = st.session_state.search_page * page_size
+end = start + page_size
+page_movies = available_movies.iloc[start:end]
+
+# Filme als Grid anzeigen
+cols = st.columns(5)  # 5 Cover pro Reihe
+for idx, row in page_movies.iterrows():
+    col = cols[idx % 5]
+    with col:
+        poster = get_movie_poster(clean_title(row["title"]), st.secrets.get("TMDB_API_KEY"))
+        poster = poster or "https://via.placeholder.com/200x300.png?text=No+Image"
+        is_selected = row["title"] in st.session_state.selected_titles
+
+        # Button als Auswahl
+        if st.button(f"{'✅' if is_selected else '🎥'} {row['title']}", key=f"btn_{row['movieId']}"):
+            if is_selected:
+                st.session_state.selected_titles.remove(row["title"])
+            elif len(st.session_state.selected_titles) < 5:
+                st.session_state.selected_titles.append(row["title"])
+
+        st.image(poster, use_container_width=True)
+
+        # Pagination Buttons
+        col1, col2, col3 = st.columns([1,2,1])
+        with col1:
+            if st.button("⬅️ Zurück", disabled=st.session_state.search_page == 0):
+                st.session_state.search_page -= 1
+                st.rerun()
+        with col3:
+            if st.button("➡️ Weiter", disabled=st.session_state.search_page >= total_pages - 1):
+                st.session_state.search_page += 1
+                st.rerun()
+        
+        # Fortschrittsanzeige
+        st.progress(len(st.session_state.selected_titles) / 5)
+        st.write(f"Ausgewählt: {len(st.session_state.selected_titles)}/5 Filme")
+        
+        # Sobald 5 Filme fertig → übernehmen
+        selected_titles = st.session_state.selected_titles
+
 
     # ⚡ Für die Empfehlungen nach Jahr filtern
     movies_view = movies[movies["year"] >= min_year].copy()
@@ -393,6 +444,7 @@ else:
 
         if not can_more:
             st.caption("🎉 Du hast alle passenden Empfehlungen gesehen. Ändere deine Auswahl, um neue Vorschläge zu bekommen.")
+
 
 
 
