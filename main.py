@@ -79,9 +79,33 @@ h1 {
   height: 44px; display:flex; align-items:center; justify-content:center; text-align:center;
   overflow:hidden; text-overflow:ellipsis; margin:8px 0;
 }
-.card__explain { font-size: 15px; line-height: 1.4; text-align: left; }
-.badge { display:inline-block; background:#eef2ff; color:#4338ca; padding:4px 10px; border-radius:999px; font-size:12px; font-weight:700; margin-bottom:6px; }
-.section-title { margin:12px 0 10px; font-weight:800; color:#111 !important; }
+.card__explain { 
+  font-size: 14px; 
+  line-height: 1.6;          /* mehr Zeilenhöhe */
+  text-align: left; 
+  margin-top: 8px;           /* etwas Abstand zum Titel */
+  max-height: 120px;         /* Höhe begrenzen */
+  overflow: hidden; 
+  text-overflow: ellipsis;   /* falls Text zu lang ist */
+}
+
+.badge { 
+  display: inline-block; 
+  background: #eef2ff; 
+  color: #4338ca; 
+  padding: 4px 10px; 
+  border-radius: 999px; 
+  font-size: 12px; 
+  font-weight: 700; 
+  margin-bottom: 8px;        /* mehr Abstand unter Badge */
+}
+
+.section-title { 
+  margin: 16px 0 12px;       /* etwas mehr Abstand drumherum */
+  font-weight: 800; 
+  color: #111 !important; 
+}
+
 
 /* Netflix Style Buttons */
 .stButton > button {
@@ -458,6 +482,7 @@ else:
             if st.button("🔄 Mehr Empfehlungen laden", disabled=not can_more, use_container_width=True):
                 st.session_state.rec_index = min(st.session_state.rec_index + 3, max_n)
                 st.rerun()
+
 
 
 
