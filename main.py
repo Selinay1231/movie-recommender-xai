@@ -91,7 +91,7 @@ div.stButton > button:first-child:disabled {
   /* Gradient Overlay */
   background: linear-gradient(
     to bottom,
-    rgba(0,0,0,0.15) 0%,
+    rgba(0,0,0,0) 0%,
     rgba(0,0,0,0.6) 100%
   );
 }
@@ -387,6 +387,7 @@ else:
 
         if not can_more:
             st.caption("🎉 Du hast alle passenden Empfehlungen gesehen. Ändere deine Auswahl, um neue Vorschläge zu bekommen.")
+
 
 
 
