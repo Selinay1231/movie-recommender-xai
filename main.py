@@ -5,7 +5,7 @@ import streamlit as st
 from sklearn.metrics.pairwise import cosine_similarity
 import os, requests, re, uuid, gdown, random, hashlib
 from textwrap import dedent
-from rapidfuzz import process
+
 
 
 # =========================
@@ -449,6 +449,7 @@ else:
             if st.button("🔄 Mehr Empfehlungen laden", disabled=not can_more, use_container_width=True):
                 st.session_state.rec_index = min(st.session_state.rec_index + 3, max_n)
                 st.rerun()
+
 
 
 
