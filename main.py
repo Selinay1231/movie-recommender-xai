@@ -289,7 +289,14 @@ else:
         movies_view = movies[movies["year"] >= min_year].copy()
         available_movies = movies_view.sort_values("title")
         if search:
-            available_movies = available_movies[available_movies["title"].str.contains(search, case=False, na=False)]
+            # Alle Titel, die den Suchbegriff enthalten
+            mask = available_movies["title"].str.contains(search, case=False, na=False, regex=False)
+            available_movies = available_movies[mask].copy()
+        
+            # Filme, die mit dem Suchbegriff beginnen, nach oben sortieren
+            available_movies["starts"] = available_movies["title"].str.lower().str.startswith(search.lower())
+            available_movies = available_movies.sort_values(by="starts", ascending=False).drop(columns=["starts"])
+
 
         page_size = 25
         total_pages = max(1, (len(available_movies) - 1) // page_size + 1)
@@ -421,6 +428,7 @@ else:
             if st.button("🔄 Mehr Empfehlungen laden", disabled=not can_more, use_container_width=True):
                 st.session_state.rec_index = min(st.session_state.rec_index + 3, max_n)
                 st.rerun()
+
 
 
 
