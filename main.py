@@ -1,4 +1,4 @@
-# MovieMate – eleganter Movie-Recommender (Hero Landing + Grid Cards + Fix Farben + weiße Inputs)
+# MovieMate – eleganter Movie-Recommender (Hero Landing + Grid Cards + Fix Farben + weiße Inputs + abwechslungsreiche Texte)
 
 import pandas as pd
 import streamlit as st
@@ -21,17 +21,10 @@ st.markdown(dedent("""
 html, body, [data-testid="stApp"] { background: var(--bg-soft); }
 
 /* Headline */
-h1 {
-  font-weight: 800;
-  letter-spacing: .3px;
-  color: #111 !important;   /* immer schwarz */
-}
+h1 { font-weight: 800; letter-spacing: .3px; color: #111 !important; }
 
 /* Labels & Widget-Texte */
-label, .stSelectbox label, .stMultiSelect label, .stSlider label {
-  color: #111 !important; 
-  font-weight: 600;
-}
+label, .stSelectbox label, .stMultiSelect label, .stSlider label { color: #111 !important; font-weight: 600; }
 .stSlider p { color: #111 !important; }
 
 /* Eingabefelder: Hintergrund immer weiß */
@@ -47,8 +40,7 @@ label, .stSelectbox label, .stMultiSelect label, .stSlider label {
 /* Buttons */
 div.stButton { display:flex; justify-content:center; }
 div.stButton > button:first-child{
-  background: var(--primary);
-  color:#fff; border:none; border-radius:12px;
+  background: var(--primary); color:#fff; border:none; border-radius:12px;
   padding:14px 28px; font-size:18px; font-weight:600;
   box-shadow:0 6px 20px rgba(108,92,231,.25);
   transition:transform .06s ease, background .2s ease;
@@ -58,94 +50,48 @@ div.stButton > button:first-child:disabled{ opacity:.45; cursor:not-allowed; }
 
 /* Hero */
 .hero {
-  position: relative;
-  border-radius: 18px;
-  overflow: hidden;
-  box-shadow: 0 10px 40px rgba(0,0,0,.08);
-  margin-top: 8px;
+  position: relative; border-radius: 18px; overflow: hidden;
+  box-shadow: 0 10px 40px rgba(0,0,0,.08); margin-top: 8px;
 }
 .hero__bg {
   background-image: url('https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1600&q=80');
-  background-size: cover;
-  background-position: center;
-  height: 290px;
+  background-size: cover; background-position: center; height: 290px;
 }
 .hero__content {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 0 24px;
-  background: rgba(0,0,0,0.45);   /* schwarze transparente Box */
+  position: absolute; inset: 0; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; text-align: center;
+  padding: 0 24px; background: rgba(0,0,0,0.45);
 }
 .hero__title {
-  font-size: clamp(24px, 6vw, 44px);
-  font-weight: 800;
-  margin: 0 0 4px;
-  color: #fff !important;
+  font-size: clamp(24px, 6vw, 44px); font-weight: 800;
+  margin: 0 0 4px; color: #fff !important;
 }
 .hero__subtitle {
-  font-size: clamp(14px, 4vw, 18px);
-  margin: 8px 0 0;
-  color: #fff !important;
-  opacity: .95;
+  font-size: clamp(14px, 4vw, 18px); margin: 8px 0 0;
+  color: #fff !important; opacity: .95;
 }
 
 /* Cards */
-.grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);  /* exakt 3 pro Reihe */
-  gap: 20px;
-}
+.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
 .card {
-  background: var(--card-bg);
-  border-radius: 14px;
-  overflow: hidden;
+  background: var(--card-bg); border-radius: 14px; overflow: hidden;
   box-shadow: 0 8px 20px rgba(0,0,0,.06);
   transition: transform .08s ease, box-shadow .2s ease;
 }
-.card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 28px rgba(0,0,0,.12);
-}
+.card:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(0,0,0,.12); }
 .card img {
-  width: 100%;
-  height: 300px;
-  object-fit: cover;
-  border-bottom: 1px solid #eee;
-  background: #e5e7eb;
+  width: 100%; height: 300px; object-fit: cover;
+  border-bottom: 1px solid #eee; background: #e5e7eb;
 }
 .card__body { padding: 14px 16px 18px; }
-.card__title {
-  margin: 0 0 8px;
-  font-size: 17px;
-  font-weight: 700;
-  color: #111 !important;
-}
-.card__explain {
-  color: #374151 !important;
-  line-height: 1.45;
-  font-size: 15px;
-}
+.card__title { margin: 0 0 8px; font-size: 17px; font-weight: 700; color: #111 !important; }
+.card__explain { color: #374151 !important; line-height: 1.45; font-size: 15px; }
 .badge {
-  display: inline-block;
-  background: #eef2ff;
-  color: #4338ca;
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 700;
-  margin-bottom: 8px;
+  display: inline-block; background: #eef2ff; color: #4338ca;
+  padding: 4px 10px; border-radius: 999px;
+  font-size: 12px; font-weight: 700; margin-bottom: 8px;
 }
-.section-title {
-  margin: 10px 0 8px;
-  font-weight: 800;
-  letter-spacing: .2px;
-  color: #111 !important;
-}
+.section-title { margin: 10px 0 8px; font-weight: 800; letter-spacing: .2px; color: #111 !important; }
 </style>
 """), unsafe_allow_html=True)
 
@@ -183,40 +129,71 @@ def generate_text_explanation(movie_row, tags_selected):
     year = int(movie_row.get("year", 0)) if not pd.isna(movie_row.get("year", 0)) else None
     n_ratings = movie_row.get("n_ratings", 0)
 
-    if genre_sim > 0.65:
-        reasons.append("weil er sehr ähnliche Genres hat wie deine Lieblingsfilme")
-    elif genre_sim > 0.4:
-        reasons.append("weil er einige typische Elemente deiner Genres enthält")
+    # --- Textbausteine ---
+    genre_high = [
+        "🎭 passt perfekt zu deinen Lieblingsgenres",
+        "🎭 ist inhaltlich stark an deine bevorzugten Genres angelehnt",
+        "🎭 spiegelt viele deiner Genre-Vorlieben wider"
+    ]
+    genre_mid = [
+        "🎭 enthält einige Elemente deiner bevorzugten Genres",
+        "🎭 überschneidet sich teilweise mit deinen Genre-Präferenzen",
+        "🎭 bringt bekannte Genre-Themen mit"
+    ]
+    tag_texts = [
+        "🔖 greift viele deiner gewählten Schlagworte auf",
+        "🔖 deckt sich mit den von dir markierten Themen",
+        "🔖 spiegelt deine Tag-Auswahl deutlich wider"
+    ]
+    rating_high = [
+        "⭐ zählt zu den bestbewerteten Filmen seiner Art",
+        "⭐ hat außergewöhnlich gute Bewertungen",
+        "⭐ wird von vielen Zuschauer:innen als Highlight gesehen"
+    ]
+    rating_mid = [
+        "⭐ wurde solide und überdurchschnittlich bewertet",
+        "⭐ gilt als empfehlenswert in seiner Kategorie",
+        "⭐ hat viele positive Stimmen erhalten"
+    ]
+    popular_texts = [
+        "🎬 ist extrem beliebt und oft gesehen",
+        "🎬 wurde schon tausendfach bewertet",
+        "🎬 erfreut sich großer Bekanntheit"
+    ]
+    classic_texts = [
+        "🕰 gilt als zeitloser Klassiker",
+        "🕰 ist ein Film, der bis heute relevant geblieben ist",
+        "🕰 wird seit Jahrzehnten geschätzt"
+    ]
+    modern_texts = [
+        "✨ bringt moderne Themen auf die Leinwand",
+        "✨ ist ein aktuellerer Film mit frischem Stil",
+        "✨ greift zeitgemäße Inhalte auf"
+    ]
 
-    if tag_sim > 0.4 and tags_selected:
-        reasons.append("weil er viele deiner gewählten Schlagworte aufgreift")
-
-    if rating >= 4.0:
-        reasons.append("weil er allgemein als sehr sehenswert gilt")
-    elif rating >= 3.6:
-        reasons.append("weil er solide und überdurchschnittliche Bewertungen bekommen hat")
-
-    if n_ratings >= 5000:
-        reasons.append("weil er extrem beliebt ist")
-    elif n_ratings >= 1000:
-        reasons.append("weil er viele Bewertungen hat")
-
-    if year and year > 2010:
-        reasons.append("weil er ein relativ neuer Film ist")
-    elif year and year < 2000:
-        reasons.append("weil er ein Klassiker ist")
+    # --- Regeln ---
+    if genre_sim > 0.65: reasons.append(random.choice(genre_high))
+    elif genre_sim > 0.4: reasons.append(random.choice(genre_mid))
+    if tag_sim > 0.4 and tags_selected: reasons.append(random.choice(tag_texts))
+    if rating >= 4.0: reasons.append(random.choice(rating_high))
+    elif rating >= 3.6: reasons.append(random.choice(rating_mid))
+    if n_ratings >= 5000: reasons.append(random.choice(popular_texts))
+    elif n_ratings >= 1000: reasons.append("🎬 hat viele Bewertungen gesammelt")
+    if year and year > 2010: reasons.append(random.choice(modern_texts))
+    elif year and year < 2000: reasons.append(random.choice(classic_texts))
 
     trust = movie_row.get("similarity", 0)
     trust_percent = round(trust * 100, 1)
     trust_label = "sehr hoch" if trust >= 0.8 else "hoch" if trust >= 0.6 else "mittel"
     vt = f"🔒 Vertrauenswert: {trust_percent}% ({trust_label})"
 
-    return ("Dieser Film wurde empfohlen, " + " und ".join(reasons) + ". " + vt) if reasons else ("Dieser Film passt zu deinem Profil. " + vt)
+    if reasons:
+        return "Dieser Film wurde empfohlen, " + " und ".join(reasons[:3]) + ". " + vt
+    return "Dieser Film passt zu deinem Profil. " + vt
 
 def download_and_verify_csv(file_id, dest_path):
     url = f"https://drive.google.com/uc?export=download&id={file_id}"
-    if not os.path.exists(dest_path):
-        gdown.download(url, dest_path, quiet=False)
+    if not os.path.exists(dest_path): gdown.download(url, dest_path, quiet=False)
     with open(dest_path, "r", encoding="utf-8") as f:
         if "<html" in f.readline().lower():
             st.error(f"❌ Fehler beim Download: '{dest_path}' enthält HTML statt CSV.")
@@ -238,8 +215,8 @@ download_and_verify_csv("1M0v8mSSbgS7Wz1HoMdCM_YqpXTh0bGd9","./data/genome-score
 @st.cache_data
 def load_data():
     base = "./data/"
-    movies = pd.read_csv(base + "movies.csv", sep=";", encoding="utf-8")
-    ratings = pd.read_csv(base + "ratings.csv", sep=";", encoding="utf-8")
+    movies = pd.read_csv(base+"movies.csv", sep=";", encoding="utf-8")
+    ratings = pd.read_csv(base+"ratings.csv", sep=";", encoding="utf-8")
     movies["year"] = movies["title"].str.extract(r"\((\d{4})\)").astype(float)
     avg = ratings.groupby("movieId")["rating"].mean()
     cnt = ratings.groupby("movieId")["rating"].count()
@@ -251,8 +228,8 @@ def load_data():
 def load_tag_data():
     base = "./data/"
     return (
-        pd.read_csv(base + "genome-tags.csv", sep=";", encoding="utf-8"),
-        pd.read_csv(base + "genome-scores.csv", sep=";", encoding="utf-8")
+        pd.read_csv(base+"genome-tags.csv", sep=";", encoding="utf-8"),
+        pd.read_csv(base+"genome-scores.csv", sep=";", encoding="utf-8")
     )
 
 movies, ratings = load_data()
@@ -277,8 +254,8 @@ if not st.session_state.intro_done:
     """)
     st.markdown(hero_html, unsafe_allow_html=True)
 
-    st.write("")  # spacing
-    c1, c2, c3 = st.columns([1,2,1])
+    st.write("")
+    c1,c2,c3 = st.columns([1,2,1])
     with c2:
         if st.button("🎬 Los geht's", use_container_width=True):
             st.session_state.intro_done = True
@@ -293,7 +270,7 @@ else:
     available_movies = movies_view.sort_values("title")
 
     selected_titles = []
-    for i in range(1, 6):
+    for i in range(1,6):
         if i == 1 or len(selected_titles) >= (i - 1):
             film = st.selectbox(
                 f"🎥 Film {i} auswählen oder suchen:",
@@ -315,40 +292,33 @@ else:
             st.session_state.selection_key = sel_key
             st.session_state.rec_index = 3
 
-        # Features
         selected_ids = movies_view[movies_view["title"].isin(selected_titles)]["movieId"].values
         movie_features = movies_view.join(movies_view["genres"].str.get_dummies("|"))
         genre_cols = movies_view["genres"].str.get_dummies("|").columns
-        user_profile = movie_features[movie_features["movieId"].isin(selected_ids)][genre_cols].mean().values.reshape(1, -1)
+        user_profile = movie_features[movie_features["movieId"].isin(selected_ids)][genre_cols].mean().values.reshape(1,-1)
         all_profiles = movie_features[genre_cols].values
         movies_view["genre_similarity"] = cosine_similarity(user_profile, all_profiles)[0]
 
         tag_matrix = pd.pivot_table(genome_scores, values="relevance", index="movieId", columns="tagId", fill_value=0)
         selected_tag_ids = genome_tags[genome_tags["tag"].isin(tags_selected)]["tagId"].tolist()
         user_tag_vector = pd.Series(0, index=tag_matrix.columns, dtype=float)
-        for t in selected_tag_ids:
-            user_tag_vector[t] = 1.0
+        for t in selected_tag_ids: user_tag_vector[t] = 1.0
         movies_view["tag_similarity"] = cosine_similarity(
-            [user_tag_vector],
-            tag_matrix.reindex(movies_view["movieId"].values, fill_value=0).fillna(0).values
+            [user_tag_vector], tag_matrix.reindex(movies_view["movieId"].values, fill_value=0).fillna(0).values
         )[0]
 
         movies_view["similarity"] = (
-            0.5 * movies_view["genre_similarity"] + 0.5 * movies_view["tag_similarity"]
+            0.5*movies_view["genre_similarity"] + 0.5*movies_view["tag_similarity"]
             if tags_selected else movies_view["genre_similarity"]
         )
-        sorted_movies = movies_view[~movies_view["movieId"].isin(selected_ids)] \
-            .sort_values("similarity", ascending=False) \
-            .reset_index(drop=True)
+        sorted_movies = movies_view[~movies_view["movieId"].isin(selected_ids)].sort_values("similarity", ascending=False).reset_index(drop=True)
 
-        max_n = len(sorted_movies)
-        show_n = min(st.session_state.rec_index, max_n)
+        max_n=len(sorted_movies); show_n=min(st.session_state.rec_index, max_n)
         to_show = sorted_movies.iloc[:show_n]
 
         st.markdown("<h3 class='section-title'>🌟 Deine Empfehlungen</h3>", unsafe_allow_html=True)
         api_key = st.secrets.get("TMDB_API_KEY")
 
-        # Cards sammeln
         cards = ['<div class="grid">']
         for _, row in to_show.iterrows():
             poster = get_movie_poster(clean_title(row["title"]), api_key) if api_key else None
@@ -367,10 +337,9 @@ else:
         cards.append("</div>")
         st.markdown("".join(cards), unsafe_allow_html=True)
 
-        # Mehr laden
         can_more = show_n < max_n
         st.write("")
-        cc1, cc2, cc3 = st.columns([1, 2, 1])
+        cc1,cc2,cc3 = st.columns([1,2,1])
         with cc2:
             if st.button("🔄 Mehr Empfehlungen laden", disabled=not can_more, use_container_width=True):
                 st.session_state.rec_index = min(st.session_state.rec_index + 3, max_n)
