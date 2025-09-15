@@ -1,4 +1,4 @@
-# MovieMate – eleganter Movie-Recommender (Hero + Netflix-Style Button + 5er-Auswahlgrid + 3er-Empfehlungsgrid)
+# MovieMate – Recommender mit Hero, Grid-Auswahl (ohne Lücken), Empfehlungen & abwechslungsreichen Texten
 
 import pandas as pd
 import streamlit as st
@@ -65,49 +65,21 @@ h1 {
   text-shadow: 0 1px 4px rgba(0,0,0,.6);
 }
 
-/* Karten (Auswahl & Empfehlungen) */
+/* Cards */
 .card {
   background: var(--card-bg); border-radius: 14px; overflow: hidden;
   box-shadow: 0 6px 14px rgba(0,0,0,.06); margin-bottom: 20px;
   display: flex; flex-direction: column; align-items: center;
 }
-.card img { width: 100%; height: 260px; object-fit: cover; border-bottom: 1px solid #eee; background:#e5e7eb; }
+.card img { width: 100%; height: 260px; object-fit: cover; border-bottom: 1px solid #eee; }
 .card__title {
   font-size: 14px; font-weight: 700; color: #111 !important;
   height: 44px; display:flex; align-items:center; justify-content:center; text-align:center;
   overflow:hidden; text-overflow:ellipsis; margin:8px 0;
 }
-.card__body { padding: 12px; display:flex; flex-direction:column; align-items:center; gap: 8px; }
 .card__explain { font-size: 15px; line-height: 1.4; text-align: left; }
 .badge { display:inline-block; background:#eef2ff; color:#4338ca; padding:4px 10px; border-radius:999px; font-size:12px; font-weight:700; margin-bottom:6px; }
 .section-title { margin:12px 0 10px; font-weight:800; color:#111 !important; }
-
-/* Grid für Empfehlungen (3 Spalten, fester Abstand) */
-.grid { 
-  display: grid; 
-  grid-template-columns: repeat(3, 1fr); 
-  gap: 20px; 
-}
-
-/* Netflix Style Buttons (gilt global inklusive Landingpage-Button) */
-.stButton > button {
-  background-color: #e50914 !important;
-  color: #fff !important;
-  font-weight: 700 !important;
-  border: none !important;
-  border-radius: 6px !important;
-  padding: 14px 24px !important;
-  font-size: 16px !important;
-  text-transform: uppercase !important;
-  letter-spacing: .5px !important;
-  box-shadow: 0 6px 20px rgba(229,9,20,.4) !important;
-  transition: background .2s ease, transform .1s ease;
-  width: 100% !important;
-}
-.stButton > button:hover {
-  background-color: #f6121d !important;
-  transform: scale(1.03) !important;
-}
 </style>
 """), unsafe_allow_html=True)
 
@@ -125,7 +97,7 @@ if "search_page" not in st.session_state: st.session_state.search_page = 0
 # Helpers
 # =========================
 def clean_title(title: str) -> str:
-    return re.sub(r"\\s*\\(\\d{4}\\)", "", str(title)).strip()
+    return re.sub(r"\s*\(\d{4}\)", "", str(title)).strip()
 
 def get_movie_poster(title, api_key):
     if not api_key: return None
@@ -142,7 +114,7 @@ def get_movie_poster(title, api_key):
     return None
 
 def generate_text_explanation(movie_row, tags_selected):
-    # abwechslungsreiche Textbausteine (dein Ansatz)
+    # Abwechslungsreiche Begründungen (dein Baustein-Ansatz)
     reasons = []
     genre_sim = movie_row.get("genre_similarity", 0)
     tag_sim = movie_row.get("tag_similarity", 0)
@@ -287,7 +259,7 @@ if not st.session_state.intro_done:
 else:
     min_year = st.slider("Zeige Filme ab Jahr:", 1950, 2015, 1999)
 
-    # Auswahlphase (Grid sichtbar, bis 5 Filme gewählt)
+    # Auswahlphase: Grid anzeigen, solange <5 gewählt
     if len(st.session_state.selected_titles) < 5:
         search = st.text_input("🔎 Film suchen oder aus Liste wählen:")
         movies_view = movies[movies["year"] >= min_year].copy()
@@ -301,7 +273,7 @@ else:
         end = start + page_size
         page_movies = available_movies.iloc[start:end]
 
-        # Zeilenweises Grid: 5 Karten pro Zeile → keine „Lücken“
+        # Zeilenweises Grid ohne Lücken (je 5 Karten pro Zeile)
         for i in range(0, len(page_movies), 5):
             cols = st.columns(5)
             for j, (_, row) in enumerate(page_movies.iloc[i:i+5].iterrows()):
@@ -334,7 +306,7 @@ else:
         st.progress(len(st.session_state.selected_titles)/5)
         st.write(f"Ausgewählt: {len(st.session_state.selected_titles)}/5 Filme")
 
-    # Empfehlungsphase (Auswahl ausgeblendet)
+    # Empfehlungsphase: Grid ausblenden, nur Empfehlungen zeigen
     else:
         st.success("✅ Du hast 5 Filme ausgewählt – hier deine Empfehlungen:")
 
@@ -347,11 +319,11 @@ else:
             st.session_state.selection_key = sel_key
             st.session_state.rec_index = 3
 
-        # IDs aus vollständigem Datensatz (nicht aus gefiltertem View)
+        # IDs immer aus vollständigem Datensatz (nicht aus gefiltertem View)
         selected_ids = movies.loc[movies["title"].isin(st.session_state.selected_titles), "movieId"] \
                            .dropna().astype(int).values
 
-        # Genre-Profil (Full) -> Vergleich (View nach Jahr)
+        # Genre-Profil (Full) -> Vergleich (View)
         genres_full = movies["genres"].astype(str).str.get_dummies("|")
         movie_features_full = movies.join(genres_full)
         user_rows = movie_features_full[movie_features_full["movieId"].isin(selected_ids)]
@@ -385,12 +357,12 @@ else:
                 user_tag_vector.values.reshape(1, -1), tag_block.values
             )[0]
 
-        # Gesamtscore
         w_tag = 0.5 if tags_selected else 0.0
         w_genre = 1.0 - w_tag
-        movies_view_rec["similarity"] = w_genre*movies_view_rec["genre_similarity"] + w_tag*movies_view_rec["tag_similarity"]
+        movies_view_rec["similarity"] = (
+            w_genre*movies_view_rec["genre_similarity"] + w_tag*movies_view_rec["tag_similarity"]
+        )
 
-        # eigene Auswahl ausschließen
         sorted_movies = movies_view_rec.loc[~movies_view_rec["movieId"].isin(selected_ids)] \
                                        .sort_values("similarity", ascending=False) \
                                        .reset_index(drop=True)
@@ -400,35 +372,31 @@ else:
         to_show = sorted_movies.iloc[:show_n]
 
         st.markdown("<h3 class='section-title'>🌟 Empfehlungen</h3>", unsafe_allow_html=True)
-
-        # >>> Empfehlungs-Grid als HTML-Grid mit 3 Spalten <<<
+        cols = st.columns(3)
         api_key = st.secrets.get("TMDB_API_KEY")
-        cards = ['<div class="grid">']
-        for _, row in to_show.iterrows():
-            poster = get_movie_poster(clean_title(row["title"]), api_key) if api_key else None
-            poster = poster or "https://via.placeholder.com/500x750.png?text=No+Image"
-            exp = generate_text_explanation(row, tags_selected)
-            cards.append(dedent(f"""
-            <div class="card">
-              <img src="{poster}" alt="Poster">
-              <div class="card__body">
-                <div class="badge">Empfehlung</div>
-                <div class="card__title">{row['title']}</div>
-                <div class="card__explain">{exp}</div>
-              </div>
-            </div>
-            """))
-        cards.append("</div>")
-        st.markdown("".join(cards), unsafe_allow_html=True)
+        for idx, row in to_show.iterrows():
+            col = cols[idx % 3]
+            with col:
+                poster = get_movie_poster(clean_title(row["title"]), api_key) if api_key else None
+                poster = poster or "https://via.placeholder.com/500x750.png?text=No+Image"
+                exp = generate_text_explanation(row, tags_selected)
+                st.markdown(f"""
+                <div class="card">
+                  <img src="{poster}">
+                  <div class="card__body">
+                    <div class="badge">Empfehlung</div>
+                    <div class="card__title">{row['title']}</div>
+                    <div class="card__explain">{exp}</div>
+                  </div>
+                </div>
+                """, unsafe_allow_html=True)
 
-        # Mehr laden
         can_more = show_n < max_n
         c1, c2, c3 = st.columns([1,2,1])
         with c2:
             if st.button("🔄 Mehr Empfehlungen laden", disabled=not can_more, use_container_width=True):
                 st.session_state.rec_index = min(st.session_state.rec_index + 3, max_n)
                 st.rerun()
-        if not can_more and max_n > 0:
-            st.caption("🎉 Du hast alle passenden Empfehlungen gesehen. Ändere deine Auswahl oder Tags für neue Vorschläge.")
+
 
 
