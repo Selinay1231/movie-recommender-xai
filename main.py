@@ -126,19 +126,19 @@ def clean_title(title: str) -> str:
     return re.sub(r"\s*\(\d{4}\)", "", str(title)).strip()
   
 def fuzzy_filter(query, choices, limit=100, threshold=60):
-    """
-    Liefert eine Liste von Titeln, die dem Query ähnlich sind oder das Query enthalten.
-    """
-    # Normale Substring-Suche (case-insensitive)
-    substring_matches = [c for c in choices if query.lower() in c.lower()]
+    q = query.lower()
 
-    # Fuzzy-Suche
+    # 1. Substring-Treffer (immer behalten)
+    substring_matches = [c for c in choices if q in c.lower()]
+
+    # 2. Fuzzy-Treffer
     results = process.extract(query, choices, limit=limit, score_cutoff=threshold)
     fuzzy_matches = [title for title, score, _ in results]
 
-    # Kombinieren & Duplikate entfernen
-    all_matches = list(dict.fromkeys(substring_matches + fuzzy_matches))
+    # 3. Kombinieren: Substring-Treffer zuerst, Rest danach
+    all_matches = substring_matches + [m for m in fuzzy_matches if m not in substring_matches]
     return all_matches
+
 
 
 def get_movie_poster(title, api_key):
@@ -448,6 +448,7 @@ else:
             if st.button("🔄 Mehr Empfehlungen laden", disabled=not can_more, use_container_width=True):
                 st.session_state.rec_index = min(st.session_state.rec_index + 3, max_n)
                 st.rerun()
+
 
 
 
