@@ -21,7 +21,15 @@ st.markdown(dedent("""
 html, body, [data-testid="stApp"] { background: var(--bg-soft); }
 
 /* Headline */
-h1 { font-weight: 800; letter-spacing: .3px; color: #111 !important; }
+@import url('https://fonts.googleapis.com/css2?family=Montserrat+Alternates:wght@700&display=swap');
+
+h1 {
+  font-family: 'Montserrat Alternates', sans-serif !important;
+  font-weight: 800 !important;
+  letter-spacing: 1px;
+  color: #111 !important;  /* fix schwarz */
+}
+
 
 /* Labels & Widget-Texte */
 label, .stSelectbox label, .stMultiSelect label, .stSlider label { color: #111 !important; font-weight: 600; }
@@ -381,6 +389,7 @@ else:
 
         if not can_more:
             st.caption("🎉 Du hast alle passenden Empfehlungen gesehen. Ändere deine Auswahl, um neue Vorschläge zu bekommen.")
+
 
 
 
