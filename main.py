@@ -308,8 +308,9 @@ else:
     st.markdown("<h3 class='section-title'>✨ Deine Auswahl</h3>", unsafe_allow_html=True)
 
     min_year = st.slider("Zeige Filme ab Jahr:", 1950, 2015, 1999)
-    movies_view = movies[movies["year"] >= min_year].copy()
-    available_movies = movies_view.sort_values("title")
+
+    # ⚡ Wichtig: Für die Auswahl NICHT nach Jahr filtern
+    available_movies = movies.sort_values("title")
 
     selected_titles = []
     for i in range(1,6):
@@ -321,6 +322,9 @@ else:
             )
             if film != "-- auswählen / suchen --":
                 selected_titles.append(film)
+
+    # ⚡ Für die Empfehlungen nach Jahr filtern
+    movies_view = movies[movies["year"] >= min_year].copy()
 
     tags_selected = []
     if len(selected_titles) == 5:
@@ -389,6 +393,7 @@ else:
 
         if not can_more:
             st.caption("🎉 Du hast alle passenden Empfehlungen gesehen. Ändere deine Auswahl, um neue Vorschläge zu bekommen.")
+
 
 
 
