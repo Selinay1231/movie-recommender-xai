@@ -307,14 +307,15 @@ else:
         movies_view = movies[movies["year"] >= min_year].copy()
         available_movies = movies_view.sort_values("title")
         if search:
-            titles = available_movies["title"].tolist()
-            matches = fuzzy_filter(search, titles, limit=200, threshold=55)  # tolerance einstellbar
-            available_movies = available_movies[available_movies["title"].isin(matches)].copy()
+            # Alle Filme, die den eingegebenen Text irgendwo im Titel enthalten
+            mask = available_movies["title"].str.contains(search, case=False, na=False, regex=False)
+            available_movies = available_movies[mask].copy()
         
-            # Filme, die exakt mit dem Suchbegriff anfangen, nach oben sortieren
+            # Filme, die direkt mit dem Text beginnen, nach oben sortieren
             available_movies["starts"] = available_movies["title"].str.lower().str.startswith(search.lower())
             available_movies = available_movies.sort_values(by=["starts","title"], ascending=[False, True])
             available_movies = available_movies.drop(columns=["starts"])
+        
 
 
 
@@ -448,6 +449,7 @@ else:
             if st.button("🔄 Mehr Empfehlungen laden", disabled=not can_more, use_container_width=True):
                 st.session_state.rec_index = min(st.session_state.rec_index + 3, max_n)
                 st.rerun()
+
 
 
 
