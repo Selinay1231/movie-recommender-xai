@@ -7,5 +7,6 @@ requests
 gdown
 gspread
 oauth2client
-openai
+openai==0.28
+
 
