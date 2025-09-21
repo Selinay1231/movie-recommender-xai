@@ -86,8 +86,8 @@ h1 {
   margin-top: 10px;
   padding: 0 6px;
   color: #111 !important;
-  min-height: 210px;   /* alle gleich hoch */
-  max-height: 210px;   /* verhindert, dass welche länger werden */
+  min-height: 250px;   /* alle gleich hoch */
+  max-height: 250px;   /* verhindert, dass welche länger werden */
   overflow: hidden;   /* überlange Texte abschneiden */
 }
 
@@ -504,6 +504,7 @@ else:
             if st.button("🔄 Mehr Empfehlungen laden", disabled=not can_more, use_container_width=True):
                 st.session_state.rec_index = min(st.session_state.rec_index + 3, max_n)
                 st.rerun()
+
 
 
 
