@@ -218,6 +218,11 @@ def generate_text_explanation(movie_row, tags_selected):
         except Exception:
             pass
 
+    # Vertrauenswert berechnen
+    trust = float(movie_row.get("similarity", 0))
+    trust_percent = round(trust * 100, 1)
+    trust_label = "sehr hoch" if trust >= 0.8 else "hoch" if trust >= 0.6 else "mittel"
+
     # Prompt für OpenAI
     prompt = f"""
     Erkläre in 2-3 Sätzen, warum der Film "{title}" empfohlen wird.
@@ -226,7 +231,7 @@ def generate_text_explanation(movie_row, tags_selected):
     - Genres: {genres}
     - Durchschnittsbewertung: {avg_rating:.1f}
     - Plot: {overview}
-    - Ähnlichkeitsscore: {similarity:.2f}
+    - Vertrauenswert: {trust_percent}% ({trust_label})
 
     Die Erklärung soll:
     - leicht verständlich und freundlich sein,
@@ -480,6 +485,7 @@ else:
             if st.button("🔄 Mehr Empfehlungen laden", disabled=not can_more, use_container_width=True):
                 st.session_state.rec_index = min(st.session_state.rec_index + 3, max_n)
                 st.rerun()
+
 
 
 
