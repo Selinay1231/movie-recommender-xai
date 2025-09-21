@@ -237,7 +237,8 @@ def generate_text_explanation(movie_row, tags_selected):
     Die Erklärung soll:
     - leicht verständlich und freundlich sein,
     - Bezug zu den Nutzerpräferenzen herstellen,
-    - betonen, was ähnlich UND was neu/anders ist ("similar but different").
+    - betonen, was ähnlich UND was neu/anders ist ("similar but different"),
+    - niemals länger als 3 Sätze / 45 Wörter.
     """
 
     try:
@@ -495,6 +496,7 @@ else:
             if st.button("🔄 Mehr Empfehlungen laden", disabled=not can_more, use_container_width=True):
                 st.session_state.rec_index = min(st.session_state.rec_index + 3, max_n)
                 st.rerun()
+
 
 
 
