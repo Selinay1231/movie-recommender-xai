@@ -226,7 +226,7 @@ def generate_text_explanation(movie_row, tags_selected):
 
     # Prompt für OpenAI
     prompt = f"""
-    Erkläre in 2-3 Sätzen, warum der Film "{title}" empfohlen wird.
+    Erkläre in 3 Sätzen, die immer gleich lang sind, warum der Film "{title}" empfohlen wird.
     Infos:
     - Jahr: {year}
     - Genres: {genres}
@@ -237,8 +237,9 @@ def generate_text_explanation(movie_row, tags_selected):
     Die Erklärung soll:
     - leicht verständlich und freundlich sein,
     - Bezug zu den Nutzerpräferenzen herstellen,
+    - Den berechneten Vertrauenswert beinhalten
     - betonen, was ähnlich UND was neu/anders ist ("similar but different"),
-    - niemals länger als 3 Sätze / 45 Wörter.
+    - niemals länger als 3 Sätze / 45 Wörter sein.
     """
 
     try:
@@ -496,6 +497,7 @@ else:
             if st.button("🔄 Mehr Empfehlungen laden", disabled=not can_more, use_container_width=True):
                 st.session_state.rec_index = min(st.session_state.rec_index + 3, max_n)
                 st.rerun()
+
 
 
 
