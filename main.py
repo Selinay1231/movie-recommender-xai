@@ -186,73 +186,63 @@ def get_movie_poster(title, api_key):
     return None
 
 
+import openai
+
+# OpenAI API-Key aus Streamlit Secrets
+openai.api_key = st.secrets["OPENAI_API_KEY"]
+
 def generate_text_explanation(movie_row, tags_selected):
-    # Abwechslungsreiche Begründungen (dein Baustein-Ansatz)
-    reasons = []
-    genre_sim = movie_row.get("genre_similarity", 0)
-    tag_sim = movie_row.get("tag_similarity", 0)
-    rating = movie_row.get("avg_rating", 0)
+    """
+    Generiert eine textuelle Erklärung für die Filmempfehlung mit der OpenAI API.
+    Nimmt Daten aus TMDb (falls vorhanden) und Similarity-Werte als Kontext.
+    """
+
+    title = movie_row.get("title", "Unbekannter Film")
     year = int(movie_row.get("year", 0)) if not pd.isna(movie_row.get("year", 0)) else None
-    n_ratings = movie_row.get("n_ratings", 0)
+    avg_rating = movie_row.get("avg_rating", 0)
+    genres = str(movie_row.get("genres", ""))
+    similarity = float(movie_row.get("similarity", 0))
 
-    genre_high = [
-        "weil er perfekt zu deinen Lieblingsgenres passt",
-        "weil er inhaltlich stark an deine Genre-Vorlieben angelehnt ist",
-        "denn er spiegelt viele deiner Genre-Präferenzen wider"
-    ]
-    genre_mid = [
-        "weil er einige Elemente deiner Genres enthält",
-        "denn er überschneidet sich teilweise mit deinen Vorlieben",
-        "weil er bekannte Genre-Themen aufgreift"
-    ]
-    tag_texts = [
-        "denn er deckt sich mit deinen gewählten Themen",
-        "weil er deine Tag-Auswahl widerspiegelt",
-        "denn er greift viele deiner Schlagworte auf"
-    ]
-    rating_high = [
-        "denn er zählt zu den bestbewerteten Filmen",
-        "denn er hat außergewöhnlich gute Bewertungen",
-        "denn er wird von vielen Zuschauenden als Highlight gesehen"
-    ]
-    rating_mid = [
-        "denn er wurde solide und überdurchschnittlich bewertet",
-        "denn er gilt als empfehlenswert in seiner Kategorie",
-        "denn er hat viele positive Stimmen erhalten"
-    ]
-    popular_texts = [
-        "denn er ist extrem beliebt und wurde oft gesehen",
-        "denn er wurde schon tausendfach bewertet",
-        "denn er erfreut sich großer Bekanntheit"
-    ]
-    classic_texts = [
-        "denn er gilt als zeitloser Klassiker",
-        "denn er ist ein Film, der bis heute relevant geblieben ist",
-        "denn er wird seit Jahrzehnten geschätzt"
-    ]
-    modern_texts = [
-        "denn er bringt moderne Themen auf die Leinwand",
-        "denn er ist ein aktuellerer Film mit frischem Stil",
-        "denn er greift zeitgemäße Inhalte auf"
-    ]
+    # TMDb API-Key holen, um Plot (overview) zu laden
+    tmdb_key = st.secrets.get("TMDB_API_KEY")
+    overview = ""
+    if tmdb_key:
+        try:
+            url = "https://api.themoviedb.org/3/search/movie"
+            params = {"api_key": tmdb_key, "query": title}
+            r = requests.get(url, params=params, timeout=8)
+            if r.ok and r.json().get("results"):
+                overview = r.json()["results"][0].get("overview", "")
+        except Exception:
+            pass
 
-    if genre_sim > 0.65: reasons.append(random.choice(genre_high))
-    elif genre_sim > 0.4: reasons.append(random.choice(genre_mid))
-    if tag_sim > 0.4 and tags_selected: reasons.append(random.choice(tag_texts))
-    if rating >= 4.0: reasons.append(random.choice(rating_high))
-    elif rating >= 3.6: reasons.append(random.choice(rating_mid))
-    if n_ratings and n_ratings >= 5000: reasons.append(random.choice(popular_texts))
-    if year and year > 2010: reasons.append(random.choice(modern_texts))
-    elif year and year < 2000: reasons.append(random.choice(classic_texts))
+    # Prompt für OpenAI
+    prompt = f"""
+    Erkläre in 2-3 Sätzen, warum der Film "{title}" empfohlen wird.
+    Infos:
+    - Jahr: {year}
+    - Genres: {genres}
+    - Durchschnittsbewertung: {avg_rating:.1f}
+    - Plot: {overview}
+    - Ähnlichkeitsscore: {similarity:.2f}
 
-    trust = float(movie_row.get("similarity", 0))
-    trust_percent = round(trust * 100, 1)
-    trust_label = "sehr hoch" if trust >= 0.8 else "hoch" if trust >= 0.6 else "mittel"
-    vt = f"🔒 Vertrauenswert: {trust_percent}% ({trust_label})"
+    Die Erklärung soll:
+    - leicht verständlich und freundlich sein,
+    - Bezug zu den Nutzerpräferenzen herstellen,
+    - betonen, was ähnlich UND was neu/anders ist ("similar but different").
+    """
 
-    if reasons:
-        return "Dieser Film wurde empfohlen, " + " und ".join(reasons[:3]) + ". " + vt
-    return "Dieser Film passt zu deinem Profil. " + vt
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-4o-mini",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.7,
+            max_tokens=150
+        )
+        return response.choices[0].message["content"].strip()
+    except Exception as e:
+        return f"Dieser Film passt zu deinem Profil (Fehler bei Textgenerierung: {e})."
+
 
 def download_and_verify_csv(file_id, dest_path):
     url = f"https://drive.google.com/uc?export=download&id={file_id}"
@@ -488,6 +478,7 @@ else:
             if st.button("🔄 Mehr Empfehlungen laden", disabled=not can_more, use_container_width=True):
                 st.session_state.rec_index = min(st.session_state.rec_index + 3, max_n)
                 st.rerun()
+
 
 
 
