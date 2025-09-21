@@ -142,6 +142,7 @@ if "selection_key" not in st.session_state: st.session_state.selection_key = Non
 if "intro_done" not in st.session_state: st.session_state.intro_done = False
 if "selected_titles" not in st.session_state: st.session_state.selected_titles = []
 if "search_page" not in st.session_state: st.session_state.search_page = 0
+if "explanations" not in st.session_state: st.session_state.explanations = {}
 
 # =========================
 # Helpers
@@ -462,12 +463,20 @@ else:
         st.markdown("<h3 class='section-title'>🌟 Empfehlungen</h3>", unsafe_allow_html=True)
         cols = st.columns(3)
         api_key = st.secrets.get("TMDB_API_KEY")
+        
         for idx, row in to_show.iterrows():
             col = cols[idx % 3]
             with col:
                 poster = get_movie_poster(clean_title(row["title"]), api_key) if api_key else None
                 poster = poster or "https://via.placeholder.com/500x750.png?text=No+Image"
-                exp = generate_text_explanation(row, tags_selected)
+        
+                # Erklärung nur einmal generieren, dann im Cache behalten
+                if row["movieId"] in st.session_state.explanations:
+                    exp = st.session_state.explanations[row["movieId"]]
+                else:
+                    exp = generate_text_explanation(row, tags_selected)
+                    st.session_state.explanations[row["movieId"]] = exp
+        
                 st.markdown(f"""
                 <div class="card">
                   <img src="{poster}">
@@ -479,28 +488,13 @@ else:
                 </div>
                 """, unsafe_allow_html=True)
 
+
         can_more = show_n < max_n
         c1, c2, c3 = st.columns([1,2,1])
         with c2:
             if st.button("🔄 Mehr Empfehlungen laden", disabled=not can_more, use_container_width=True):
                 st.session_state.rec_index = min(st.session_state.rec_index + 3, max_n)
                 st.rerun()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
