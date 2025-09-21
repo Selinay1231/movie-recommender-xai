@@ -189,7 +189,9 @@ def get_movie_poster(title, api_key):
 import openai
 
 # OpenAI API-Key aus Streamlit Secrets
-openai.api_key = st.secrets["OPENAI_API_KEY"]
+openai.api_key = st.secrets.get("OPENAI_API_KEY")
+if not openai.api_key:
+    st.error("❌ OPENAI_API_KEY fehlt in den Streamlit Secrets.")
 
 def generate_text_explanation(movie_row, tags_selected):
     """
@@ -478,6 +480,7 @@ else:
             if st.button("🔄 Mehr Empfehlungen laden", disabled=not can_more, use_container_width=True):
                 st.session_state.rec_index = min(st.session_state.rec_index + 3, max_n)
                 st.rerun()
+
 
 
 
