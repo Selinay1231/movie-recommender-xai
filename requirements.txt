@@ -7,3 +7,5 @@ requests
 gdown
 gspread
 oauth2client
+openai
+
