@@ -368,7 +368,7 @@ else:
 
 
 
-        page_size = 25
+        page_size = 15
         total_pages = max(1, (len(available_movies) - 1) // page_size + 1)
         start = st.session_state.search_page * page_size
         end = start + page_size
@@ -504,6 +504,7 @@ else:
             if st.button("🔄 Mehr Empfehlungen laden", disabled=not can_more, use_container_width=True):
                 st.session_state.rec_index = min(st.session_state.rec_index + 3, max_n)
                 st.rerun()
+
 
 
 
