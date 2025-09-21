@@ -346,7 +346,10 @@ else:
 
     # Auswahlphase: Grid anzeigen, solange <5 gewählt
     if len(st.session_state.selected_titles) < 5:
-        search = st.text_input("🔎 Film suchen oder aus Liste wählen:")
+        search = st.text_input(
+              "🔎 Film suchen oder aus Liste wählen:",
+              placeholder="Titel eingeben..."
+          )
         movies_view = movies[movies["year"] >= min_year].copy()
         available_movies = movies_view.sort_values("title")
         if search:
@@ -501,6 +504,7 @@ else:
             if st.button("🔄 Mehr Empfehlungen laden", disabled=not can_more, use_container_width=True):
                 st.session_state.rec_index = min(st.session_state.rec_index + 3, max_n)
                 st.rerun()
+
 
 
 
