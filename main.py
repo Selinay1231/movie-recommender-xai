@@ -153,22 +153,10 @@ if "explanations" not in st.session_state: st.session_state.explanations = {}
 # =========================
 def clean_title(title: str) -> str:
     return re.sub(r"\s*\(\d{4}\)", "", str(title)).strip()
-  
-def fuzzy_filter(query, choices, limit=100, threshold=60):
-    q = query.lower()
 
-    # 1. Substring-Treffer (immer behalten)
-    substring_matches = [c for c in choices if q in c.lower()]
-
-    # 2. Fuzzy-Treffer
-    results = process.extract(query, choices, limit=limit, score_cutoff=threshold)
-    fuzzy_matches = [title for title, score, _ in results]
-
-    # 3. Kombinieren: Substring-Treffer zuerst, Rest danach
-    all_matches = substring_matches + [m for m in fuzzy_matches if m not in substring_matches]
-    return all_matches
-
-
+def selection_hash(titles, tags, year_from):
+    raw = "|".join(sorted(titles)) + "||" + "|".join(sorted(tags)) + f"||{year_from}"
+    return hashlib.sha1(raw.encode("utf-8")).hexdigest()
 
 # =========================
 # Poster laden (mit Caching)
@@ -267,10 +255,6 @@ def download_and_verify_csv(file_id, dest_path):
             st.error(f"❌ Fehler beim Download: '{dest_path}' enthält HTML statt CSV.")
             st.stop()
 
-def selection_hash(titles, tags, year_from):
-    raw = "|".join(sorted(titles)) + "||" + "|".join(sorted(tags)) + f"||{year_from}"
-    return hashlib.sha1(raw.encode("utf-8")).hexdigest()
-
 # =========================
 # Daten laden (robust)
 # =========================
@@ -366,10 +350,9 @@ else:
             )
             available_movies = available_movies.drop(columns=["starts"])
 
-
-
         page_size = 15
         total_pages = max(1, (len(available_movies) - 1) // page_size + 1)
+        st.session_state.search_page = min(st.session_state.search_page, total_pages - 1)
         start = st.session_state.search_page * page_size
         end = start + page_size
         page_movies = available_movies.iloc[start:end]
@@ -395,6 +378,8 @@ else:
                             st.session_state.selected_titles.remove(row["title"])
                         elif len(st.session_state.selected_titles) < 5:
                             st.session_state.selected_titles.append(row["title"])
+                        # >>> WICHTIG: sofort neu rendern, damit der Klick direkt sichtbar ist
+                        st.rerun()
 
         col1, col2, col3 = st.columns([1,2,1])
         with col1:
@@ -410,7 +395,6 @@ else:
     # Empfehlungsphase: Grid ausblenden, nur Empfehlungen zeigen
     else:
         st.success("✅ Du hast 5 Filme ausgewählt – hier deine Empfehlungen:")
-
 
         sel_key = selection_hash(st.session_state.selected_titles, tags_selected, int(min_year))
         if st.session_state.selection_key != sel_key:
@@ -496,7 +480,6 @@ else:
                   </div>
                 </div>
                 """, unsafe_allow_html=True)
-
 
         can_more = show_n < max_n
         c1, c2, c3 = st.columns([1,2,1])
