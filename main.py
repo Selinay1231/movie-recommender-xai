@@ -1,5 +1,4 @@
-# MovieMate – Recommender mit Hero, Grid-Auswahl (ohne Lücken), Empfehlungen & abwechslungsreichen Texten
-
+# MovieMate – Recommender 
 import pandas as pd
 import streamlit as st
 from sklearn.metrics.pairwise import cosine_similarity
@@ -487,6 +486,7 @@ else:
             if st.button("🔄 Mehr Empfehlungen laden", disabled=not can_more, use_container_width=True):
                 st.session_state.rec_index = min(st.session_state.rec_index + 3, max_n)
                 st.rerun()
+
 
 
 
