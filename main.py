@@ -247,7 +247,8 @@ def generate_text_explanation(movie_row, tags_selected):
 
 def download_and_verify_csv(file_id, dest_path):
     url = f"https://drive.google.com/uc?export=download&id={file_id}"
-    if not os.path.exists(dest_path): gdown.download(url, dest_path, quiet=False)
+    if not os.path.exists(dest_path): gdown.download(url, dest_path, quiet=False, use_cookies=False)
+
     with open(dest_path, "rb") as f:
         head = f.read(4096).lower()
         if b"<html" in head:
@@ -486,6 +487,7 @@ else:
             if st.button("🔄 Mehr Empfehlungen laden", disabled=not can_more, use_container_width=True):
                 st.session_state.rec_index = min(st.session_state.rec_index + 3, max_n)
                 st.rerun()
+
 
 
 
