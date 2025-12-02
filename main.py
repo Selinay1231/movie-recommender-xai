@@ -28,7 +28,7 @@ h1 {
 .hero__title { font-size: clamp(24px, 6vw, 44px); font-weight: 800; margin: 0 0 4px; color: #fff !important; text-shadow: 0 2px 6px rgba(0,0,0,.7); }
 .hero__subtitle { font-size: clamp(15px, 4vw, 20px); margin: 8px 0 0; color: #fff !important; opacity: .95; text-shadow: 0 1px 4px rgba(0,0,0,.6); }
 
-.card { background: var(--card-bg); border-radius: 14px; overflow: hidden; box-shadow: 0 6px 14px rgba(0,0,0,.06); margin-bottom: 20px; display: flex; flex-direction: column; align-items: center; }
+.card { background: var(--card-bg); border-radius: 14px; overflow: hidden; box-shadow: 0 6px 14px rgba(0,0,0,.06); margin-bottom: 20px; display: flex; flex-direction: column; align-items: center; cursor: pointer; }
 .card img { width: 100%; height: 260px; object-fit: cover; border-bottom: 1px solid #eee; }
 .card__title { font-size: 14px; font-weight: 700; color: #111 !important; height: 44px; display:flex; align-items:center; justify-content:center; text-align:center; overflow:hidden; text-overflow:ellipsis; margin:8px 0; }
 .card__explain { font-size: 14px; line-height: 1.6; text-align: left; margin-top: 10px; padding: 0 6px; color: #111 !important; min-height: 250px; max-height: 250px; overflow: hidden; }
@@ -188,6 +188,8 @@ else:
         start = st.session_state.search_page * page_size
         end = start + page_size
         page_movies = available_movies.iloc[start:end]
+
+        # Film-Cards mit Klick-Funktion
         for i in range(0, len(page_movies), 5):
             cols = st.columns(5)
             for j, (_, row) in enumerate(page_movies.iloc[i:i+5].iterrows()):
@@ -195,21 +197,24 @@ else:
                     api_key = st.secrets.get("TMDB_API_KEY")
                     poster = get_movie_poster(clean_title(row["title"]), api_key) if api_key else None
                     poster = poster or "https://via.placeholder.com/300x450.png?text=No+Image"
-                    st.markdown(f"<div class='card'><img src='{poster}'><div class='card__title'>{row['title']}</div></div>", unsafe_allow_html=True)
                     is_selected = row["title"] in st.session_state.selected_titles
                     label = "✅ Entfernen" if is_selected else "➕ Auswählen"
-                    if st.button(label, key=f"btn_{row['movieId']}"):
+
+                    # Klick auf Bild oder Button
+                    if st.button(label, key=f"btn_{row['movieId']}") or st.image(poster, use_column_width=True, output_format="PNG", caption=""):
                         if is_selected:
                             st.session_state.selected_titles.remove(row["title"])
                         elif len(st.session_state.selected_titles) < 5:
                             st.session_state.selected_titles.append(row["title"])
                         st.rerun()
+
         # Mehr Filme Button
         col1, col2, col3 = st.columns([1,2,1])
         with col2:
             if st.button("🔄 Mehr Filme laden", use_container_width=True):
                 st.session_state.search_page += 1
                 st.rerun()
+
         st.progress(len(st.session_state.selected_titles)/5)
         st.write(f"Ausgewählt: {len(st.session_state.selected_titles)}/5 Filme")
 
@@ -259,6 +264,3 @@ else:
             if st.button("🔄 Mehr Empfehlungen laden", disabled=not can_more, use_container_width=True):
                 st.session_state.rec_index = min(st.session_state.rec_index + 3, max_n)
                 st.rerun()
-
-
-
