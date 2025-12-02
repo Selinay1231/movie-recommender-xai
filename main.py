@@ -42,6 +42,7 @@ h1 {
 </style>
 """), unsafe_allow_html=True)
 
+# --- Session State ---
 if "user_id" not in st.session_state: st.session_state.user_id = str(uuid.uuid4())
 if "rec_index" not in st.session_state: st.session_state.rec_index = 3
 if "selection_key" not in st.session_state: st.session_state.selection_key = None
@@ -50,6 +51,7 @@ if "selected_titles" not in st.session_state: st.session_state.selected_titles =
 if "search_page" not in st.session_state: st.session_state.search_page = 0
 if "explanations" not in st.session_state: st.session_state.explanations = {}
 
+# --- Helper Functions ---
 def clean_title(title: str) -> str:
     return re.sub(r"\s*\(\d{4}\)", "", str(title)).strip()
 
@@ -75,15 +77,24 @@ openai.api_key = st.secrets.get("OPENAI_API_KEY")
 if not openai.api_key:
     st.error("❌ OPENAI_API_KEY fehlt in den Streamlit Secrets.")
 
+# --- Text Explanation with Stars ---
 def generate_text_explanation(movie_row):
     title = movie_row.get("title", "Unbekannter Film")
     year = int(movie_row.get("year", 0)) if not pd.isna(movie_row.get("year", 0)) else None
     avg_rating = movie_row.get("avg_rating", 0)
     genres = str(movie_row.get("genres", ""))
+    similarity = float(movie_row.get("similarity", 0))
+    trust_percent = round(similarity * 100, 0)
+    
+    # Berechne Stern-Visualisierung
+    n_stars = 5
+    filled = round(n_stars * (trust_percent/100))
+    empty = n_stars - filled
+    star_visual = "★"*filled + "☆"*empty
+
+    # Plot abrufen
     tmdb_key = st.secrets.get("TMDB_API_KEY")
     overview = ""
-    
-    # Plot abrufen
     if tmdb_key:
         try:
             url = "https://api.themoviedb.org/3/search/movie"
@@ -98,18 +109,15 @@ def generate_text_explanation(movie_row):
     selected_list_str = ", ".join(selected_titles) if selected_titles else "ähnliche Filme"
 
     prompt = f"""
-    Erkläre in 4-5 Sätzen, warum der Film "{title}" empfohlen wird.
-    Jahr: {year}
-    Genres: {genres}
-    Durchschnittsbewertung: {avg_rating:.1f}
-    Plot: {overview}
-    Vertrauenswert: {trust_percent}% ({trust_label})
-    
-    Erkläre den Vertrauenswert visuell mit Sternen (★ = ausgefüllt, ☆ = leer), passend zu {trust_percent}. 
-    Nutze max. 4-5 Sätze / 60 Wörter. Die Erklärung soll leicht verständlich, freundlich und einladend sein. Beziehe dich auf die vom Nutzer vorab ausgewählten Filme und erwähne nach Möglichkeit Schauspieler oder Streamingplattformen.
-    """
+Erkläre in 4-5 Sätzen, warum der Film "{title}" empfohlen wird.
+Jahr: {year}
+Genres: {genres}
+Durchschnittsbewertung: {avg_rating:.1f}
+Plot: {overview}
+Vertrauenswert: {star_visual}
 
-    # GPT-Abfrage
+Nutze max. 4-5 Sätze / 60 Wörter. Die Erklärung soll leicht verständlich, freundlich und einladend sein. Beziehe dich auf die vom Nutzer vorab ausgewählten Filme und erwähne nach Möglichkeit Schauspieler oder Streamingplattformen.
+"""
     try:
         response = openai.ChatCompletion.create(
             model="gpt-4o-mini",
@@ -121,7 +129,7 @@ def generate_text_explanation(movie_row):
     except Exception as e:
         return f"Dieser Film passt zu deinem Profil (Fehler: {e})."
 
-
+# --- CSV Download / Load ---
 def download_and_verify_csv(file_id, dest_path):
     url = f"https://drive.google.com/uc?export=download&id={file_id}"
     if not os.path.exists(dest_path):
@@ -176,6 +184,7 @@ if not st.session_state.intro_done:
         if st.button("🎬 Los geht's", use_container_width=True):
             st.session_state.intro_done = True
             st.rerun()
+
 
 # ---------- MAIN ----------
 else:
@@ -279,6 +288,7 @@ else:
             if st.button("🔄 Mehr Empfehlungen laden", disabled=not can_more, use_container_width=True):
                 st.session_state.rec_index = min(st.session_state.rec_index + 3, max_n)
                 st.rerun()
+
 
 
 
