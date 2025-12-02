@@ -1,4 +1,4 @@
-# MovieMate – Recommender 
+# MovieMate – Recommender
 import pandas as pd
 import streamlit as st
 from sklearn.metrics.pairwise import cosine_similarity
@@ -8,6 +8,7 @@ import openai
 
 st.set_page_config(page_title="MovieMate", page_icon="🎬", layout="wide")
 
+# -------------------- Style --------------------
 st.markdown(dedent("""
 <style>
 :root{
@@ -16,17 +17,7 @@ st.markdown(dedent("""
 }
 html, body, [data-testid="stApp"] { background: var(--bg-soft); }
 
-h1 {
-  font-family: 'Montserrat Alternates', sans-serif !important;
-  font-weight: 800 !important;
-  color: #111 !important;
-}
-
-.hero { position: relative; border-radius: 18px; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,.08); margin-top: 8px; }
-.hero__bg { background-image: url('https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1600&q=80'); background-size: cover; background-position: center; height: 290px; }
-.hero__content { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 0 24px; }
-.hero__title { font-size: clamp(24px, 6vw, 44px); font-weight: 800; margin: 0 0 4px; color: #fff !important; text-shadow: 0 2px 6px rgba(0,0,0,.7); }
-.hero__subtitle { font-size: clamp(15px, 4vw, 20px); margin: 8px 0 0; color: #fff !important; opacity: .95; text-shadow: 0 1px 4px rgba(0,0,0,.6); }
+h1 { font-family: 'Montserrat Alternates', sans-serif !important; font-weight: 800 !important; color: #111 !important; }
 
 .card { background: var(--card-bg); border-radius: 14px; overflow: hidden; box-shadow: 0 6px 14px rgba(0,0,0,.06); margin-bottom: 20px; display: flex; flex-direction: column; align-items: center; }
 .card img { width: 100%; height: 260px; object-fit: cover; border-bottom: 1px solid #eee; }
@@ -35,10 +26,6 @@ h1 {
 
 .badge { display: inline-block; background: #eef2ff; color: #4338ca; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; margin-bottom: 10px; }
 .section-title { margin: 16px 0 12px; font-weight: 800; color: #111 !important; }
-
-.stButton > button { background-color: #e50914 !important; color: #fff !important; font-weight: 700 !important; border: none !important; border-radius: 6px !important; padding: 14px 28px !important; font-size: 16px !important; text-transform: uppercase !important; letter-spacing: .5px !important; box-shadow: 0 6px 20px rgba(229,9,20,.4) !important; transition: background .2s ease, transform .1s ease; width: 100% !important; margin-top: 20px !important; }
-.stButton > button:hover { background-color: #f6121d !important; transform: scale(1.03) !important; }
-.stButton > button:disabled { opacity: .5 !important; cursor: not-allowed !important; }
 </style>
 """), unsafe_allow_html=True)
 
@@ -156,25 +143,18 @@ st.markdown("<h1 style='text-align:center;'>🎬 MovieMate</h1>", unsafe_allow_h
 
 # -------------------- Intro --------------------
 if not st.session_state.intro_done:
-    hero_html = dedent("""
-    <div class="hero">
-      <div class="hero__bg"></div>
-      <div class="hero__content">
-        <div class="hero__title">Willkommen bei MovieMate</div>
-        <div class="hero__subtitle">Wähle 5 Filme aus und erhalte deine Empfehlungen.</div>
-      </div>
+    st.markdown("""
+    <div style="text-align:center;">
+        <h2>Willkommen bei MovieMate</h2>
+        <p>Wähle 5 Filme aus und erhalte deine Empfehlungen.</p>
     </div>
-    """)
-    st.markdown(hero_html, unsafe_allow_html=True)
-    c1,c2,c3 = st.columns([1,2,1])
-    with c2:
-        if st.button("🎬 Los geht's", use_container_width=True):
-            st.session_state.intro_done = True
-            st.experimental_rerun()
+    """, unsafe_allow_html=True)
+    if st.button("🎬 Los geht's", use_container_width=True):
+        st.session_state.intro_done = True
+        st.experimental_rerun()
 
-# -------------------- Hauptlogik --------------------
+# -------------------- Auswahlphase mit Multiselect --------------------
 else:
-    # Auswahlphase mit Forms
     if len(st.session_state.selected_titles) < 5:
         min_year = st.slider("Zeige Filme ab Jahr:", 1950, 2015, 1999)
         search = st.text_input("🔎 Film suchen oder aus Liste wählen:", placeholder="Titel eingeben...")
@@ -184,53 +164,41 @@ else:
         if search:
             mask = available_movies["title"].str.contains(search, case=False, na=False, regex=False)
             available_movies = available_movies[mask].copy()
-            available_movies["starts"] = available_movies["title"].str.lower().str.startswith(search.lower())
-            available_movies = available_movies.sort_values(by=["starts","title"], ascending=[False, True]).drop(columns=["starts"])
 
-        page_size = 15
-        total_pages = max(1, (len(available_movies)-1)//page_size + 1)
-        st.session_state.search_page = min(st.session_state.search_page, total_pages-1)
-        start = st.session_state.search_page * page_size
-        end = start + page_size
-        page_movies = available_movies.iloc[start:end]
+        movie_options = available_movies["title"].tolist()
+        selected = st.multiselect(
+            "Wähle bis zu 5 Filme:",
+            options=movie_options,
+            default=st.session_state.selected_titles,
+            help="Maximal 5 Filme auswählen"
+        )
 
-        for i in range(0, len(page_movies), 5):
-            cols = st.columns(5)
-            for j, (_, row) in enumerate(page_movies.iloc[i:i+5].iterrows()):
+        # Begrenze auf 5 Filme
+        if len(selected) > 5:
+            st.warning("Du kannst maximal 5 Filme auswählen.")
+            selected = selected[:5]
+
+        st.session_state.selected_titles = selected
+
+        # Grid-Anzeige
+        cols_per_row = 5
+        for i in range(0, len(available_movies), cols_per_row):
+            cols = st.columns(cols_per_row)
+            for j, (_, row) in enumerate(available_movies.iloc[i:i+cols_per_row].iterrows()):
                 with cols[j]:
                     api_key = st.secrets.get("TMDB_API_KEY")
                     poster = get_movie_poster(clean_title(row["title"]), api_key) if api_key else None
                     poster = poster or "https://via.placeholder.com/300x450.png?text=No+Image"
-                    st.image(poster, caption=row["title"], use_column_width=True)
+                    caption = row["title"]
+                    if row["title"] in st.session_state.selected_titles:
+                        caption += " ✅"
+                    st.image(poster, caption=caption, use_column_width=True)
 
-                    movie_id = int(row["movieId"])
-                    is_selected = row["title"] in st.session_state.selected_titles
-                    label = "✅ Entfernen" if is_selected else "➕ Auswählen"
-
-                    # Form pro Film
-                    with st.form(key=f"form_{movie_id}"):
-                        submitted = st.form_submit_button(label)
-                        if submitted:
-                            if is_selected:
-                                st.session_state.selected_titles.remove(row["title"])
-                            elif len(st.session_state.selected_titles) < 5:
-                                st.session_state.selected_titles.append(row["title"])
-                            st.experimental_rerun()
-
-        # Mehr Filme Button
-        col1, col2, col3 = st.columns([1,2,1])
-        with col2:
-            if st.button("🔄 Mehr Filme laden", use_container_width=True):
-                st.session_state.search_page += 1
-                st.experimental_rerun()
-
-        st.progress(len(st.session_state.selected_titles)/5)
         st.write(f"Ausgewählt: {len(st.session_state.selected_titles)}/5 Filme")
 
-    # Empfehlungsphase (unverändert)
+    # -------------------- Empfehlungsphase --------------------
     else:
         st.success("✅ Du hast 5 Filme ausgewählt – hier deine Empfehlungen:")
-        st.markdown("🎉 Das sind die Filme, die ich dir empfehle! Viel Spaß beim Schauen! 🍿")
         sel_key = selection_hash(st.session_state.selected_titles, 1999)
         if st.session_state.selection_key != sel_key:
             st.session_state.selection_key = sel_key
