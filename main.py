@@ -101,7 +101,7 @@ def generate_text_explanation(movie_row):
     Durchschnittsbewertung: {avg_rating:.1f}
     Plot: {overview}
     Vertrauenswert: {trust_percent}% ({trust_label})
-    Erklärung soll leicht verständlich, freundlich und den Vertrauenswert in prozent nennen max. 4-5 Sätze / 60 Wörter.
+    Erklärung soll leicht verständlich, freundlich und den Vertrauenswert nicht in Prozent nennen max. 4-5 Sätze / 60 Wörter. Es soll Bezug zu den vom user vorab ausgewählten Filmen hergestellt werden und auch schauspieler sollen erwähnt weerden. 
     """
     try:
         response = openai.ChatCompletion.create(
@@ -271,4 +271,5 @@ else:
             if st.button("🔄 Mehr Empfehlungen laden", disabled=not can_more, use_container_width=True):
                 st.session_state.rec_index = min(st.session_state.rec_index + 3, max_n)
                 st.rerun()
+
 
