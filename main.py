@@ -110,8 +110,7 @@ def generate_text_explanation(movie_row):
 
     prompt = f"""
 Du bist ein freundlicher Filmempfehlungsassistent. 
-Erkläre in maximal 2 Sätzen, warum der Film "{title}" ({year}) empfohlen wird. 
-Verwende dabei die Genres: {genres} und erwähne den Plot kurz: {overview}. 
+Erkläre in maximal 2 Sätzen, warum der Film "{title}" ({year}) empfohlen wird. Indem  du die Genres: {genres} und den Plot kurz: {overview} erwähnst. 
 Anschließend mache zwei Absätze und schreibe genau einmal in einer Zeile: "So gut passt der Film zu dir: {star_visual}". 
 Nichts weiter hinzufügen, keine zusätzlichen Kommentare oder Bewertungen und achte darauf dass du im Text nicht mehr als 60 Wörter nutzt.
 """
@@ -286,6 +285,7 @@ else:
             if st.button("🔄 Mehr Empfehlungen laden", disabled=not can_more, use_container_width=True):
                 st.session_state.rec_index = min(st.session_state.rec_index + 3, max_n)
                 st.rerun()
+
 
 
 
