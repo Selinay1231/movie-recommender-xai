@@ -97,15 +97,18 @@ def generate_text_explanation(movie_row):
     selected_titles = st.session_state.get("selected_titles", [])
     selected_list_str = ", ".join(selected_titles) if selected_titles else "ähnliche Filme"
 
-    # Prompt erstellen
     prompt = f"""
-    Erkläre in 4-5 Sätzen, warum der Film "{title}" empfohlen wird..
+    Erkläre in 4-5 Sätzen, warum der Film "{title}" empfohlen wird.
     Jahr: {year}
     Genres: {genres}
     Durchschnittsbewertung: {avg_rating:.1f}
     Plot: {overview}
-    Erkläre den Vertrauenswert **visuell mit Sternen** (★ = ausgefüllt, ☆ = leer), passend zu {trust_percent}. Nutze max. 4-5 Sätze / 60 Wörter. Die Erklärung soll leicht verständlich, freundlich und einladend sein. 
+    Vertrauenswert: {trust_percent}% ({trust_label})
+    
+    Erkläre den Vertrauenswert visuell mit Sternen (★ = ausgefüllt, ☆ = leer), passend zu {trust_percent}. 
+    Nutze max. 4-5 Sätze / 60 Wörter. Die Erklärung soll leicht verständlich, freundlich und einladend sein. Beziehe dich auf die vom Nutzer vorab ausgewählten Filme und erwähne nach Möglichkeit Schauspieler oder Streamingplattformen.
     """
+
     # GPT-Abfrage
     try:
         response = openai.ChatCompletion.create(
@@ -276,6 +279,7 @@ else:
             if st.button("🔄 Mehr Empfehlungen laden", disabled=not can_more, use_container_width=True):
                 st.session_state.rec_index = min(st.session_state.rec_index + 3, max_n)
                 st.rerun()
+
 
 
 
