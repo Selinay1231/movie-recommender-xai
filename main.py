@@ -109,7 +109,7 @@ def generate_text_explanation(movie_row):
     selected_list_str = ", ".join(selected_titles) if selected_titles else "ähnliche Filme"
 
     prompt = f"""
-Erkläre in 3-4 Sätzen, warum der Film "{title}" empfohlen wird.
+Erkläre in kurz warum der Film "{title}" empfohlen wird.
 Jahr: {year}
 Genres: {genres}
 Durchschnittsbewertung: {avg_rating:.1f}
@@ -288,6 +288,7 @@ else:
             if st.button("🔄 Mehr Empfehlungen laden", disabled=not can_more, use_container_width=True):
                 st.session_state.rec_index = min(st.session_state.rec_index + 3, max_n)
                 st.rerun()
+
 
 
 
