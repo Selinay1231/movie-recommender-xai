@@ -36,7 +36,7 @@ h1 {
 .badge { display: inline-block; background: #eef2ff; color: #4338ca; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; margin-bottom: 10px; }
 .section-title { margin: 16px 0 12px; font-weight: 800; color: #111 !important; }
 
-.stButton > button { background-color: #e50914 !important; color: #fff !important; font-weight: 700 !important; border: none !important; border-radius: 6px !important; padding: 14px 28px !important; font-size: 16px !important; text-transform: uppercase !important; letter-spacing: .5px !important; box-shadow: 0 6px 20px rgba(229,9,20,.4) !important; transition: background .2s ease, transform .1s ease; width: 100% !important; margin-top: 20px !important; }
+.stButton > button { background-color: #e50914 !important; color: #fff !important; font-weight: 700 !important; border: none !important; border-radius: 6px !important; padding: 14px 28px !important; font-size: 16px !important; text-transform: uppercase !important; letter-spacing: .5px !important; box-shadow: 0 6px 20px rgba(229,9,20,.4) !important; transition: background .2s ease, transform .1s ease; width: 100% !important; margin-top: 10px !important; }
 .stButton > button:hover { background-color: #f6121d !important; transform: scale(1.03) !important; }
 .stButton > button:disabled { opacity: .5 !important; cursor: not-allowed !important; }
 </style>
@@ -200,8 +200,10 @@ else:
                     is_selected = row["title"] in st.session_state.selected_titles
                     label = "✅ Entfernen" if is_selected else "➕ Auswählen"
 
-                    # Klick auf Bild oder Button
-                    if st.button(label, key=f"btn_{row['movieId']}") or st.image(poster, use_column_width=True, output_format="PNG", caption=""):
+                    # Bild anzeigen
+                    st.image(poster, use_column_width=True)
+                    # Klick über Button
+                    if st.button(label, key=f"btn_{row['movieId']}"):
                         if is_selected:
                             st.session_state.selected_titles.remove(row["title"])
                         elif len(st.session_state.selected_titles) < 5:
