@@ -108,14 +108,13 @@ def generate_text_explanation(movie_row):
     selected_titles = st.session_state.get("selected_titles", [])
     selected_list_str = ", ".join(selected_titles) if selected_titles else "ähnliche Filme"
 
- prompt = f"""
-Du bist ein freundlicher Filmempfehlungsassistent. 
-Erkläre in maximal 2 Sätzen, warum der Film "{title}" ({year}) empfohlen wird. 
-Verwende dabei die Genres: {genres} und erwähne den Plot kurz: {overview}. 
-Anschließend schreibe genau eine Zeile: "Vertrauenswert: {star_visual}". 
-Nichts weiter hinzufügen, keine zusätzlichen Kommentare oder Bewertungen.
-"""
-
+     prompt = f"""
+    Du bist ein freundlicher Filmempfehlungsassistent. 
+    Erkläre in maximal 2 Sätzen, warum der Film "{title}" ({year}) empfohlen wird. 
+    Verwende dabei die Genres: {genres} und erwähne den Plot kurz: {overview}. 
+    Anschließend schreibe genau eine Zeile: "Vertrauenswert: {star_visual}". 
+    Nichts weiter hinzufügen, keine zusätzlichen Kommentare oder Bewertungen.
+    """
 
     try:
         response = openai.ChatCompletion.create(
@@ -287,6 +286,7 @@ else:
             if st.button("🔄 Mehr Empfehlungen laden", disabled=not can_more, use_container_width=True):
                 st.session_state.rec_index = min(st.session_state.rec_index + 3, max_n)
                 st.rerun()
+
 
 
 
