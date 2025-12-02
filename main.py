@@ -36,12 +36,13 @@ h1 {
 .badge { display: inline-block; background: #eef2ff; color: #4338ca; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; margin-bottom: 10px; }
 .section-title { margin: 16px 0 12px; font-weight: 800; color: #111 !important; }
 
-.stButton > button { background-color: #e50914 !important; color: #fff !important; font-weight: 700 !important; border: none !important; border-radius: 6px !important; padding: 14px 28px !important; font-size: 16px !important; text-transform: uppercase !important; letter-spacing: .5px !important; box-shadow: 0 6px 20px rgba(229,9,20,.4) !important; transition: background .2s ease, transform .1s ease; width: 100% !important; margin-top: 10px !important; }
+.stButton > button { background-color: #e50914 !important; color: #fff !important; font-weight: 700 !important; border: none !important; border-radius: 6px !important; padding: 14px 28px !important; font-size: 16px !important; text-transform: uppercase !important; letter-spacing: .5px !important; box-shadow: 0 6px 20px rgba(229,9,20,.4) !important; transition: background .2s ease, transform .1s ease; width: 100% !important; margin-top: 20px !important; }
 .stButton > button:hover { background-color: #f6121d !important; transform: scale(1.03) !important; }
 .stButton > button:disabled { opacity: .5 !important; cursor: not-allowed !important; }
 </style>
 """), unsafe_allow_html=True)
 
+# -------------------- Session State --------------------
 if "user_id" not in st.session_state: st.session_state.user_id = str(uuid.uuid4())
 if "rec_index" not in st.session_state: st.session_state.rec_index = 3
 if "selection_key" not in st.session_state: st.session_state.selection_key = None
@@ -50,6 +51,7 @@ if "selected_titles" not in st.session_state: st.session_state.selected_titles =
 if "search_page" not in st.session_state: st.session_state.search_page = 0
 if "explanations" not in st.session_state: st.session_state.explanations = {}
 
+# -------------------- Helper --------------------
 def clean_title(title: str) -> str:
     return re.sub(r"\s*\(\d{4}\)", "", str(title)).strip()
 
@@ -91,9 +93,8 @@ def generate_text_explanation(movie_row):
             if r.ok and r.json().get("results"):
                 overview = r.json()["results"][0].get("overview", "")
         except: pass
-    trust = similarity
-    trust_percent = round(trust*100,1)
-    trust_label = "sehr hoch" if trust >= 0.8 else "hoch" if trust >= 0.6 else "mittel"
+    trust_percent = round(similarity*100,1)
+    trust_label = "sehr hoch" if similarity >= 0.8 else "hoch" if similarity >= 0.6 else "mittel"
     prompt = f"""
     Erkläre in 3 Sätzen, warum der Film "{title}" empfohlen wird.
     Jahr: {year}
@@ -114,6 +115,7 @@ def generate_text_explanation(movie_row):
     except Exception as e:
         return f"Dieser Film passt zu deinem Profil (Fehler: {e})."
 
+# -------------------- CSV & Data --------------------
 def download_and_verify_csv(file_id, dest_path):
     url = f"https://drive.google.com/uc?export=download&id={file_id}"
     if not os.path.exists(dest_path):
@@ -149,9 +151,10 @@ def load_data():
 
 movies, ratings = load_data()
 
+# -------------------- UI --------------------
 st.markdown("<h1 style='text-align:center;'>🎬 MovieMate</h1>", unsafe_allow_html=True)
 
-# ---------- INTRO ----------
+# ---------- Intro ----------
 if not st.session_state.intro_done:
     hero_html = dedent("""
     <div class="hero">
@@ -169,11 +172,11 @@ if not st.session_state.intro_done:
             st.session_state.intro_done = True
             st.rerun()
 
-# ---------- MAIN ----------
+# ---------- Main ----------
 else:
-    # Auswahlphase
+    min_year = st.slider("Zeige Filme ab Jahr:", 1950, 2015, 1999)
+    
     if len(st.session_state.selected_titles) < 5:
-        min_year = st.slider("Zeige Filme ab Jahr:", 1950, 2015, 1999)
         search = st.text_input("🔎 Film suchen oder aus Liste wählen:", placeholder="Titel eingeben...")
         movies_view = movies[movies["year"] >= min_year].copy()
         available_movies = movies_view.sort_values("title")
@@ -189,7 +192,6 @@ else:
         end = start + page_size
         page_movies = available_movies.iloc[start:end]
 
-        # Film-Cards mit Klick-Funktion
         for i in range(0, len(page_movies), 5):
             cols = st.columns(5)
             for j, (_, row) in enumerate(page_movies.iloc[i:i+5].iterrows()):
@@ -197,22 +199,29 @@ else:
                     api_key = st.secrets.get("TMDB_API_KEY")
                     poster = get_movie_poster(clean_title(row["title"]), api_key) if api_key else None
                     poster = poster or "https://via.placeholder.com/300x450.png?text=No+Image"
-                    is_selected = row["title"] in st.session_state.selected_titles
-                    label = "✅ Entfernen" if is_selected else "➕ Auswählen"
 
-                    # Bild anzeigen
-                    st.image(poster, use_column_width=True)
-                    # Klick über Button
-                    if st.button(label, key=f"btn_{row['movieId']}"):
-                        if is_selected:
+                    # Card klickbar
+                    card_key = f"card_{row['movieId']}"
+                    if st.button("", key=card_key, help="Film auswählen/entfernen", args=()):
+                        if row["title"] in st.session_state.selected_titles:
                             st.session_state.selected_titles.remove(row["title"])
                         elif len(st.session_state.selected_titles) < 5:
                             st.session_state.selected_titles.append(row["title"])
                         st.rerun()
 
-        # Mehr Filme Button
-        col1, col2, col3 = st.columns([1,2,1])
-        with col2:
+                    # Render Card
+                    is_selected = row["title"] in st.session_state.selected_titles
+                    label = "✅ Entfernen" if is_selected else "➕ Auswählen"
+                    st.markdown(f"""
+                    <div class='card' onclick="document.getElementById('{card_key}').click();">
+                        <img src='{poster}'>
+                        <div class='card__title'>{row['title']}</div>
+                    </div>
+                    <div style='text-align:center; margin-top:4px;'>{label}</div>
+                    """, unsafe_allow_html=True)
+
+        # Nur "Mehr laden" Button, keine Navigation mehr
+        if st.session_state.search_page < total_pages - 1:
             if st.button("🔄 Mehr Filme laden", use_container_width=True):
                 st.session_state.search_page += 1
                 st.rerun()
@@ -220,14 +229,15 @@ else:
         st.progress(len(st.session_state.selected_titles)/5)
         st.write(f"Ausgewählt: {len(st.session_state.selected_titles)}/5 Filme")
 
-    # Empfehlungsphase
     else:
         st.success("✅ Du hast 5 Filme ausgewählt – hier deine Empfehlungen:")
-        st.markdown("🎉 Das sind die Filme, die ich dir empfehle! Viel Spaß beim Schauen! 🍿")
-        sel_key = selection_hash(st.session_state.selected_titles, 1999)
+        st.markdown("🎉 Das sind die Filme, die ich dir empfehle! Viel Spaß beim Anschauen!")
+
+        sel_key = selection_hash(st.session_state.selected_titles, int(min_year))
         if st.session_state.selection_key != sel_key:
             st.session_state.selection_key = sel_key
             st.session_state.rec_index = 3
+
         selected_ids = movies.loc[movies["title"].isin(st.session_state.selected_titles), "movieId"].dropna().astype(int).values
         genres_full = movies["genres"].astype(str).str.get_dummies("|")
         movie_features_full = movies.join(genres_full)
@@ -236,6 +246,7 @@ else:
         user_profile = user_rows[genre_cols].mean(axis=0)
         if user_profile.isna().all():
             st.warning("Kein Profil berechenbar – bitte andere Filme wählen."); st.stop()
+
         movies_view_rec = movies.copy()
         view_genres = movies_view_rec["genres"].astype(str).str.get_dummies("|")
         for c in genre_cols:
@@ -243,10 +254,12 @@ else:
         view_genres = view_genres[genre_cols]
         movies_view_rec["similarity"] = cosine_similarity(user_profile.values.reshape(1,-1), view_genres.values)[0]
         sorted_movies = movies_view_rec.loc[~movies_view_rec["movieId"].isin(selected_ids)].sort_values("similarity", ascending=False).reset_index(drop=True)
+
         max_n = len(sorted_movies)
         show_n = min(st.session_state.rec_index, max_n)
         to_show = sorted_movies.iloc[:show_n]
         st.markdown("<h3 class='section-title'>🌟 Empfehlungen</h3>", unsafe_allow_html=True)
+
         cols = st.columns(3)
         api_key = st.secrets.get("TMDB_API_KEY")
         for idx, row in to_show.iterrows():
@@ -260,9 +273,11 @@ else:
                     exp = generate_text_explanation(row)
                     st.session_state.explanations[row["movieId"]] = exp
                 st.markdown(f"<div class='card'><img src='{poster}'><div class='card__body'><div class='badge'>Empfehlung</div><div class='card__title'>{row['title']}</div><div class='card__explain'>{exp}</div></div></div>", unsafe_allow_html=True)
+
         can_more = show_n < max_n
         c1, c2, c3 = st.columns([1,2,1])
         with c2:
             if st.button("🔄 Mehr Empfehlungen laden", disabled=not can_more, use_container_width=True):
                 st.session_state.rec_index = min(st.session_state.rec_index + 3, max_n)
                 st.rerun()
+
