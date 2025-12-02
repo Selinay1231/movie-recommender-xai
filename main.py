@@ -108,16 +108,14 @@ def generate_text_explanation(movie_row):
     selected_titles = st.session_state.get("selected_titles", [])
     selected_list_str = ", ".join(selected_titles) if selected_titles else "ähnliche Filme"
 
-    prompt = f"""
-    Erkläre in 2 Sätzen warum der Film "{title}" empfohlen wird.
-    Jahr: {year}
-    Genres: {genres}
-    Durchschnittsbewertung: {avg_rating:.1f}
-    Plot: {overview}
-    Vertrauenswert: {star_visual}
-    
-    Nachdem du in zwei Sätzen erklärt hast warum der film empfohlen wurde mache zwei Absätze und dann Visualisiere den Vertrauenswert,  mit einer 5 Sternenskala (★ = ausgefüllt, ☆ = leer), passend zu {trust_percent}. Achte drauf dass dieser Abschnitt bei allen Empfehlungen vom Satzaufbau gleich ist. Nutze max. 3 Sätze / 40 Wörter. Die Erklärung soll leicht verständlich, freundlich und einladend sein.
+     prompt = f"""
+    Du bist ein freundlicher Filmempfehlungsassistent. 
+    Erkläre in maximal 2 Sätzen, warum der Film "{title}" ({year}) empfohlen wird. 
+    Verwende dabei die Genres: {genres} und erwähne den Plot kurz: {overview}. 
+    Anschließend schreibe genau eine Zeile: "Vertrauenswert: {star_visual}". 
+    Nichts weiter hinzufügen, keine zusätzlichen Kommentare oder Bewertungen.
     """
+
     try:
         response = openai.ChatCompletion.create(
             model="gpt-4o-mini",
@@ -288,6 +286,7 @@ else:
             if st.button("🔄 Mehr Empfehlungen laden", disabled=not can_more, use_container_width=True):
                 st.session_state.rec_index = min(st.session_state.rec_index + 3, max_n)
                 st.rerun()
+
 
 
 
