@@ -101,7 +101,7 @@ def generate_text_explanation(movie_row):
     Durchschnittsbewertung: {avg_rating:.1f}
     Plot: {overview}
     Vertrauenswert: {trust_percent}% ({trust_label})
-    Erklärung soll leicht verständlich, freundlich, Bezug zu Nutzerpräferenzen herstellen und "similar but different" betonen, max. 3-4 Sätze / 50 Wörter.
+    Erklärung soll leicht verständlich, freundlich und den Vertrauenswert in prozent nennen max. 3-4 Sätze / 50 Wörter.
     """
     try:
         response = openai.ChatCompletion.create(
@@ -259,5 +259,6 @@ else:
             if st.button("🔄 Mehr Empfehlungen laden", disabled=not can_more, use_container_width=True):
                 st.session_state.rec_index = min(st.session_state.rec_index + 3, max_n)
                 st.rerun()
+
 
 
