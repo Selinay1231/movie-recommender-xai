@@ -133,53 +133,58 @@ if not st.session_state.intro_done:
 else:
     min_year = st.slider("Zeige Filme ab Jahr:", 1950, 2015, 1999)
 
-    # --- AUSWAHLPHASE ---
-    if len(st.session_state.selected_titles) < 5:
-        search = st.text_input("🔎 Film suchen oder aus Liste wählen:", placeholder="Titel eingeben...")
-        movies_view = movies[movies["year"] >= min_year].copy()
-        available_movies = movies_view.sort_values("title")
+# ---------- Auswahlphase ----------
+if len(st.session_state.selected_titles) < 5:
+    min_year = st.slider("Zeige Filme ab Jahr:", 1950, 2015, 1999)
+    search = st.text_input("🔎 Film suchen oder aus Liste wählen:", placeholder="Titel eingeben...")
+    movies_view = movies[movies["year"] >= min_year].copy()
+    available_movies = movies_view.sort_values("title")
 
-        if search:
-            mask = available_movies["title"].str.contains(search, case=False, na=False, regex=False)
-            available_movies = available_movies[mask].copy()
-            available_movies["starts"] = available_movies["title"].str.lower().str.startswith(search.lower())
-            available_movies = available_movies.sort_values(by=["starts","title"], ascending=[False, True]).drop(columns=["starts"])
+    if search:
+        mask = available_movies["title"].str.contains(search, case=False, na=False, regex=False)
+        available_movies = available_movies[mask].copy()
+        available_movies["starts"] = available_movies["title"].str.lower().str.startswith(search.lower())
+        available_movies = available_movies.sort_values(by=["starts","title"], ascending=[False, True]).drop(columns=["starts"])
 
-        page_size = 15
-        total_pages = max(1, (len(available_movies)-1)//page_size +1)
-        start = st.session_state.search_page * page_size
-        end = start + page_size
-        page_movies = available_movies.iloc[start:end]
+    page_size = 15
+    total_pages = max(1, (len(available_movies) - 1)//page_size + 1)
+    st.session_state.search_page = min(st.session_state.search_page, total_pages-1)
+    start = st.session_state.search_page * page_size
+    end = start + page_size
+    page_movies = available_movies.iloc[start:end]
 
-        # Filme in 5 Spalten
-        for i in range(0, len(page_movies), 5):
-            cols = st.columns(5)
-            for j, (_, row) in enumerate(page_movies.iloc[i:i+5].iterrows()):
-                with cols[j]:
-                    api_key = st.secrets.get("TMDB_API_KEY")
-                    poster = get_movie_poster(clean_title(row["title"]), api_key) if api_key else None
-                    poster = poster or "https://via.placeholder.com/300x450.png?text=No+Image"
-                    st.markdown(f"<div class='card'><img src='{poster}'><div class='card__title'>{row['title']}</div></div>", unsafe_allow_html=True)
-                    
-                    # Auswählen / Entfernen Button
-                    is_selected = row["title"] in st.session_state.selected_titles
-                    label = "✅ Entfernen" if is_selected else "➕ Auswählen"
-                    if st.button(label, key=f"btn_{row['movieId']}"):
-                        if is_selected:
-                            st.session_state.selected_titles.remove(row["title"])
-                        elif len(st.session_state.selected_titles) < 5:
-                            st.session_state.selected_titles.append(row["title"])
-                        st.rerun()
+    # Filme in 5er-Reihen darstellen
+    for i in range(0, len(page_movies), 5):
+        cols = st.columns(5)
+        for j, (_, row) in enumerate(page_movies.iloc[i:i+5].iterrows()):
+            with cols[j]:
+                api_key = st.secrets.get("TMDB_API_KEY")
+                poster = get_movie_poster(clean_title(row["title"]), api_key) if api_key else None
+                poster = poster or "https://via.placeholder.com/300x450.png?text=No+Image"
 
-        # Zentrierter "Mehr Filme laden" Button
-        c1,c2,c3 = st.columns([1,2,1])
-        with c2:
-            if st.button("🔄 Mehr Filme laden", use_container_width=True):
-                st.session_state.search_page += 1
-                st.rerun()
+                # Filmcover + Titel
+                st.markdown(f"<div class='card'><img src='{poster}'><div class='card__title'>{row['title']}</div></div>", unsafe_allow_html=True)
 
-        st.progress(len(st.session_state.selected_titles)/5)
-        st.write(f"Ausgewählt: {len(st.session_state.selected_titles)}/5 Filme")
+                # Auswahlbutton unter dem Cover
+                is_selected = row["title"] in st.session_state.selected_titles
+                label = "✅ Entfernen" if is_selected else "➕ Auswählen"
+                if st.button(label, key=f"btn_{row['movieId']}_{i}_{j}", use_container_width=True):
+                    if is_selected:
+                        st.session_state.selected_titles.remove(row["title"])
+                    elif len(st.session_state.selected_titles) < 5:
+                        st.session_state.selected_titles.append(row["title"])
+                    st.rerun()
+
+    # Zentrierter "Mehr Filme laden" Button
+    col1, col2, col3 = st.columns([1,2,1])
+    with col2:
+        if st.button("🔄 Mehr Filme laden", use_container_width=True):
+            st.session_state.search_page += 1
+            st.rerun()
+
+    st.progress(len(st.session_state.selected_titles)/5)
+    st.write(f"Ausgewählt: {len(st.session_state.selected_titles)}/5 Filme")
+
 
     # --- EMPFEHLUNGSPHASE ---
     else:
@@ -233,3 +238,4 @@ else:
             if st.button("🔄 Mehr Empfehlungen laden", disabled=not can_more, use_container_width=True):
                 st.session_state.rec_index = min(st.session_state.rec_index + 3, max_n)
                 st.rerun()
+
