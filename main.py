@@ -99,15 +99,14 @@ def generate_text_explanation(movie_row):
 
     # Prompt erstellen
     prompt = f"""
-    Erkläre in 4-5 Sätzen, warum der Film "{title}" für jemanden interessant sein könnte, der diese Filme mag: {selected_list_str}.
+    Erkläre in 4-5 Sätzen, warum der Film "{title}" empfohlen wird.
     Jahr: {year}
     Genres: {genres}
     Durchschnittsbewertung: {avg_rating:.1f}
     Plot: {overview}
-    Hinweis: Erwähne bekannte Schauspieler und mögliche Streaming-Plattformen.
-    Erklärung soll leicht verständlich, freundlich und kreativ sein, max. 4-5 Sätze / 60 Wörter. 
-    Vertrauenswert in Prozent soll nicht genannt werden.
-    """
+    Vertrauenswert: {trust_percent}% ({trust_label})
+    Erklärung soll leicht verständlich, freundlich und den Vertrauenswert soll visuell dargestellt werden, 4-5 Sätze / 60 Wörter.
+
 
     # GPT-Abfrage
     try:
@@ -279,6 +278,7 @@ else:
             if st.button("🔄 Mehr Empfehlungen laden", disabled=not can_more, use_container_width=True):
                 st.session_state.rec_index = min(st.session_state.rec_index + 3, max_n)
                 st.rerun()
+
 
 
 
