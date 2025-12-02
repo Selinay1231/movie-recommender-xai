@@ -173,29 +173,26 @@ if not st.session_state.intro_done:
 else:
     # Auswahlphase
     if len(st.session_state.selected_titles) < 5:
-        min_year = st.slider("Zeige Filme ab Jahr:", 1950, 2015, 1999)
-        search = st.text_input("🔎 Film suchen oder aus Liste wählen:", placeholder="Titel eingeben...")
+        # --- Filterleiste: Suche, Genre, Jahr ---
+        search, selected_genres, min_year = st.columns([3,3,2])
+        with search:
+            search_text = st.text_input("🔎 Film suchen:", placeholder="Titel eingeben...")
+        with selected_genres:
+            all_genres = sorted(set(g for sub in movies["genres"].dropna() for g in sub.split("|")))
+            genres = st.multiselect("Filter nach Genre:", options=all_genres)
+        with min_year:
+            year_from = st.slider("Zeige Filme ab Jahr:", 1950, 2015, 1999)
 
-        # --- NEU: Genre-Filter ---
-        all_genres = set()
-        movies["genres"].dropna().str.split("|").apply(all_genres.update)
-        all_genres = sorted(all_genres)
-        selected_genres = st.multiselect("Filter nach Genre:", options=all_genres)
-
-        # --- Filme filtern ---
-        movies_view = movies[movies["year"] >= min_year].copy()
-        if selected_genres:
-            movies_view = movies_view[movies_view["genres"].apply(lambda g: any(genre in g.split("|") for genre in selected_genres))]
-
-        # --- Suche ---
-        available_movies = movies_view.sort_values(["avg_rating","title"], ascending=[False, True])
-        if search:
-            mask = available_movies["title"].str.contains(search, case=False, na=False, regex=False)
-            available_movies = available_movies[mask].copy()
-            available_movies["starts"] = available_movies["title"].str.lower().str.startswith(search.lower())
-            available_movies = available_movies.sort_values(by=["starts","avg_rating","title"], ascending=[False, False, True]).drop(columns=["starts"])
-
-        # --- Paginierung ---
+        movies_view = movies[movies["year"] >= year_from].copy()
+        if genres:
+            mask_genre = movies_view["genres"].apply(lambda x: any(g in str(x).split("|") for g in genres))
+            movies_view = movies_view[mask_genre]
+        if search_text:
+            mask_search = movies_view["title"].str.contains(search_text, case=False, na=False, regex=False)
+            movies_view = movies_view[mask_search].copy()
+            movies_view["starts"] = movies_view["title"].str.lower().str.startswith(search_text.lower())
+            movies_view = movies_view.sort_values(by=["starts","title"], ascending=[False, True]).drop(columns=["starts"])
+        available_movies = movies_view.sort_values("title")
         page_size = 15
         total_pages = max(1, (len(available_movies) - 1)//page_size + 1)
         st.session_state.search_page = min(st.session_state.search_page, total_pages-1)
@@ -219,6 +216,7 @@ else:
                         elif len(st.session_state.selected_titles) < 5:
                             st.session_state.selected_titles.append(row["title"])
                         st.rerun()
+        # Mehr Filme Button
         col1, col2, col3 = st.columns([1,2,1])
         with col2:
             if st.button("🔄 Mehr Filme laden", use_container_width=True):
@@ -273,4 +271,3 @@ else:
             if st.button("🔄 Mehr Empfehlungen laden", disabled=not can_more, use_container_width=True):
                 st.session_state.rec_index = min(st.session_state.rec_index + 3, max_n)
                 st.rerun()
-
