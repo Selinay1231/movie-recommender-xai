@@ -80,9 +80,10 @@ def generate_text_explanation(movie_row):
     year = int(movie_row.get("year", 0)) if not pd.isna(movie_row.get("year", 0)) else None
     avg_rating = movie_row.get("avg_rating", 0)
     genres = str(movie_row.get("genres", ""))
-    similarity = float(movie_row.get("similarity", 0))
     tmdb_key = st.secrets.get("TMDB_API_KEY")
     overview = ""
+    
+    # Plot abrufen
     if tmdb_key:
         try:
             url = "https://api.themoviedb.org/3/search/movie"
@@ -91,28 +92,35 @@ def generate_text_explanation(movie_row):
             if r.ok and r.json().get("results"):
                 overview = r.json()["results"][0].get("overview", "")
         except: pass
-    trust = similarity
-    trust_percent = round(trust*100,1)
-    trust_label = "sehr hoch" if trust >= 0.8 else "hoch" if trust >= 0.6 else "mittel"
+
+    # Liste der vom User ausgewählten Filme
+    selected_titles = st.session_state.get("selected_titles", [])
+    selected_list_str = ", ".join(selected_titles) if selected_titles else "ähnliche Filme"
+
+    # Prompt erstellen
     prompt = f"""
-    Erkläre in 4-5 Sätzen, warum der Film "{title}" empfohlen wird.
+    Erkläre in 4-5 Sätzen, warum der Film "{title}" für jemanden interessant sein könnte, der diese Filme mag: {selected_list_str}.
     Jahr: {year}
     Genres: {genres}
     Durchschnittsbewertung: {avg_rating:.1f}
     Plot: {overview}
-    Vertrauenswert: {trust_percent}% ({trust_label})
-    Erklärung soll leicht verständlich, freundlich und den Vertrauenswert nicht in Prozent nennen max. 4-5 Sätze / 60 Wörter. Es soll Bezug zu den vom user vorab ausgewählten Filmen hergestellt werden und auch schauspieler sollen erwähnt weerden. 
+    Hinweis: Erwähne bekannte Schauspieler und mögliche Streaming-Plattformen.
+    Erklärung soll leicht verständlich, freundlich und kreativ sein, max. 4-5 Sätze / 60 Wörter. 
+    Vertrauenswert in Prozent soll nicht genannt werden.
     """
+
+    # GPT-Abfrage
     try:
         response = openai.ChatCompletion.create(
             model="gpt-4o-mini",
             messages=[{"role": "user", "content": prompt}],
             temperature=0.8,
-            max_tokens=150
+            max_tokens=200
         )
         return response.choices[0].message["content"].strip()
     except Exception as e:
         return f"Dieser Film passt zu deinem Profil (Fehler: {e})."
+
 
 def download_and_verify_csv(file_id, dest_path):
     url = f"https://drive.google.com/uc?export=download&id={file_id}"
@@ -271,5 +279,6 @@ else:
             if st.button("🔄 Mehr Empfehlungen laden", disabled=not can_more, use_container_width=True):
                 st.session_state.rec_index = min(st.session_state.rec_index + 3, max_n)
                 st.rerun()
+
 
 
