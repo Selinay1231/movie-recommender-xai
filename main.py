@@ -182,34 +182,43 @@ else:
             available_movies = available_movies[mask].copy()
             available_movies["starts"] = available_movies["title"].str.lower().str.startswith(search.lower())
             available_movies = available_movies.sort_values(by=["starts","title"], ascending=[False, True]).drop(columns=["starts"])
+
         page_size = 15
         total_pages = max(1, (len(available_movies) - 1)//page_size + 1)
         st.session_state.search_page = min(st.session_state.search_page, total_pages-1)
         start = st.session_state.search_page * page_size
         end = start + page_size
         page_movies = available_movies.iloc[start:end]
-        for i in range(0, len(page_movies), 5):
-            cols = st.columns(5)
-            for j, (_, row) in enumerate(page_movies.iloc[i:i+5].iterrows()):
-                with cols[j]:
-                    api_key = st.secrets.get("TMDB_API_KEY")
-                    poster = get_movie_poster(clean_title(row["title"]), api_key) if api_key else None
-                    poster = poster or "https://via.placeholder.com/300x450.png?text=No+Image"
-                    st.markdown(f"<div class='card'><img src='{poster}'><div class='card__title'>{row['title']}</div></div>", unsafe_allow_html=True)
-                    is_selected = row["title"] in st.session_state.selected_titles
-                    label = "✅ Entfernen" if is_selected else "➕ Auswählen"
-                    if st.button(label, key=f"btn_{row['movieId']}"):
-                        if is_selected:
-                            st.session_state.selected_titles.remove(row["title"])
-                        elif len(st.session_state.selected_titles) < 5:
-                            st.session_state.selected_titles.append(row["title"])
-                        st.rerun()
+
+        # ✅ Form-basierte Auswahl
+        with st.form("movie_selection"):
+            for i in range(0, len(page_movies), 5):
+                cols = st.columns(5)
+                for j, (_, row) in enumerate(page_movies.iloc[i:i+5].iterrows()):
+                    with cols[j]:
+                        api_key = st.secrets.get("TMDB_API_KEY")
+                        poster = get_movie_poster(clean_title(row["title"]), api_key) if api_key else None
+                        poster = poster or "https://via.placeholder.com/300x450.png?text=No+Image"
+                        st.image(poster, caption=row["title"], use_column_width=True)
+                        is_selected = row["title"] in st.session_state.selected_titles
+                        st.checkbox("Auswählen", key=f"chk_{row['movieId']}", value=is_selected)
+            submitted = st.form_submit_button("Auswahl bestätigen")
+            if submitted:
+                for _, row in page_movies.iterrows():
+                    key = f"chk_{row['movieId']}"
+                    if st.session_state[key] and row["title"] not in st.session_state.selected_titles:
+                        st.session_state.selected_titles.append(row["title"])
+                    elif not st.session_state[key] and row["title"] in st.session_state.selected_titles:
+                        st.session_state.selected_titles.remove(row["title"])
+                st.rerun()
+
         # Mehr Filme Button
         col1, col2, col3 = st.columns([1,2,1])
         with col2:
             if st.button("🔄 Mehr Filme laden", use_container_width=True):
                 st.session_state.search_page += 1
                 st.rerun()
+
         st.progress(len(st.session_state.selected_titles)/5)
         st.write(f"Ausgewählt: {len(st.session_state.selected_titles)}/5 Filme")
 
@@ -259,4 +268,3 @@ else:
             if st.button("🔄 Mehr Empfehlungen laden", disabled=not can_more, use_container_width=True):
                 st.session_state.rec_index = min(st.session_state.rec_index + 3, max_n)
                 st.rerun()
-
