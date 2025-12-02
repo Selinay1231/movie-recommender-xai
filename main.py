@@ -26,6 +26,9 @@ h1 { font-family: 'Montserrat Alternates', sans-serif !important; font-weight: 8
 
 .badge { display: inline-block; background: #eef2ff; color: #4338ca; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; margin-bottom: 10px; }
 .section-title { margin: 16px 0 12px; font-weight: 800; color: #111 !important; }
+.stButton > button { background-color: #e50914 !important; color: #fff !important; font-weight: 700 !important; border: none !important; border-radius: 6px !important; padding: 14px 28px !important; font-size: 16px !important; text-transform: uppercase !important; letter-spacing: .5px !important; box-shadow: 0 6px 20px rgba(229,9,20,.4) !important; transition: background .2s ease, transform .1s ease; width: 100% !important; margin-top: 10px !important; }
+.stButton > button:hover { background-color: #f6121d !important; transform: scale(1.03) !important; }
+.stButton > button:disabled { opacity: .5 !important; cursor: not-allowed !important; }
 </style>
 """), unsafe_allow_html=True)
 
@@ -153,7 +156,7 @@ if not st.session_state.intro_done:
         st.session_state.intro_done = True
         st.experimental_rerun()
 
-# -------------------- Auswahlphase mit Multiselect --------------------
+# -------------------- Haupt-Auswahlphase --------------------
 else:
     if len(st.session_state.selected_titles) < 5:
         min_year = st.slider("Zeige Filme ab Jahr:", 1950, 2015, 1999)
@@ -164,36 +167,40 @@ else:
         if search:
             mask = available_movies["title"].str.contains(search, case=False, na=False, regex=False)
             available_movies = available_movies[mask].copy()
+            available_movies["starts"] = available_movies["title"].str.lower().str.startswith(search.lower())
+            available_movies = available_movies.sort_values(by=["starts","title"], ascending=[False, True]).drop(columns=["starts"])
 
-        movie_options = available_movies["title"].tolist()
-        selected = st.multiselect(
-            "Wähle bis zu 5 Filme:",
-            options=movie_options,
-            default=st.session_state.selected_titles,
-            help="Maximal 5 Filme auswählen"
-        )
+        page_size = 15
+        total_pages = max(1, (len(available_movies) - 1)//page_size + 1)
+        st.session_state.search_page = min(st.session_state.search_page, total_pages-1)
+        start = st.session_state.search_page * page_size
+        end = start + page_size
+        page_movies = available_movies.iloc[start:end]
 
-        # Begrenze auf 5 Filme
-        if len(selected) > 5:
-            st.warning("Du kannst maximal 5 Filme auswählen.")
-            selected = selected[:5]
-
-        st.session_state.selected_titles = selected
-
-        # Grid-Anzeige
-        cols_per_row = 5
-        for i in range(0, len(available_movies), cols_per_row):
-            cols = st.columns(cols_per_row)
-            for j, (_, row) in enumerate(available_movies.iloc[i:i+cols_per_row].iterrows()):
+        for i in range(0, len(page_movies), 5):
+            cols = st.columns(5)
+            for j, (_, row) in enumerate(page_movies.iloc[i:i+5].iterrows()):
                 with cols[j]:
                     api_key = st.secrets.get("TMDB_API_KEY")
                     poster = get_movie_poster(clean_title(row["title"]), api_key) if api_key else None
                     poster = poster or "https://via.placeholder.com/300x450.png?text=No+Image"
-                    caption = row["title"]
-                    if row["title"] in st.session_state.selected_titles:
-                        caption += " ✅"
-                    st.image(poster, caption=caption, use_column_width=True)
+                    st.image(poster, caption=row["title"], use_column_width=True)
+                    is_selected = row["title"] in st.session_state.selected_titles
+                    label = "✅ Entfernen" if is_selected else "➕ Auswählen"
+                    if st.button(label, key=f"select_{row['movieId']}"):
+                        if is_selected:
+                            st.session_state.selected_titles.remove(row["title"])
+                        elif len(st.session_state.selected_titles) < 5:
+                            st.session_state.selected_titles.append(row["title"])
+                        st.experimental_rerun()
 
+        # Mehr Filme Button
+        col1, col2, col3 = st.columns([1,2,1])
+        with col2:
+            if st.button("🔄 Mehr Filme laden", use_container_width=True):
+                st.session_state.search_page += 1
+                st.experimental_rerun()
+        st.progress(len(st.session_state.selected_titles)/5)
         st.write(f"Ausgewählt: {len(st.session_state.selected_titles)}/5 Filme")
 
     # -------------------- Empfehlungsphase --------------------
