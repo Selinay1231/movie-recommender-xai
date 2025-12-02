@@ -42,14 +42,20 @@ h1 {
 </style>
 """), unsafe_allow_html=True)
 
+# -------------------
+# Session State
+# -------------------
 if "user_id" not in st.session_state: st.session_state.user_id = str(uuid.uuid4())
-if "rec_index" not in st.session_state: st.session_state.rec_index = 3
+if "rec_index" not in st.session_state: st.session_state.rec_index = 15
 if "selection_key" not in st.session_state: st.session_state.selection_key = None
 if "intro_done" not in st.session_state: st.session_state.intro_done = False
 if "selected_titles" not in st.session_state: st.session_state.selected_titles = []
 if "search_page" not in st.session_state: st.session_state.search_page = 0
 if "explanations" not in st.session_state: st.session_state.explanations = {}
 
+# -------------------
+# Helpers
+# -------------------
 def clean_title(title: str) -> str:
     return re.sub(r"\s*\(\d{4}\)", "", str(title)).strip()
 
@@ -75,7 +81,7 @@ openai.api_key = st.secrets.get("OPENAI_API_KEY")
 if not openai.api_key:
     st.error("❌ OPENAI_API_KEY fehlt in den Streamlit Secrets.")
 
-def generate_text_explanation(movie_row, tags_selected):
+def generate_text_explanation(movie_row):
     title = movie_row.get("title", "Unbekannter Film")
     year = int(movie_row.get("year", 0)) if not pd.isna(movie_row.get("year", 0)) else None
     avg_rating = movie_row.get("avg_rating", 0)
@@ -114,6 +120,9 @@ def generate_text_explanation(movie_row, tags_selected):
     except Exception as e:
         return f"Dieser Film passt zu deinem Profil (Fehler: {e})."
 
+# -------------------
+# Daten laden
+# -------------------
 def download_and_verify_csv(file_id, dest_path):
     url = f"https://drive.google.com/uc?export=download&id={file_id}"
     if not os.path.exists(dest_path):
@@ -149,8 +158,12 @@ def load_data():
 
 movies, ratings = load_data()
 
+# -------------------
+# UI
+# -------------------
 st.markdown("<h1 style='text-align:center;'>🎬 MovieMate</h1>", unsafe_allow_html=True)
 
+# Intro
 if not st.session_state.intro_done:
     hero_html = dedent("""
     <div class="hero">
@@ -168,6 +181,7 @@ if not st.session_state.intro_done:
             st.session_state.intro_done = True
             st.rerun()
 
+# Hauptbereich
 else:
     min_year = st.slider("Zeige Filme ab Jahr:", 1950, 2015, 1999)
     if len(st.session_state.selected_titles) < 5:
@@ -180,8 +194,6 @@ else:
             available_movies["starts"] = available_movies["title"].str.lower().str.startswith(search.lower())
             available_movies = available_movies.sort_values(by=["starts","title"], ascending=[False, True]).drop(columns=["starts"])
         page_size = 15
-        total_pages = max(1, (len(available_movies) - 1)//page_size + 1)
-        st.session_state.search_page = min(st.session_state.search_page, total_pages-1)
         start = st.session_state.search_page * page_size
         end = start + page_size
         page_movies = available_movies.iloc[start:end]
@@ -201,13 +213,6 @@ else:
                         elif len(st.session_state.selected_titles) < 5:
                             st.session_state.selected_titles.append(row["title"])
                         st.rerun()
-        col1, col2, col3 = st.columns([1,2,1])
-        with col1:
-            if st.button("⬅️ Zurück", disabled=st.session_state.search_page == 0):
-                st.session_state.search_page -= 1; st.rerun()
-        with col3:
-            if st.button("➡️ Weiter", disabled=st.session_state.search_page >= total_pages-1):
-                st.session_state.search_page += 1; st.rerun()
         st.progress(len(st.session_state.selected_titles)/5)
         st.write(f"Ausgewählt: {len(st.session_state.selected_titles)}/5 Filme")
 
@@ -216,7 +221,7 @@ else:
         sel_key = selection_hash(st.session_state.selected_titles, int(min_year))
         if st.session_state.selection_key != sel_key:
             st.session_state.selection_key = sel_key
-            st.session_state.rec_index = 3
+            st.session_state.rec_index = 15
         selected_ids = movies.loc[movies["title"].isin(st.session_state.selected_titles), "movieId"].dropna().astype(int).values
         genres_full = movies["genres"].astype(str).str.get_dummies("|")
         movie_features_full = movies.join(genres_full)
@@ -246,14 +251,14 @@ else:
                 if row["movieId"] in st.session_state.explanations:
                     exp = st.session_state.explanations[row["movieId"]]
                 else:
-                    exp = generate_text_explanation(row, [])
+                    exp = generate_text_explanation(row)
                     st.session_state.explanations[row["movieId"]] = exp
                 st.markdown(f"<div class='card'><img src='{poster}'><div class='card__body'><div class='badge'>Empfehlung</div><div class='card__title'>{row['title']}</div><div class='card__explain'>{exp}</div></div></div>", unsafe_allow_html=True)
         can_more = show_n < max_n
         c1, c2, c3 = st.columns([1,2,1])
         with c2:
             if st.button("🔄 Mehr Empfehlungen laden", disabled=not can_more, use_container_width=True):
-                st.session_state.rec_index = min(st.session_state.rec_index + 3, max_n)
+                st.session_state.rec_index = min(st.session_state.rec_index + 15, max_n)
                 st.rerun()
 
 
