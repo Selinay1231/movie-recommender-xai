@@ -116,7 +116,7 @@ Durchschnittsbewertung: {avg_rating:.1f}
 Plot: {overview}
 Vertrauenswert: {star_visual}
 
-Visualisier den Vertrauenswert und erkläre ihn, in dem du sagst ,,so sicher bin ich mir mit meiner Empfehlung" mit Sternen (★ = ausgefüllt, ☆ = leer), passend zu {trust_percent}. Nutze max. 4-5 Sätze / 60 Wörter. Die Erklärung soll leicht verständlich, freundlich und einladend sein.
+Mach einen Absatz und dann Visualisiere den Vertrauenswert und erkläre ihn, in dem du sagst ,,so sicher bin ich mir mit meiner Empfehlung und dann in klammern zum Beispiel (5 von 5) " mit Sternen (★ = ausgefüllt, ☆ = leer), passend zu {trust_percent}. Nutze max. 4-5 Sätze / 60 Wörter. Die Erklärung soll leicht verständlich, freundlich und einladend sein.
 """
     try:
         response = openai.ChatCompletion.create(
@@ -288,6 +288,7 @@ else:
             if st.button("🔄 Mehr Empfehlungen laden", disabled=not can_more, use_container_width=True):
                 st.session_state.rec_index = min(st.session_state.rec_index + 3, max_n)
                 st.rerun()
+
 
 
 
