@@ -105,7 +105,7 @@ def generate_text_explanation(movie_row):
     Durchschnittsbewertung: {avg_rating:.1f}
     Plot: {overview}
     Hinweis: Erwähne bekannte Schauspieler und mögliche Streaming-Plattformen.
-    Erklärung soll leicht verständlich, freundlich und den Vertrauenswert soll visuell dargestellt werden, nicht in Prozent. 4-5 Sätze / 60 Wörter.
+    Die Darstellung des Vertrauenswertes soll **visuell in Textform** erfolgen, z.B. als Balken aus "🟩" für positives Vertrauen und "⬜" für fehlendes Vertrauen, nicht als Beschreibung. Nutze max. 4-5 Sätze / 60 Wörter. Leicht verständlich und freundlich.
     """
 
     # GPT-Abfrage
@@ -278,6 +278,7 @@ else:
             if st.button("🔄 Mehr Empfehlungen laden", disabled=not can_more, use_container_width=True):
                 st.session_state.rec_index = min(st.session_state.rec_index + 3, max_n)
                 st.rerun()
+
 
 
 
