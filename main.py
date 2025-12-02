@@ -75,50 +75,27 @@ openai.api_key = st.secrets.get("OPENAI_API_KEY")
 if not openai.api_key:
     st.error("❌ OPENAI_API_KEY fehlt in den Streamlit Secrets.")
 
-def generate_text_explanation(movie_row):
-    title = movie_row.get("title", "Unbekannter Film")
-    year = int(movie_row.get("year", 0)) if not pd.isna(movie_row.get("year", 0)) else None
-    avg_rating = movie_row.get("avg_rating", 0)
-    genres = str(movie_row.get("genres", ""))
-    tmdb_key = st.secrets.get("TMDB_API_KEY")
-    overview = ""
-    
-    # Plot abrufen
-    if tmdb_key:
-        try:
-            url = "https://api.themoviedb.org/3/search/movie"
-            params = {"api_key": tmdb_key, "query": title}
-            r = requests.get(url, params=params, timeout=8)
-            if r.ok and r.json().get("results"):
-                overview = r.json()["results"][0].get("overview", "")
-        except: pass
+prompt = f"""
+Erkläre in 4-5 Sätzen, warum der Film "{title}" empfohlen wird.
+Jahr: {year}
+Genres: {genres}
+Durchschnittsbewertung: {avg_rating:.1f}
+Plot: {overview}
+Vertrauenswert: {trust_percent}% ({trust_label})
+Erklärung soll leicht verständlich, freundlich und den Vertrauenswert soll visuell dargestellt werden, 4-5 Sätze / 60 Wörter.
+"""  
 
-    # Liste der vom User ausgewählten Filme
-    selected_titles = st.session_state.get("selected_titles", [])
-    selected_list_str = ", ".join(selected_titles) if selected_titles else "ähnliche Filme"
-
-    # Prompt erstellen
-    prompt = f"""
-    Erkläre in 4-5 Sätzen, warum der Film "{title}" empfohlen wird.
-    Jahr: {year}
-    Genres: {genres}
-    Durchschnittsbewertung: {avg_rating:.1f}
-    Plot: {overview}
-    Vertrauenswert: {trust_percent}% ({trust_label})
-    Erklärung soll leicht verständlich, freundlich und den Vertrauenswert soll visuell dargestellt werden, 4-5 Sätze / 60 Wörter.
-
-
-    # GPT-Abfrage
-    try:
-        response = openai.ChatCompletion.create(
-            model="gpt-4o-mini",
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.8,
-            max_tokens=200
-        )
-        return response.choices[0].message["content"].strip()
-    except Exception as e:
-        return f"Dieser Film passt zu deinem Profil (Fehler: {e})."
+# GPT-Abfrage
+try:
+    response = openai.ChatCompletion.create(
+        model="gpt-4o-mini",
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.8,
+        max_tokens=200
+    )
+    return response.choices[0].message["content"].strip()
+except Exception as e:
+    return f"Dieser Film passt zu deinem Profil (Fehler: {e})."
 
 
 def download_and_verify_csv(file_id, dest_path):
@@ -278,6 +255,7 @@ else:
             if st.button("🔄 Mehr Empfehlungen laden", disabled=not can_more, use_container_width=True):
                 st.session_state.rec_index = min(st.session_state.rec_index + 3, max_n)
                 st.rerun()
+
 
 
 
