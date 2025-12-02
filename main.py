@@ -42,6 +42,7 @@ h1 {
 </style>
 """), unsafe_allow_html=True)
 
+# -------------------- Session State --------------------
 if "user_id" not in st.session_state: st.session_state.user_id = str(uuid.uuid4())
 if "rec_index" not in st.session_state: st.session_state.rec_index = 3
 if "selection_key" not in st.session_state: st.session_state.selection_key = None
@@ -50,6 +51,7 @@ if "selected_titles" not in st.session_state: st.session_state.selected_titles =
 if "search_page" not in st.session_state: st.session_state.search_page = 0
 if "explanations" not in st.session_state: st.session_state.explanations = {}
 
+# -------------------- Funktionen --------------------
 def clean_title(title: str) -> str:
     return re.sub(r"\s*\(\d{4}\)", "", str(title)).strip()
 
@@ -127,6 +129,7 @@ def download_and_verify_csv(file_id, dest_path):
 def _read_csv_anysep(path):
     return pd.read_csv(path, sep=None, engine="python", encoding="utf-8")
 
+# -------------------- Daten --------------------
 os.makedirs("./data", exist_ok=True)
 download_and_verify_csv("1AVtktDFEXey1RSTq_lTFE4sgG-S9nIxT","./data/movies.csv")
 download_and_verify_csv("17USu4Dkt0SaoL8XiV3ckm1wX2iP7HgQQ","./data/ratings.csv")
@@ -151,7 +154,7 @@ movies, ratings = load_data()
 
 st.markdown("<h1 style='text-align:center;'>🎬 MovieMate</h1>", unsafe_allow_html=True)
 
-# ---------- INTRO ----------
+# -------------------- Intro --------------------
 if not st.session_state.intro_done:
     hero_html = dedent("""
     <div class="hero">
@@ -169,15 +172,15 @@ if not st.session_state.intro_done:
             st.session_state.intro_done = True
             st.experimental_rerun()
 
-# ---------- MAIN ----------
+# -------------------- Hauptlogik --------------------
 else:
-    # Auswahlphase mit funktionierendem Button
+    # Auswahlphase mit Forms
     if len(st.session_state.selected_titles) < 5:
         min_year = st.slider("Zeige Filme ab Jahr:", 1950, 2015, 1999)
         search = st.text_input("🔎 Film suchen oder aus Liste wählen:", placeholder="Titel eingeben...")
         movies_view = movies[movies["year"] >= min_year].copy()
         available_movies = movies_view.sort_values("title")
-        
+
         if search:
             mask = available_movies["title"].str.contains(search, case=False, na=False, regex=False)
             available_movies = available_movies[mask].copy()
@@ -200,18 +203,19 @@ else:
                     poster = poster or "https://via.placeholder.com/300x450.png?text=No+Image"
                     st.image(poster, caption=row["title"], use_column_width=True)
 
-                    # Sicherstellen, dass movieId int ist
                     movie_id = int(row["movieId"])
                     is_selected = row["title"] in st.session_state.selected_titles
                     label = "✅ Entfernen" if is_selected else "➕ Auswählen"
 
-                    # Button-Callback
-                    if st.button(label, key=f"btn_{movie_id}"):
-                        if is_selected:
-                            st.session_state.selected_titles.remove(row["title"])
-                        elif len(st.session_state.selected_titles) < 5:
-                            st.session_state.selected_titles.append(row["title"])
-                        st.experimental_rerun()
+                    # Form pro Film
+                    with st.form(key=f"form_{movie_id}"):
+                        submitted = st.form_submit_button(label)
+                        if submitted:
+                            if is_selected:
+                                st.session_state.selected_titles.remove(row["title"])
+                            elif len(st.session_state.selected_titles) < 5:
+                                st.session_state.selected_titles.append(row["title"])
+                            st.experimental_rerun()
 
         # Mehr Filme Button
         col1, col2, col3 = st.columns([1,2,1])
@@ -223,7 +227,7 @@ else:
         st.progress(len(st.session_state.selected_titles)/5)
         st.write(f"Ausgewählt: {len(st.session_state.selected_titles)}/5 Filme")
 
-    # Empfehlungsphase
+    # Empfehlungsphase (unverändert)
     else:
         st.success("✅ Du hast 5 Filme ausgewählt – hier deine Empfehlungen:")
         st.markdown("🎉 Das sind die Filme, die ich dir empfehle! Viel Spaß beim Schauen! 🍿")
