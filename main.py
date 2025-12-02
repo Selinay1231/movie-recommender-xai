@@ -95,13 +95,13 @@ def generate_text_explanation(movie_row):
     trust_percent = round(trust*100,1)
     trust_label = "sehr hoch" if trust >= 0.8 else "hoch" if trust >= 0.6 else "mittel"
     prompt = f"""
-    Erkläre in 3 Sätzen, warum der Film "{title}" empfohlen wird.
+    Erkläre in 4-5 Sätzen, warum der Film "{title}" empfohlen wird.
     Jahr: {year}
     Genres: {genres}
     Durchschnittsbewertung: {avg_rating:.1f}
     Plot: {overview}
     Vertrauenswert: {trust_percent}% ({trust_label})
-    Erklärung soll leicht verständlich, freundlich und den Vertrauenswert in prozent nennen max. 3-4 Sätze / 50 Wörter.
+    Erklärung soll leicht verständlich, freundlich und den Vertrauenswert in prozent nennen max. 4-5 Sätze / 60 Wörter.
     """
     try:
         response = openai.ChatCompletion.create(
@@ -271,3 +271,4 @@ else:
             if st.button("🔄 Mehr Empfehlungen laden", disabled=not can_more, use_container_width=True):
                 st.session_state.rec_index = min(st.session_state.rec_index + 3, max_n)
                 st.rerun()
+
