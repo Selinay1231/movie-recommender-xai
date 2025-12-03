@@ -111,10 +111,7 @@ def generate_text_explanation(movie_row):
     prompt = f"""
 Du bist ein freundlicher Filmempfehlungsassistent.
 Erkläre in maximal 2 Sätzen (unter 60 Wörtern), warum der Film "{title}" ({year}) empfohlen wird. Erwähne kurz Genres ({genres}) und die Handlung.
-Nach dieser Erklärung soll ein **Absatz** folgen.
-In einem **eigenen, separaten Absatz** schreibe genau diesen Satz:
-"So gut passt der Film zu dir: {star_visual}"
-Gib keine weiteren Sätze, Erklärungen oder Wiederholungen aus.
+Erklärung soll leicht verständlich, freundlich und den Vertrauenswert in prozent nennen max. 4-5 Sätze / 60 Wörter.
 """
 
     try:
@@ -287,6 +284,7 @@ else:
             if st.button("🔄 Mehr Empfehlungen laden", disabled=not can_more, use_container_width=True):
                 st.session_state.rec_index = min(st.session_state.rec_index + 3, max_n)
                 st.rerun()
+
 
 
 
